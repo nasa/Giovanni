@@ -10,16 +10,16 @@ Giovanni locally is split into several repositories:
 
 Each subdirectory has either a Makefile or Perl Makefile.PL
 
-<br/><b>agiovanni:</b><br>
+<br/><b>agiovanni:</b>
 <br/><b>agiovanni_algorithms</b>
 <br/><b>agiovanni_data_access</b>
 <br/><b>agiovanni_www</b>, 
 <br/><b>agiovanni_shapes</b>
 <br/><b> agiovanni_giovanni</b> 
+<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database. Giovanni's File database is <a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR</a>
 
 <br/><b>agiovanni/Dev-Tools/other/rpmbuild</b><br/> Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
 
-<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database. Giovanni's File database is <a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR</a>
 
 <b>Disclaimer:We will update the software but not maintain the pull requests.</b>
 
