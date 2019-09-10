@@ -1,0 +1,95 @@
+netcdf t_correlate.nc {
+dimensions:
+	longitude = 2 ;
+	latitude = 2 ;
+variables:
+	double longitude(longitude) ;
+		longitude:long_name = "longitude" ;
+		longitude:standard_name = "longitude" ;
+		longitude:units = "degrees_east" ;
+	double latitude(latitude) ;
+		latitude:long_name = "latitude" ;
+		latitude:standard_name = "latitude" ;
+		latitude:units = "degrees_north" ;
+	double correlation(latitude, longitude) ;
+		correlation:long_name = "correlation" ;
+		correlation:_FillValue = 9.96920996838687e+36 ;
+		correlation:quantity_type = "correlation" ;
+	double slope(latitude, longitude) ;
+		slope:long_name = "slope" ;
+		slope:_FillValue = 9.96920996838687e+36 ;
+	double offset(latitude, longitude) ;
+		offset:long_name = "offset" ;
+		offset:_FillValue = 9.96920996838687e+36 ;
+	double time_matched_difference(latitude, longitude) ;
+		time_matched_difference:long_name = "time_matched_difference" ;
+		time_matched_difference:_FillValue = 9.96920996838687e+36 ;
+		time_matched_difference:quantity_type = "difference" ;
+	double sum_x(latitude, longitude) ;
+		sum_x:long_name = "sum_x" ;
+		sum_x:_FillValue = 9.96920996838687e+36 ;
+	double sum_y(latitude, longitude) ;
+		sum_y:long_name = "sum_y" ;
+		sum_y:_FillValue = 9.96920996838687e+36 ;
+	double sum_xy(latitude, longitude) ;
+		sum_xy:long_name = "sum_xy" ;
+		sum_xy:_FillValue = 0. ;
+	double sum_x2(latitude, longitude) ;
+		sum_x2:long_name = "sum_x2" ;
+		sum_x2:_FillValue = 0. ;
+	double sum_y2(latitude, longitude) ;
+		sum_y2:long_name = "sum_y2" ;
+		sum_y2:_FillValue = 0. ;
+	int n_samples(latitude, longitude) ;
+		n_samples:long_name = "Number of samples" ;
+		n_samples:quantity_type = "count" ;
+		n_samples:units = "count" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+data:
+
+ longitude = -59.5, -58.5 ;
+
+ latitude = 26.5, 25.5 ;
+
+ correlation =
+  -0.9941265577273, _,
+  -0.57054638957105, -0.427128068326252 ;
+
+ slope =
+  -0.731684110371074, _,
+  _, _ ;
+
+ offset =
+  0.280224230891215, _,
+  0.369946188340812, 0.247277251642829 ;
+
+ time_matched_difference =
+  -0.0256666666666667, -0.0245,
+  0.00433333333333334, 0.0153333333333333 ;
+
+ sum_x =
+  0.441, 0.225,
+  0.412, 0.419 ;
+
+ sum_y =
+  0.518, 0.274,
+  0.399, 0.373 ;
+
+ sum_xy =
+  0.074608, 0.0329,
+  0.05377, 0.046023 ;
+
+ sum_x2 =
+  0.066929, 0.025625,
+  0.057176, 0.065419 ;
+
+ sum_y2 =
+  0.09058, 0.051316,
+  0.058505, 0.075677 ;
+
+ n_samples =
+  3, 2,
+  3, 3 ;
+}

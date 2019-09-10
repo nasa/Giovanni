@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/DataAccess-Translator.t
+lib/DataAccess/Translator.pm

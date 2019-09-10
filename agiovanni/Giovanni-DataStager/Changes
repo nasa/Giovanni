@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::DataStager.
+
+0.01  Mon Jul  8 16:14:41 2013
+	- original version; created by h2xs 1.23 with options
+		-AXcO Giovanni::DataStager
+

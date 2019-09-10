@@ -1,0 +1,101 @@
+netcdf pairedData.TRMM_3B42_daily_precipitation_V6+TRMM_3B42_daily_precipitation_V7.20030101-20030102.79W_35N_77W_36N {
+dimensions:
+	time = UNLIMITED ; // (2 currently)
+	lat = 6 ;
+	lon = 6 ;
+	time1 = 2 ;
+variables:
+	float TRMM_3B42_daily_precipitation_V6(time, lat, lon) ;
+		TRMM_3B42_daily_precipitation_V6:_FillValue = -9999.f ;
+		TRMM_3B42_daily_precipitation_V6:Serializable = "True" ;
+		TRMM_3B42_daily_precipitation_V6:coordinates = "time lat lon" ;
+		TRMM_3B42_daily_precipitation_V6:grid_name = "grid-1" ;
+		TRMM_3B42_daily_precipitation_V6:grid_type = "linear" ;
+		TRMM_3B42_daily_precipitation_V6:level_description = "Earth surface" ;
+		TRMM_3B42_daily_precipitation_V6:long_name = "Daily Rainfall Estimate from 3B42 V6, TRMM and other sources, 0.25 deg." ;
+		TRMM_3B42_daily_precipitation_V6:product_short_name = "TRMM_3B42_daily" ;
+		TRMM_3B42_daily_precipitation_V6:product_version = "6" ;
+		TRMM_3B42_daily_precipitation_V6:quantity_type = "Precipitation" ;
+		TRMM_3B42_daily_precipitation_V6:standard_name = "r" ;
+		TRMM_3B42_daily_precipitation_V6:units = "mm" ;
+		TRMM_3B42_daily_precipitation_V6:plot_hint_axis_title = "Daily Rainfall Estimate from 3B42 V6, TRMM and other sources, 0.25 deg. [TRMM_3B42_daily v6] (mm)" ;
+	int dataday(time) ;
+		dataday:standard_name = "Standardized Date Label" ;
+	double lat(lat) ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	double lon(lon) ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	double time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	float TRMM_3B42_daily_precipitation_V7(time1, lat, lon) ;
+		TRMM_3B42_daily_precipitation_V7:_FillValue = -9999.9f ;
+		TRMM_3B42_daily_precipitation_V7:Serializable = "True" ;
+		TRMM_3B42_daily_precipitation_V7:coordinates = "time lat lon" ;
+		TRMM_3B42_daily_precipitation_V7:grid_name = "grid-1" ;
+		TRMM_3B42_daily_precipitation_V7:grid_type = "linear" ;
+		TRMM_3B42_daily_precipitation_V7:level_description = "Earth surface" ;
+		TRMM_3B42_daily_precipitation_V7:long_name = "Daily Rainfall Estimate from 3B42 V7, TRMM and other sources, 0.25 deg." ;
+		TRMM_3B42_daily_precipitation_V7:product_short_name = "TRMM_3B42_daily" ;
+		TRMM_3B42_daily_precipitation_V7:product_version = "7" ;
+		TRMM_3B42_daily_precipitation_V7:quantity_type = "Precipitation" ;
+		TRMM_3B42_daily_precipitation_V7:standard_name = "r" ;
+		TRMM_3B42_daily_precipitation_V7:units = "mm" ;
+		TRMM_3B42_daily_precipitation_V7:plot_hint_axis_title = "Daily Rainfall Estimate from 3B42 V7, TRMM and other sources, 0.25 deg. [TRMM_3B42_daily v7] (mm)" ;
+	double time1(time1) ;
+		time1:standard_name = "time" ;
+		time1:units = "seconds since 1970-01-01 00:00:00" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:nco_openmp_thread_number = 1 ;
+		:NCO = "4.2.1" ;
+		:temporal_resolution = "daily" ;
+		:matched_start_time = "2003-01-01T00:00:00Z";
+		:matched_end_time = "2003-01-02T23:59:59Z";
+		:title = "Data match (79.1016W - 77.5195W, 35.5605N - 36.9668N): TRMM_3B42_daily.6 TRMM_3B42_daily.7" ;
+		:plot_hint_caption = " Selected date range was 2003-01-01 - 2003-01-02. The data date range for the first variable, Daily Rainfall Estimate from 3B42 V6, TRMM and other sources, 0.25 deg. [TRMM_3B42_daily V6], is 2002-12-31 22:30Z - 2003-01-02 22:29Z. The data date range for the second variable, Daily Rainfall Estimate from 3B42 V7, TRMM and other sources, 0.25 deg. [TRMM_3B42_daily V7], is 2002-12-31 22:30Z - 2003-01-02 22:29Z." ;
+		:plot_hint_title = "Region 79.1016W, 35.5605N, 77.5195W, 36.9668N" ;
+		:plot_hint_subtitle = "2003-01-01 - 2003-01-02" ;
+data:
+
+ TRMM_3B42_daily_precipitation_V6 =
+  18.69102, 19.99434, 12.84, 10.73246, 15.85903, 22.07253,
+  11.99532, 14.34939, 13.45857, 15.48218, 14.16951, 19.42751,
+  12.4245, 12.52332, 21.60161, 12.00955, 15.28359, 12.51745,
+  24.96473, 16.2783, 22.55955, 18.32075, 5.187134, 5.836076,
+  31.2472, 21.6456, 31.83805, 21.24984, 10.84539, 4.14,
+  27.00253, 23.1, 14.4, 11.16, 18.38512, 6,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 7.613374, 6.652311,
+  0, 0, 0, 0, 3.707825, 0,
+  0, 0, 0, 0, 0, 0 ;
+
+ dataday = 2003001, 2003002 ;
+
+ lat = 35.625, 35.875, 36.125, 36.375, 36.625, 36.875 ;
+
+ lon = -78.875, -78.625, -78.375, -78.125, -77.875, -77.625 ;
+
+ time = 1041373800, 1041460200 ;
+
+ TRMM_3B42_daily_precipitation_V7 =
+  11.44212, 16.15743, 15.72042, 11.81419, 14.27441, 22.39795,
+  15.39179, 13.10986, 20.53902, 16.09244, 14.32727, 16.03936,
+  9.636202, 11.54655, 13.19983, 9.524668, 17.29129, 11.38941,
+  21.06, 14.49, 12.60753, 21.78128, 5.166286, 11.41495,
+  28.26, 9.838618, 39.94102, 32.27687, 10.66415, 4.665545,
+  20.34, 11.07, 7.92, 17.19, 17.19, 6.059588,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 3.612468,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 3.913853, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0 ;
+
+ time1 = 1041373800, 1041460200 ;
+}

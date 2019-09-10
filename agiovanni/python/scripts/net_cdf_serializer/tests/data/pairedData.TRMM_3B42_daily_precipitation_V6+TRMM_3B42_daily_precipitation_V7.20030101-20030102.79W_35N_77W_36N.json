@@ -1,0 +1,72 @@
+{
+  "time": {
+    "data": 
+      [ "2003-01-01", "2003-01-02"]
+  },
+  "lat": {
+    "units": "degrees_north",
+    "data": 
+      [ 35.625, 35.875, 36.125, 36.375, 36.625, 36.875 ]
+  },
+  "lon": {
+    "units": "degrees_east",
+    "data": 
+      [ -78.875, -78.625, -78.375, -78.125, -77.875, -77.625 ]
+  },
+  "TRMM_3B42_daily_precipitation_V6": {
+    "units": "mm",
+    "quantity_type": "Precipitation",
+    "long_name": "Daily Rainfall Estimate from 3B42 V6, TRMM and other sources, 0.25 deg.",
+    "product_short_name": "TRMM_3B42_daily",
+    "product_version": "6",
+    "_FillValue": [-9999],
+    "plot_hint_axis_title": "Daily Rainfall Estimate from 3B42 V6, TRMM and other sources, 0.25 deg. [TRMM_3B42_daily v6] (mm)",
+    "data": 
+      [
+        [
+          [ 18.691, 19.994, 12.84, 10.732, 15.859, 22.073 ],
+          [ 11.995, 14.349, 13.459, 15.482, 14.17, 19.428 ],
+          [ 12.425, 12.523, 21.602, 12.01, 15.284, 12.517 ],
+          [ 24.965, 16.278, 22.56, 18.321, 5.1871, 5.8361 ],
+          [ 31.247, 21.646, 31.838, 21.25, 10.845, 4.14 ],
+          [ 27.003, 23.1, 14.4, 11.16, 18.385, 6 ]
+        ],
+        [
+          [ 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 7.6134, 6.6523 ],
+          [ 0, 0, 0, 0, 3.7078, 0 ],
+          [ 0, 0, 0, 0, 0, 0 ]
+        ]
+      ]
+  },
+  "TRMM_3B42_daily_precipitation_V7": {
+    "units": "mm",
+    "quantity_type": "Precipitation",
+    "long_name": "Daily Rainfall Estimate from 3B42 V7, TRMM and other sources, 0.25 deg.",
+    "product_short_name": "TRMM_3B42_daily",
+    "product_version": "7",
+    "_FillValue": [-9999.9],
+    "plot_hint_axis_title": "Daily Rainfall Estimate from 3B42 V7, TRMM and other sources, 0.25 deg. [TRMM_3B42_daily v7] (mm)",
+    "data": 
+      [
+        [
+          [ 11.442, 16.157, 15.72, 11.814, 14.274, 22.398 ],
+          [ 15.392, 13.11, 20.539, 16.092, 14.327, 16.039 ],
+          [ 9.6362, 11.547, 13.2, 9.5247, 17.291, 11.389 ],
+          [ 21.06, 14.49, 12.608, 21.781, 5.1663, 11.415 ],
+          [ 28.26, 9.8386, 39.941, 32.277, 10.664, 4.6655 ],
+          [ 20.34, 11.07, 7.92, 17.19, 17.19, 6.0596 ]
+        ],
+        [
+          [ 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 3.6125 ],
+          [ 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 3.9139, 0 ],
+          [ 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0 ]
+        ]
+      ]
+  }
+}

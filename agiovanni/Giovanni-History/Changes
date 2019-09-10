@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::History.
+
+0.01  Fri Nov 15 22:06:42 2013
+	- original version; created by h2xs 1.23 with options
+		-AXc Giovanni::History
+

@@ -1,0 +1,63 @@
+
+Building an RPM
+=================================================================
+RPMs are built from a tagged snapshot of all repositories in GIT.
+In most cases these tags refer to sprints. Alternatively 'HEAD'
+can be used to checkout from the main Trunk, which is Dev.
+
+The build script requires a revision number of the RPM. This
+corresponds to the number of the RPM build for the given tag. For
+example, if this is the third RPM built and distributed for
+Sprint-124, then the revision number would be '003'.
+
+The build script also requires a repository type 'git'.
+ 
+To start RPM generation:
+
+$ [ -e ~/rpmbuild/ ] && mv ~/rpmbuild ~/rpmbuild.back
+$ cp -r aGiovanni/Dev-Tools/other/rpmbuild ~/rpmbuild
+$ cd ~/rpmbuild
+
+-----------------------------------------------------------------
+Building a new giovanni4 RPM
+build_rpm_for_g4.sh use the following documentation
+
+$ ./build_rpm_for_g4.sh $repo $version $revision $opt_partner_flag  # replace these vars; 
+$opt_partner_flag is an optional argument that can be used to install a specific package
+such as a Tier 2 partner like jpl or podaac.
+
+Examples:
+$ ./build_rpm_for_g4.sh Sprint-135 4.21 1
+$ ./build_rpm_for_g4.sh dev 4.19 1
+$ ./build_rpm_for_g4.sh master 4.19 2
+$ ./build_rpm_for_g4.sh Sprint-104 4.22 1 podaac
+$ ./build_rpm_for_cloud.sh Sprint-114 4.21 002 jpl
+
+End of documentation for build_rpm_for_g4.sh
+------------------------------------------------------------------
+Building a new RPM for a specific package
+build_rpm_for_admin_tools.sh please adhere to the following:
+
+Note: The following build script is for installing giovanni4 Admin Tools
+Alternately, build_rpm_for_admin_tools.sh it could be used to install any
+package as long as there is a corresponding SPEC file. For example:
+
+$ ./build_rpm_for_admin_tools.sh $branch_name $rev $package
+
+# Args
+branch_name=$1 # Where branch_name is the git Branch you are building from
+rev=$2 # Where rev is the revision number of the RPM
+package=$3 # Where package is the package your are installing ie. agiovanni_admin
+
+Example:
+$ ./build_rpm_for_admin_tools.sh Sprint-135 001 agiovanni_admin
+
+The SPEC file should be called agiovanni_admin.spec.template
+
+The output of the RPM generation will be located in a
+subdirectory of ~/rpmbuild/RPMS based on your system architecture.
+
+Author
+=================================================================
+Daniel da Silva, NASA/GSFC/Telophase <Daniel.e.daSilva@nasa.gov>
+Michael Nardozzi NASA/GSFC/Adnet <michael.a.nardozzi@nasa.gov>

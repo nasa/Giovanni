@@ -1,0 +1,113 @@
+netcdf ss.scrubbed.AIRX3STD_006_Temperature_D.20090117 {
+dimensions:
+	time = UNLIMITED ; // (1 currently)
+	TempPrsLvls_D = 24 ;
+	lat = 2 ;
+	lon = 2 ;
+variables:
+	float AIRX3STD_006_Temperature_D(time, TempPrsLvls_D, lat, lon) ;
+		AIRX3STD_006_Temperature_D:_FillValue = -9999.f ;
+		AIRX3STD_006_Temperature_D:standard_name = "air_temperature" ;
+		AIRX3STD_006_Temperature_D:long_name = "Atmospheric Temperature Profile, 1000 to 1 hPa, nighttime (descending), AIRS, 1 x 1 deg." ;
+		AIRX3STD_006_Temperature_D:units = "K" ;
+		AIRX3STD_006_Temperature_D:missing_value = -9999.f ;
+		AIRX3STD_006_Temperature_D:coordinates = "time TempPrsLvls_D lat lon" ;
+		AIRX3STD_006_Temperature_D:quantity_type = "Air Temperature" ;
+		AIRX3STD_006_Temperature_D:product_short_name = "AIRX3STD" ;
+		AIRX3STD_006_Temperature_D:product_version = "006" ;
+		AIRX3STD_006_Temperature_D:Serializable = "True" ;
+	float TempPrsLvls_D(TempPrsLvls_D) ;
+		TempPrsLvls_D:standard_name = "Pressure" ;
+		TempPrsLvls_D:long_name = "Pressure Levels Temperature Profile, nighttime (descending) node" ;
+		TempPrsLvls_D:units = "hPa" ;
+		TempPrsLvls_D:positive = "down" ;
+		TempPrsLvls_D:_CoordinateAxisType = "GeoZ" ;
+	int dataday(time) ;
+		dataday:standard_name = "Standardized Date Label" ;
+	float lat(lat) ;
+		lat:_FillValue = -9999.f ;
+		lat:long_name = "Latitude" ;
+		lat:missing_value = -9999.f ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	float lon(lon) ;
+		lon:_FillValue = -9999.f ;
+		lon:long_name = "Longitude" ;
+		lon:missing_value = -9999.f ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:start_time = "2009-01-17T00:00:00Z" ;
+		:end_time = "2009-01-17T23:59:59Z" ;
+		:temporal_resolution = "daily" ;
+		:nco_openmp_thread_number = 1 ;
+		:NCO = "4.2.1" ;
+		:history = "Mon Jul  1 13:59:57 2013: ncks -d lat,47.,49. -d lon,-148.,-146. scrubbed.AIRX3STD_006_Temperature_D.20090117.nc ss.scrubbed.AIRX3STD_006_Temperature_D.20090117.nc" ;
+data:
+
+ AIRX3STD_006_Temperature_D =
+  _, _,
+  _, _,
+  280.5, 281.125,
+  280.4375, 280.1875,
+  276.6875, 276.8125,
+  276.6875, 275.375,
+  267.75, 269.6875,
+  268.0625, 269,
+  260.375, 263.625,
+  260.5, 262.8125,
+  251.5312, 254.9375,
+  251.1875, 253.9062,
+  239.5938, 241.9062,
+  239.5312, 241.6562,
+  232.9375, 232.6562,
+  232.5938, 232.9375,
+  234.4062, 234.3125,
+  233.7812, 234.0625,
+  233.9688, 234.3125,
+  233.9375, 233.9062,
+  226, 225.9062,
+  226.5938, 225.5312,
+  214.5312, 213.4062,
+  214.6562, 213.7188,
+  214, 213.1562,
+  214.0938, 213.5312,
+  215.9688, 215.5312,
+  216.2188, 215.5312,
+  218.5, 218.3438,
+  218.6875, 218.2188,
+  221.3125, 220.9062,
+  221.5625, 220.9688,
+  222.75, 222.1562,
+  222.9375, 222.2188,
+  225.4375, 224.9062,
+  225.0938, 224.4375,
+  229.875, 230.125,
+  229.0312, 228.7812,
+  236.2812, 236.7812,
+  234.9062, 235,
+  245.3125, 245,
+  244.5312, 244.2188,
+  252.9375, 252.375,
+  252.9062, 252.25,
+  252.6875, 252.125,
+  252.6562, 252.1875,
+  246.4062, 245.9375,
+  246.0312, 245.9062 ;
+
+ TempPrsLvls_D = 1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100, 
+    70, 50, 30, 20, 15, 10, 7, 5, 3, 2, 1.5, 1 ;
+
+ dataday = 2009017 ;
+
+ lat = 47.5, 48.5 ;
+
+ lon = -147.5, -146.5 ;
+
+ time = 1232150400 ;
+}

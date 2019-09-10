@@ -1,0 +1,7 @@
+{
+  "title":"Interactive Scatter Plot",
+  "type":"object",
+  "properties":{
+  },
+  "additionalProperties":false
+}

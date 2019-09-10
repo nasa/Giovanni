@@ -1,0 +1,5 @@
+Changes
+Makefile.PL
+MANIFEST
+t/Giovanni-ScienceCommand.t
+lib/Giovanni/ScienceCommand.pm

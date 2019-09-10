@@ -1,0 +1,84 @@
+netcdf t_read_nc_var {
+dimensions:
+	time = UNLIMITED ; // (1 currently)
+	Latitude = 38 ;
+	Longitude = 3 ;
+variables:
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	short Optical_Depth_Land_And_Ocean_Mean(time, Latitude, Longitude) ;
+		Optical_Depth_Land_And_Ocean_Mean:coordinates = "time Latitude Longitude" ;
+		Optical_Depth_Land_And_Ocean_Mean:Level_2_Pixel_Values_Read_As = "Real" ;
+		Optical_Depth_Land_And_Ocean_Mean:Quality_Assurance_Data_Set = "None" ;
+		Optical_Depth_Land_And_Ocean_Mean:Derived_From_Level_2_Data_Set = "Optical_Depth_Land_And_Ocean" ;
+		Optical_Depth_Land_And_Ocean_Mean:long_name = "Aerosol Optical Thickness at 0.55 microns for both Ocean (best) and Land (corrected): Mean" ;
+		Optical_Depth_Land_And_Ocean_Mean:valid_range = -100s, 5000s ;
+		Optical_Depth_Land_And_Ocean_Mean:Included_Level_2_Nighttime_Data = "False" ;
+		Optical_Depth_Land_And_Ocean_Mean:Aggregation_Data_Set = "None" ;
+		Optical_Depth_Land_And_Ocean_Mean:_FillValue = -9999s ;
+		Optical_Depth_Land_And_Ocean_Mean:Statistic_Type = "Simple" ;
+		Optical_Depth_Land_And_Ocean_Mean:add_offset = 0. ;
+		Optical_Depth_Land_And_Ocean_Mean:units = "1" ;
+		Optical_Depth_Land_And_Ocean_Mean:scale_factor = 0.001 ;
+		Optical_Depth_Land_And_Ocean_Mean:quantity_type = "Aerosol Optical Depth" ;
+	double Latitude(Latitude) ;
+		Latitude:long_name = "Latitude" ;
+		Latitude:units = "degrees_north" ;
+	double Longitude(Longitude) ;
+		Longitude:long_name = "Longitude" ;
+		Longitude:units = "degrees_east" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+data:
+
+ time = 1262217600 ;
+
+ Optical_Depth_Land_And_Ocean_Mean =
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  _, _, _,
+  200, 170, _,
+  139, 132, 112,
+  283, _, 360,
+  253, 247, 211,
+  289, 257, 255,
+  367, 314, 280,
+  368, 308, 262,
+  _, 455, 314,
+  475, 443, 420,
+  515, 498, 482,
+  564, 502, 415,
+  650, 492, 434,
+  676, 626, _,
+  707, 632, 337,
+  _, 329, 377 ;
+
+ Latitude = 64.5, 63.5, 62.5, 61.5, 60.5, 59.5, 58.5, 57.5, 56.5, 55.5, 54.5, 
+    53.5, 52.5, 51.5, 50.5, 49.5, 48.5, 47.5, 46.5, 45.5, 44.5, 43.5, 42.5, 
+    41.5, 40.5, 39.5, 38.5, 37.5, 36.5, 35.5, 34.5, 33.5, 32.5, 31.5, 30.5, 
+    29.5, 28.5, 27.5 ;
+
+ Longitude = 116.5, 117.5, 118.5 ;
+}

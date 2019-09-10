@@ -1,0 +1,16 @@
+# $Id: HOV_LAT.svc,v 1.4 2015/07/16 15:46:22 mnardozz Exp $
+# Chris Lynnes, NASA/GSFC
+SERVICE_NAME = HvLt 
+SERVICE_DESCRIPTION = "Longitude-averaged Hovmoller, plotted over the selected time and latitude ranges"
+SERVICE_LABEL = "Hovmoller, Longitude-Averaged"
+PLOT_TYPE = HOV_LAT
+ALGORITHM_CMD = g4_hov_lat.pl
+OUTPUT_FILE_ROOT = dimensionAveraged
+MAX_POINTS = 912973824
+MAX_FRAMES_GUEST = 4
+SLICE_LIMIT = 8760
+DATELINE_METHOD =
+CONVERT_UNITS_STEP = POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.38z0nrnj1me3
+
+

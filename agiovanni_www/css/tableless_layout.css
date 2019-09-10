@@ -1,0 +1,165 @@
+/* Overrides for table-less layout */
+
+fieldset {
+	border:none;
+	margin:0px;
+}
+
+.pickerContent {
+	margin-left: 10px;
+}
+
+#session {
+  /* background: rgb(245,245,245); */
+  margin-left:20px;
+  margin-right:20px;
+  margin-top:80px;
+  margin-bottom:5px;
+  z-index:1;
+  background-image: linear-gradient(rgb(245,245,245),rgba(245,245,245,0.7));
+}
+#sessionDataSel {
+  padding-left:10px;
+  margin:0px;
+}
+
+#sessionDataSel.yui-panel .bd {
+}
+
+#sessionDataSelPanel {
+}
+
+#sessionDataSelSvcPk {
+	vertical-align:top;
+	margin-top:0px;
+	padding-top:0px;
+}
+
+#sessionDataSelBbPk {
+	display:inline-block;
+	vertical-align:top;
+	margin-top:0px;
+	padding-top:0px;
+}
+
+#sessionDataSelShPk {
+	display:inline-block;
+        vertical-align:bottom;
+        margin-bottom: 34px;        
+}
+
+#sessionDataSelBbPk > span {
+	float:right;
+	white-space:nowrap;
+	margin-top:0px;
+	padding-top:0px;
+}
+
+#sessionDataSelDtPk {
+	display:inline-block;
+	vertical-align:top;
+}
+
+#sessionDataSelVarPk {
+	white-space:nowrap;
+}
+
+#sessionDataSelToolbar {
+        position:fixed;
+        bottom:0px;
+        right:0px;
+        left:0px;
+	padding: 14px 20px 10px 0px;
+	text-align: right;
+        z-index:2;
+        background-color:#0b1a2d;
+        box-shadow: 0px -5px 5px rgba(30,30,30,0.5);
+        border-top-left-radius:20px;
+        border-top-right-radius:20px;
+        border-top:1px solid #777;
+}
+
+#sessionDataSelToolbarresetBTN,
+#sessionDataSelToolbarplotBTN {
+  z-index:3;
+}
+
+#facetsCell {
+	display:inline-block;
+	width:260px;
+	float:left;
+	vertical-align:top;
+	overflow-x: hidden;
+}
+
+#facetsCellScrollable {
+	width:253px;
+}
+
+#facetedResultsPanel {
+	display:inline-block;
+	margin-left:10px;
+	vertical-align:top;
+}
+
+#headerToolbar {
+	text-align:right;
+	padding:10px;
+}
+
+.tally {
+	display:block;
+	border:none;
+	background-color:transparent;
+	padding:3px 20px 3px 0px;
+	font-weight:bold;
+}
+
+.tallyTotals {
+	font-size:123.1%;
+	padding-right:15px;
+}
+
+tbody.yui-dt-data {
+	max-height:600px;
+	overflow:auto;
+}
+
+.right {
+	text-align:right;
+}
+
+.dataSelectorToolbar {
+  clear:both;
+  position: fixed;
+  bottom: 28px;
+  right: 55px;
+}
+
+.facetedSearchBar {
+  font-size:12px;
+  font-weight:bold;
+  margin-bottom:5px;
+}
+
+#facetedSearchBarInput{
+	position:relative;  /* to override position:absolute from YUI auto complete which puts the 'Search' button below the input text box */
+	width:400px;
+}
+#facetedSearchBarResults {
+  /* position:relative; /* override in facetedSearchBarInput doesn't work alone, at least not in Safari/Mac.... */
+  display:inline-block;
+  width:400px;
+}
+
+/* faceted results table border styles */
+.yui-skin-sam .yui-dt-scrollable .yui-dt-hd {
+  border: 1px solid #ccc !important;
+}
+.yui-skin-sam .yui-dt-scrollable .yui-dt-bd {
+  border-left: 1px solid #ccc !important;
+  border-bottom: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+  background-color:transparent !important;
+}
+

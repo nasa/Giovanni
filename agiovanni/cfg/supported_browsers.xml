@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BrowserList>
+  <!-- if the number listed in this file is higher than the one your browser then the user will get the popup -->
+  <!-- Generally I think we don't want users bothred by this. So for this reason we don't need too many significant figures -->
+  <SupportedBrowsers>
+    <Browser>
+      <Platform>Mac</Platform>
+      <Name>Firefox</Name>
+      <Version>68.0</Version>
+    </Browser>
+    <Browser>
+      <Platform>Mac</Platform>
+      <Name>Chrome</Name>
+      <Version>76.0</Version>
+    </Browser>
+    <Browser>
+      <Platform>Mac</Platform>
+      <Name>Safari</Name>
+      <Version>12.1</Version>
+    </Browser>
+    <Browser>
+      <Platform>Windows</Platform>
+      <Name>Firefox</Name>
+      <Version>68.0</Version>
+    </Browser>
+    <Browser>
+      <Platform>Windows</Platform>
+      <Name>Internet Explorer</Name>
+      <Version>10.0</Version>
+    </Browser>
+    <Browser>
+      <Platform>Windows</Platform>
+      <Name>Chrome</Name>
+      <Version>76.0</Version>
+    </Browser>
+    <Browser>
+      <Platform>Windows</Platform>
+      <Name>Edge</Name>
+      <Version>18.1</Version>
+    </Browser>
+    <Browser>
+      <Platform>Linux</Platform>
+      <Name>Firefox</Name>
+      <Version>60.8</Version>
+    </Browser>
+    <Browser>
+      <Platform>Linux</Platform>
+      <Name>Chrome</Name>
+      <Version>74.0</Version>
+    </Browser>
+  </SupportedBrowsers>
+  <!-- the non-supported browser list has PRECEDENCE over the supported list -->
+  <!-- the info in this list is looked up for an exact match with the user's browser info -->
+  <!-- the 'Platform' and 'Version' elements are optional under the NonSupportedBrowsers element-->
+  <NonSupportedBrowsers>
+    <Browser>
+      <Platform>Mac</Platform>
+      <Name>Opera</Name>
+    </Browser>
+  </NonSupportedBrowsers>
+</BrowserList>

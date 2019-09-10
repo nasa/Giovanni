@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<manifest><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_01.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_02.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_03.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_04.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_05.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_06.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_07.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_08.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_09.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_10.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_11.129W_49N_128W_51N.nc</file>
+  </fileList><fileList>
+    <file>data/bbox/g4.ints.SeaWiFS_L3m_CHL_2014_chlor_a.20020101-20171231.MONTH_12.129W_49N_128W_51N.nc</file>
+  </fileList></manifest>

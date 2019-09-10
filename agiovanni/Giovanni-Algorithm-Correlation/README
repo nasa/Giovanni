@@ -1,0 +1,2 @@
+nccorrelate is a C program to compute the correlation over time of each grid
+point in a lat-lon gridded dataset

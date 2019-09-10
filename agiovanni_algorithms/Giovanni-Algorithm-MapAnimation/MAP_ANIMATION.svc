@@ -1,0 +1,17 @@
+# $Id: MAP_ANIMATION.svc,v 1.2 2015/04/17 23:25:04 eseiler Exp $
+# Edward Seiler, NASA/GSFC/Adnet Systems
+# Daniel da Silva, NASA/GSFC/Telophase
+
+SERVICE_NAME = MpAn
+SERVICE_DESCRIPTION = "Map animated along the chosen timeline for each grid cell"
+SERVICE_LABEL = "Animation"
+PLOT_TYPE = MAP_ANIMATION
+ALGORITHM_CMD = g4_map_animation.pl 
+OUTPUT_FILE_ROOT = MpAn
+OUTPUT_TYPE = filelist
+MAX_FRAMES = 365
+MAX_FRAMES_GUEST = 4
+DATELINE_METHOD = 
+SKIP_REGRID = 1
+CONVERT_UNITS_STEP = POST,POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.uuradk1f5oe3

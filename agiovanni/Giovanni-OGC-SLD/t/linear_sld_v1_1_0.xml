@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >aod_sld</se:Name>
+    <UserStyle>
+      <se:Name >Aerosol Optical Depth Color Map</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#FFFFE5</se:Value>
+                <se:Threshold>0</se:Threshold>
+                <se:Value>#FFF8C3</se:Value>
+                <se:Threshold>0.1</se:Threshold>
+                <se:Value>#FEEAA0</se:Value>
+                <se:Threshold>0.2</se:Threshold>
+                <se:Value>#FED574</se:Value>
+                <se:Threshold>0.3</se:Threshold>
+                <se:Value>#FEB946</se:Value>
+                <se:Threshold>0.4</se:Threshold>
+                <se:Value>#FD9828</se:Value>
+                <se:Threshold>0.5</se:Threshold>
+                <se:Value>#EF7617</se:Value>
+                <se:Threshold>0.6</se:Threshold>
+                <se:Value>#D75808</se:Value>
+                <se:Threshold>0.7</se:Threshold>
+                <se:Value>#B64203</se:Value>
+                <se:Threshold>0.8</se:Threshold>
+                <se:Value>#8C3005</se:Value>
+                <se:Threshold>0.9</se:Threshold>
+                <se:Value>#662506</se:Value>
+                <se:Threshold>1.0</se:Threshold>
+                <se:Value>#000000</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

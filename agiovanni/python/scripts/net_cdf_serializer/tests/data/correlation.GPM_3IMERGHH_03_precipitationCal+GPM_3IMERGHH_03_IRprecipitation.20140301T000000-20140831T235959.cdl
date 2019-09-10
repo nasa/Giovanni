@@ -1,0 +1,99 @@
+netcdf correlation.GPM_3IMERGHH_03_precipitationCal+GPM_3IMERGHH_03_IRprecipitation.20140301T000000-20140831T235959 {
+dimensions:
+	lat = 10 ;
+	lon = 10 ;
+variables:
+	double y_GPM_3IMERGHH_03_IRprecipitation(lat, lon) ;
+		y_GPM_3IMERGHH_03_IRprecipitation:_FillValue = 9.96920996838687e+36 ;
+		y_GPM_3IMERGHH_03_IRprecipitation:long_name = "Instantaneous Precipitation - IR" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:quantity_type = "Precipitation" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:units = "mm/hr" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:standard_name = "irprecipitation" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:product_short_name = "GPM_3IMERGHH" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:product_version = "03" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:coordinates = "lat lon" ;
+		y_GPM_3IMERGHH_03_IRprecipitation:latitude_resolution = 0.099998 ;
+		y_GPM_3IMERGHH_03_IRprecipitation:longitude_resolution = 0.099991 ;
+		y_GPM_3IMERGHH_03_IRprecipitation:plot_hint_axis_title = "Instantaneous Precipitation - IR half-hourly .1 deg. [GPM GPM_3IMERGHH v03] mm/hr" ;
+	double x_GPM_3IMERGHH_03_precipitationCal(lat, lon) ;
+		x_GPM_3IMERGHH_03_precipitationCal:_FillValue = 9.96920996838687e+36 ;
+		x_GPM_3IMERGHH_03_precipitationCal:long_name = "Instantaneous Precipitation - Calibrated" ;
+		x_GPM_3IMERGHH_03_precipitationCal:quantity_type = "Precipitation" ;
+		x_GPM_3IMERGHH_03_precipitationCal:units = "mm/hr" ;
+		x_GPM_3IMERGHH_03_precipitationCal:standard_name = "precipitationcal" ;
+		x_GPM_3IMERGHH_03_precipitationCal:product_short_name = "GPM_3IMERGHH" ;
+		x_GPM_3IMERGHH_03_precipitationCal:product_version = "03" ;
+		x_GPM_3IMERGHH_03_precipitationCal:coordinates = "lat lon" ;
+		x_GPM_3IMERGHH_03_precipitationCal:latitude_resolution = 0.099998 ;
+		x_GPM_3IMERGHH_03_precipitationCal:longitude_resolution = 0.099991 ;
+		x_GPM_3IMERGHH_03_precipitationCal:plot_hint_axis_title = "Instantaneous Precipitation - Calibrated half-hourly .1 deg. [GPM GPM_3IMERGHH v03] mm/hr" ;
+	double lat(lat) ;
+		lat:long_name = "latitude" ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	double lon(lon) ;
+		lon:long_name = "longitude" ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int n_samples(lat, lon) ;
+		n_samples:long_name = "Number of samples" ;
+		n_samples:quantity_type = "count" ;
+		n_samples:units = "count" ;
+		n_samples:latitude_resolution = 0.099998 ;
+		n_samples:longitude_resolution = 0.099991 ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:title = "Correlation of Instantaneous Precipitation - Calibrated half-hourly .1 deg. [GPM GPM_3IMERGHH v03] mm/hr vs. Instantaneous Precipitation - IR half-hourly .1 deg. [GPM GPM_3IMERGHH v03] mm/hr" ;
+		:plot_hint_title = "Region 80.9894W, 34.0362N, 80.0446W, 35.014N" ;
+		:plot_hint_subtitle = "2014-04-01 00:00Z - 2014-06-01 01:59Z" ;
+		:matched_start_time = "2014-04-01T00:00:00Z" ;
+		:matched_end_time = "2014-06-01T01:59:59Z" ;
+		:input_temporal_resolution = "half-hourly" ;
+		:NCO = "4.3.1" ;
+data:
+
+ y_GPM_3IMERGHH_03_IRprecipitation =
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
+
+ x_GPM_3IMERGHH_03_precipitationCal =
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ;
+
+ lat = 34.0499992370605, 34.1500015258789, 34.25, 34.3499984741211, 
+    34.4500007629395, 34.5499992370605, 34.6500015258789, 34.75, 
+    34.8499984741211, 34.9500007629395 ;
+
+ lon = -80.9499969482422, -80.8499984741211, -80.75, -80.6500015258789, 
+    -80.5500030517578, -80.4499969482422, -80.3499984741211, -80.25, 
+    -80.1500015258789, -80.0500030517578 ;
+
+ n_samples =
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+  7, 7, 7, 7, 7, 7, 7, 7, 7, 7 ;
+}

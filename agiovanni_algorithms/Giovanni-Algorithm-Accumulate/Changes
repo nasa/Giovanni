@@ -1,0 +1,8 @@
+Revision history for Perl extension Giovanni::Algorithm::Accumulate.
+
+0.02  Mon Mar  17
+        - Functional version
+0.01  Tue Mar  4 20:16:00 2014
+	- original version; created by h2xs 1.23 with options
+		-AXc Giovanni::Algorithm::Accumulate
+

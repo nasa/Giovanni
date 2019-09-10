@@ -1,0 +1,224 @@
+# pkgname must match the beginning of the tar file name.
+# The tar file name must be %{pkgname}-%{version}.tar.gz
+%define pkgname giovanni4 
+%define filelist %{pkgname}-%{version}-filelist
+%define prefix_ops /opt/giovanni4
+%define prefix_shapes /var/giovanni/shapefiles
+
+%define __spec_install_post %{nil}
+%define debug_package %{nil}
+%define __os_install_post %{_dbpath}/brp-compress
+
+version:   __VERSION__
+name:      giovanni4
+summary:   giovanni4 - Earth Science Analysis Tool
+release:   GESDISC
+buildarch: __ARCH__
+License:   GESDISC Internal
+Group:     GESDISC
+prefix:    %{prefix_ops}
+source:    %{pkgname}-%{version}.tar.gz
+buildroot: %{_tmppath}/%{name}-%{version}-%(id -u -n)
+
+BuildRequires: automake
+BuildRequires: autoconf
+BuildRequires: gcc
+BuildRequires: netcdf-devel >= 4.2.1.1
+BuildRequires: perl(ExtUtils::MakeMaker)
+BuildRequires: perl(XML::LibXML)
+BuildRequires: libcurl-devel
+BuildRequires: netcdf-devel
+BuildRequires: zlib-devel
+BuildRequires: java-headless >= 1.8
+
+# Don't use auto req to browse through source code
+AutoReq:  no
+
+# General dependencies
+Requires: gdal >= 1.10.1
+Requires: gdal-libs >= 1.10.1
+Requires: gnuplot44 >= 4.4.2
+Requires: gnuplot44-latex >= 4.4.2
+Requires: httpd >= 2.2.15
+Requires: ImageMagick >= 6.5.4
+Requires: make >= 3.81
+Requires: mapserver >= 6.4.1
+Requires: ncdump-json >= 11
+Requires: nco >= 4.4.4
+Requires: netcdf >= 4.2.1.1
+Requires: opengrads >= 2.1.a2
+Requires: libxml2 >= 2.9.1
+
+# Python
+Requires: anaconda-python >= 2.7.12
+
+# Explicit Perl Dependencies
+Requires: perl(JSON::XS) >= 2.27
+Requires: perl(Crypt::SSLeay) >= 0.57
+Requires: perl(Data::UUID) >= 1.220
+Requires: perl(JSV::Validator) >= 0.08
+Requires: perl(XML::Hash::LX) >= 0.0603
+Requires: perl-XML-LibXSLT
+Requires: perl-Date-Manip
+Requires: perl-TimeDate
+Requires: perl-JSON
+Requires: perl-DateTime
+Requires: perl-Tie-IxHash
+Requires: perl-DBD-XBase
+Requires: perl-Log-Log4perl
+Requires: perl-Proc-ProcessTable
+Requires: perl-Time-HiRes
+
+# MapServer dependency
+Requires: proj-epsg
+
+%description
+Giovanni - Interactive Visualization and Analysis of Earth Science Data, from the GES DISC at NASA Goddard Spaceflight Center.
+
+%prep
+%setup -q -n %{pkgname}-%{version}
+echo %{buildroot}%{prefix_ops}
+chmod -R u+w %{_builddir}/%{pkgname}-%{version}
+
+%install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}%{prefix_ops}/bin
+
+cp -a agiovanni/Dev-Tools/scripts/addGiovanniService.pl %{buildroot}%{prefix_ops}/bin/
+export PATH=$PATH:%{buildroot}%{prefix_ops}/bin
+
+# aGiovanni_shapes
+cd agiovanni_shapes
+make install PREFIX=%{buildroot}%{prefix_shapes}
+cd ..
+
+# Jasmine
+cd jasmine
+make install PREFIX=%{buildroot}%{prefix_ops}
+cd ..
+
+# aGiovanni
+cd agiovanni
+perl Makefile.PL PREFIX=%{buildroot}%{prefix_ops}
+make
+make install
+make cfg
+cd ..
+
+# aGiovanni_Algorithms
+cd agiovanni_algorithms
+sub_projects=($(find . -maxdepth 1 -type d | grep -v .git | tail -n +2))
+
+for project in "${projects[@]}" "${sub_projects[@]}";
+do
+echo -n "Looking for $project... "
+cd $project
+perl Makefile.PL PREFIX=%{buildroot}%{prefix_ops}
+make install
+make cfg
+cd ..
+done
+cd ..
+
+# aGiovanni_DataAccess
+cd agiovanni_dataaccess
+perl Makefile.PL PREFIX=%{buildroot}%{prefix_ops}
+make install
+cd ..
+
+# aGiovanni_GIOVANNI
+cd agiovanni_giovanni
+make install PREFIX=%{buildroot}%{prefix_ops}
+cd ..
+
+# aGiovanni_www
+cd agiovanni_www
+make install PREFIX=%{buildroot}%{prefix_ops}
+cd ..
+
+# Redis Daemon Files
+cd agiovanni
+install -d %{buildroot}%{_sharedstatedir}/redis
+install -d %{buildroot}%{_localstatedir}/log/redis
+install -d %{buildroot}%{_localstatedir}/run/redis 
+
+install -pDm755 Dev-Tools/other/etc/init.d/redis %{buildroot}%{_sysconfdir}/init.d/redis
+install -pDm755 Dev-Tools/other%{_sbindir}/redis-shutdown %{buildroot}%{_sbindir}/redis-shutdown 
+
+# Celery Daemon Files
+install -d %{buildroot}%{_sharedstatedir}/celery
+install -d %{buildroot}%{_localstatedir}/log/celery
+install -d %{buildroot}%{_localstatedir}/run/celery
+
+install -pDm644 Dev-Tools/other/%{_sysconfdir}/default/celeryd %{buildroot}%{_sysconfdir}/default/celeryd
+install -pDm755 Dev-Tools/other/etc/init.d/celeryd %{buildroot}%{_sysconfdir}/init.d/celeryd 
+
+cd ..
+
+# generate filelist, excluding cfg/giovanni.cfg (listed below with %config directive)
+find %{buildroot}/var/giovanni -type f | sed s@%{buildroot}@@ >> %{filelist}
+find %{buildroot}%{prefix_ops} -type f -o -type l | sed s@%{buildroot}@@  | grep -vP 'cfg/(giovanni\.cfg|giovanni_services\.xml)$' >> %{filelist}
+
+# Setup redis and celery users and add them to the wwwuser group.
+# Celery and redis will run via service through /etc/init.d/
+
+%pre
+getent group redis &> /dev/null || \
+groupadd -r redis &> /dev/null
+getent passwd redis &> /dev/null || \
+useradd -r -g redis -d %{_sharedstatedir}/redis -s /sbin/nologin \
+-c 'Redis Database Server' redis &> /dev/null 
+# Add wwwuser group and assign redis user to be a member of wwwuser
+getent group wwwuser &> /dev/null ||
+groupadd -r wwwuser -g 103 &> /dev/null
+usermod -a -G wwwuser redis
+
+getent group celery &> /dev/null || \
+groupadd -r celery &> /dev/null
+getent passwd celery &> /dev/null || \
+useradd -r -g celery -d %{_sharedstatedir}/celery -s /bin/bash \
+-c 'Celery Daemon' celery &> /dev/null 
+getent group wwwuser &> /dev/null || \
+usermod -a -G wwwuser celery
+
+# Add redis and celeryd to chkconfig (happens post(after) installation)
+%post
+chkconfig --add redis &> /dev/null || :
+chkconfig --add celeryd &> /dev/null || :
+# Re-start redis and celery services (triggers after installation or upgrade of new rpm)
+service redis condrestart &> /dev/null || :
+service celeryd condrestart &> /dev/null || :
+
+
+# Stop redis and celeryd services (happens before un-installation)
+%preun
+# $1 = "0" indicates the package is being un-installed, not upgraded.
+# So we stop/disable redis and celeryd services
+if [ "$1" = "0" ]; then
+service redis stop &> /dev/null || :
+chkconfig --del redis &> /dev/null || :
+service celeryd stop &> /dev/null || :
+chkconfig --del celeryd &> /dev/null || :
+fi
+
+%clean
+rm -rf %{buildroot}
+
+# Copy specific configuration files into the cfg directory
+%files -f %filelist
+%config(noreplace) %{prefix}/cfg/giovanni.cfg
+%config(noreplace) %{prefix}/cfg/giovanni_services.xml
+
+# Set permissions for redis and celery users and log files
+%attr(0755, redis, redis) %{_sbindir}/redis-shutdown
+%dir %attr(0755, redis, redis) %{_sharedstatedir}/redis
+%dir %attr(0755, redis, redis) %{_localstatedir}/log/redis
+%dir %attr(0755, redis, redis) %{_localstatedir}/run/redis
+%{_sysconfdir}/init.d/redis
+
+%config(noreplace) %{_sysconfdir}/default/celeryd
+%dir %attr(0755, celery, celery) %{_sharedstatedir}/celery
+%dir %attr(0755, celery, celery) %{_localstatedir}/log/celery
+%dir %attr(0755, celery, celery) %{_localstatedir}/run/celery
+%{_sysconfdir}/init.d/celeryd 
+

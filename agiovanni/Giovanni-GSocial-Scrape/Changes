@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::GSocial::Scrape.
+
+0.01  Wed Aug 29 20:26:21 2012
+	- original version; created by h2xs 1.23 with options
+		-AXc -n Giovanni::GSocial::Scrape
+

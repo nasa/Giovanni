@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Data-NcFile.t
+lib/Giovanni/Data/NcFile.pm

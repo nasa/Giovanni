@@ -1,0 +1,276 @@
+.animCtrl {
+    width: 100%;
+    background: #666;
+}
+.icon {
+    height: 20px;
+    width: 26px;
+    padding: 0px;
+    margin-left:2px;
+    margin-right:2px;
+    border: none;
+    cursor:pointer;
+    background:url('../img/giovanni_icons.png');
+    vertical-align:bottom;
+}
+.animControls {
+    padding: 3px;
+    margin-top: 7px;
+    margin-bottom:0.5em;
+/*    position: fixed;
+    left:40px;
+    top:80%;
+    z-index:9999;
+    background-color:white;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    padding:5px; */
+}
+.animControlsHidden {
+    display:none;
+    visibility:hidden;
+}
+.animControlsVisible {
+    display:block;
+    visibility:visible;
+}
+.frameRateContainer {
+    display:inline-block;
+    margin-left:10px;
+}
+.frameRateControl {
+    display:inline-block;
+}
+.frameRateControlLabel {
+    margin-top:4px;
+    float:left;
+    margin-left: 20px;
+}
+.jumpContainer {
+    display:inline-block;
+    margin-left: 10px;
+}
+#jumpInputLabel {
+    margin-top:4px;
+}
+.enabledLabel {
+    color:black;
+}
+.disabledLabel {
+    color:darkgray;
+}
+.animStart {
+    background-position: -61px -2px;
+    margin-left:5px;
+    margin-right:5px;
+}
+.animStart:hover {
+    background-position: -61px -92px;
+}
+.animStartSelected {
+    background-position: -61px -48px;
+    margin-left:5px;
+    margin-right:5px;
+}
+.animStartDisabled {
+    background-position: -61px -25px;
+}
+.animStop {
+    height: 20px;
+    width: 26px;
+    padding: 5px !important;
+    border: 1px groove #eee !important;
+    float:left;
+    cursor:pointer;
+    background:url('../img/giovanni_icons.png');
+    background-position: -61px -2px;
+}
+.animStop:hover {
+    background-color: #aaa;
+    color:yellow;
+}
+.animPause {
+    background-position: -142px -2px;
+    margin-left:5px;
+    margin-right:5px;
+}
+.animPause:hover {
+    background-position: -142px -92px;
+}
+.animPauseSelected {
+    background-position: -142px -48px;
+    margin-left:5px;
+    margin-right:5px;
+}
+.animRewind {
+    background-position: -196px -2px;
+}
+.animRewind:hover {
+    background-position: -196px -92px;
+}
+.animRewindSelected {
+    background-position: -196px -48px;
+}
+.animRewindDisabled {
+    background-position: -196px -25px;
+}
+.animForwind {
+    background-position: -169px -2px;
+}
+.animForwind:hover {
+    background-position: -169px -92px;
+}
+.animForwindSelected {
+    background-position: -169px -48px;
+}
+.animForwindDisabled {
+    background-position: -169px -25px;
+}
+.animStepBack {
+    background-position: -115px -2px;
+}
+.animStepBack:hover {
+    background-position: -115px -92px;
+}
+.animStepBackSelected {
+    background-position: -115px -48px;
+}
+.animStepBackDisabled {
+    background-position: -115px -25px;
+}
+.animStepFor {
+    background-position: -88px -2px;
+}
+.animStepFor:hover {
+    background-position: -88px -92px;
+}
+.animStepForSelected {
+    background-position: -88px -48px;
+}
+.animStepForDisabled {
+    background-position: -88px -25px;
+}
+.animProgress {
+    height: 15px;
+    padding: 0px;
+    margin-left:5px;
+    border: none;
+    float:left;
+    margin-top:4px;
+    font-size: 0.9em;
+    font-weight: bold;
+    font-style: italic;
+}
+.animLoading {
+    float:left;
+    color: #993300;
+    font-weight:bold;
+    font-style:italic;
+    margin-left:5px;
+    margin-top:10px;
+    padding:5px;
+    text-align:left;
+}
+.animWait {
+    position:absolute;
+    left:300px;
+    top:300px;
+    z-index:9999;
+    color: #660000;
+    background: #ffe;
+    border: 1px solid black;
+    font-weight:bold;
+    font-style:italic;
+    padding: 20px;
+}
+.animRate {
+}
+.animError {
+    float:left;
+    position: relative;
+    top: -180px;
+    z-index: 9999;
+    color: #993300;
+    background: #ffe;
+    border: 1px solid black;
+    font-weight:bold;
+    font-style:italic;
+    margin-left:20px;
+    width: 80%;
+    padding:5px;
+    text-align:left;
+}
+
+.animationBufferMap {
+        float: left;
+        padding: 0px;
+        margin: 0px;
+}
+
+.loadingPanel {
+/*
+    background-image: url("loading.gif");
+    background-position:center;
+    background-repeat:no-repeat;
+*/
+    z-index:999;
+    position:absolute;
+    left:0;
+    top:12em;
+    width:80%;
+    margin-left:10%;
+    margin-right:10%;
+    background:#aaa;
+    border:1px solid #888;
+    border-radius:5px;
+    padding:5px;
+    height:25px;
+    opacity: 0.75;
+}
+.loadingPanelHidden {
+    display:none;
+}
+.loadingPanelShown {
+    display:block;
+}
+#loadingText {
+    font-weight:bold;
+    width:14em;
+    float:left;
+    text-align:left;
+    padding:5px;
+}
+#animationProgressBar {
+    display:inline-block;
+    float:left;
+    margin-left:1em;
+    width:65%;
+}
+
+.olTileImage {
+    -webkit-transition: opacity 0.2s linear;
+    -moz-transition: opacity 0.2s linear;
+    -o-transition: opacity 0.2s linear;
+    transition: opacity 0.2s linear;
+}
+
+.animationTitle {
+    font-size: 1.3em;
+    text-align: center;
+    margin-top: 2em;
+}
+.animationLegend {
+  position:absolute;
+  top:3.8em;
+  right:0em;
+  bottom:0.26em;
+  color:#ddd;
+  padding:4.7em 0.5em 0.5em 0.5em;
+  z-index:1;
+  min-height:10em;
+}
+.animtionPlotCaption {
+  font-size: 0.9em;
+  white-space: normal;
+}
+}

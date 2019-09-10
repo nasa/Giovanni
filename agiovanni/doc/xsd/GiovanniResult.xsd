@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+    <xs:element name="session">
+        <xs:annotation>
+            <xs:documentation>Holds Giovanni Session; it contains Resultsets.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="resultset">
+                    <xs:annotation>
+                        <xs:documentation>Holds Giovanni Results.</xs:documentation>
+                    </xs:annotation>
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="result">
+                                <xs:annotation>
+                                    <xs:documentation>Holds Giovanni Result. Result contains status of a service execution as well as produced data files, images and provenance of service execution.</xs:documentation>
+                                </xs:annotation>
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="status">
+                                            <xs:annotation>
+                                                <xs:documentation>Holds status information about a Giovanni Result.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element name="code">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Contains a numerical code indicating status of Giovanni Result. Non-zero code indicates an error. Zero represents that no errors have been encountered.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                  <xs:element name="message">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Contains a textual message representing the Giovanni Result's status.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                  <xs:element name="percentComplete">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Indicates completion percentage for a Giovanni Result. 100 indicates service execution has been completed.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="criteria">
+                                            <xs:annotation>
+                                                <xs:documentation>Holds the HTTP query string for a Giovanni Result.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element name="query" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holds the original query string that started the service</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                  <xs:element name="referer" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holds the original referer that started the service</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element maxOccurs="unbounded" minOccurs="0" name="data">
+                                            <xs:annotation>
+                                                <xs:documentation>Container of information about data belonging to the Result.</xs:documentation>
+                                            </xs:annotation>
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                  <xs:element maxOccurs="unbounded" minOccurs="1"
+                                                  name="fileGroup">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Contianer of dataFiles.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element maxOccurs="unbounded" minOccurs="1"
+                                                  name="dataFile">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holder of dataFile's content.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element name="dataUrl">
+                                                  <xs:annotation>
+                                                  <xs:documentation>URL for the dataFile.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:attribute name="label" type="xs:string"
+                                                  use="required"/>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  <xs:element maxOccurs="unbounded" minOccurs="0"
+                                                  name="image">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holder of images for dataFile.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element name="src">
+                                                  <xs:annotation>
+                                                  <xs:documentation>URL for image.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                  <xs:element minOccurs="0" name="imgDataUrl">
+                                                  <xs:annotation>
+                                                  <xs:documentation>URL for data that went in to producing images.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                  <xs:element minOccurs="0" name="caption">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Contains any caption associated with the image.
+</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:element>
+                                                  </xs:sequence>
+                                                  <xs:attribute name="type" use="required">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Indicates type of the image. Valids are 'STATIC' and 'INTERACTIVE_SCATTER_PLOT'. It is used to determine whether it is a client side visualized or a server side visualized image.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:simpleType>
+                                                  <xs:restriction base="xs:string">
+                                                  <xs:enumeration value="STATIC"/>
+                                                  <xs:enumeration value="INTERACTIVE_SCATTER_PLOT"/>
+                                                  </xs:restriction>
+                                                  </xs:simpleType>
+                                                  </xs:attribute>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  </xs:sequence>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  </xs:sequence>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  <xs:element minOccurs="0" name="agreementList">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holder of data agreements.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element maxOccurs="unbounded" minOccurs="0"
+                                                  name="agreement">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holder of data agreement.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:attribute name="mandatory" type="xs:boolean">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Flag to indicate user needs to agree to terms and agreements.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:attribute>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  </xs:sequence>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  <xs:element minOccurs="0" name="visualizerOptions">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holder of visualizer options.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:sequence>
+                                                  <xs:element maxOccurs="unbounded" minOccurs="0"
+                                                  name="axisOption">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Holder of axisOption.</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:complexType>
+                                                  <xs:attribute name="name" type="xs:string"
+                                                  use="required">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Name of the axis.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:attribute>
+                                                  <xs:attribute name="label" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Label of the axis.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:attribute>
+                                                  <xs:attribute name="min" type="xs:float"
+                                                  use="required">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Axis min value.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:attribute>
+                                                  <xs:attribute name="max" type="xs:float"
+                                                  use="required">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Axis max value.</xs:documentation>
+                                                  </xs:annotation>
+                                                  </xs:attribute>
+                                                  <xs:attribute form="qualified" name="scale">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Axis type: linear,log..</xs:documentation>
+                                                  </xs:annotation>
+                                                  <xs:simpleType>
+                                                  <xs:restriction base="xs:string">
+                                                  <xs:enumeration value="linear"/>
+                                                  <xs:enumeration value="log"/>
+                                                  </xs:restriction>
+                                                  </xs:simpleType>
+                                                  </xs:attribute>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                  </xs:sequence>
+                                                  </xs:complexType>
+                                                  </xs:element>
+                                                </xs:sequence>
+                                                <xs:attribute name="format" type="xs:string">
+                                                  <xs:annotation>
+                                                  <xs:documentation>Indicates the data format.</xs:documentation>
+                                                  </xs:annotation>
+                                                </xs:attribute>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element name="lineage" minOccurs="0">
+                                            <xs:annotation>
+                                                <xs:documentation>Contains the URL to provenance/data lineage.</xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+
+                                        <xs:element minOccurs="0" name="imageCollection"
+                                            type="xs:string">
+                                            <xs:annotation>
+                                                <xs:documentation>Contains URL to a document containing all images for the product including captions.</xs:documentation>
+                                            </xs:annotation>
+                                        </xs:element>
+                                    </xs:sequence>
+                                    <xs:attribute name="id" type="xs:string" use="required">
+                                        <xs:annotation>
+                                            <xs:documentation>Indicates ID of the Result. It is a UUID.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                    <xs:attribute name="time" type="xs:dateTime">
+                                        <xs:annotation>
+                                            <xs:documentation>Indicates the Result creation time.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                    <xs:attribute name="name" type="xs:string">
+                                        <xs:annotation>
+                                            <xs:documentation>Indicates short name of the result. It might be used as a display label for the result.</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                    <xs:attribute name="description" type="xs:string">
+                                        <xs:annotation>
+                                            <xs:documentation>Indicates a detailed description of the result. It might be used to display more information about the result such as mouse-over description etc.,</xs:documentation>
+                                        </xs:annotation>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="id" type="xs:string" use="required">
+                            <xs:annotation>
+                                <xs:documentation>Indicates ResultSet ID. It is a UUID.</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute name="time" type="xs:dateTime">
+                            <xs:annotation>
+                                <xs:documentation>Indicates the ResultSet creation time.</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:string" use="required">
+                <xs:annotation>
+                    <xs:documentation>Indicates Session ID. It is a UUID.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="time" type="xs:dateTime">
+                <xs:annotation>
+                    <xs:documentation>Indicates the Session creation time.</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

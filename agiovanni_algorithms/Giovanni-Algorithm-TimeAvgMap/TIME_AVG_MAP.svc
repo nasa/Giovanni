@@ -1,0 +1,19 @@
+# $Id: TIME_AVG_MAP.svc,v 1.18 2015/05/14 19:11:04 rstrub Exp $
+# Chris Lynnes, NASA/GSFC
+# Richard Strub, NASA/GSFC/Adnet Systems
+# Daniel da Silva, NASA/GSFC/Telophase
+
+SERVICE_NAME = TmAvMp 
+SERVICE_DESCRIPTION = "Interactive map of average over time at each grid cell"
+SERVICE_LABEL = "Time Averaged Map"
+PLOT_TYPE = INTERACTIVE_MAP
+ALGORITHM_CMD = g4_time_avg.pl 
+OUTPUT_FILE_ROOT = timeAvgMap
+DATELINE_METHOD = 
+SKIP_REGRID = 1
+CONVERT_UNITS_STEP = POST,WRAPPER
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.jx2xbwkrqluu
+MAX_POINTS = 5896289280
+MAX_FRAMES_GUEST = 4
+DEFAULT = true
+GROUP_DEFAULT = true

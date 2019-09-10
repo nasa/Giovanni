@@ -1,0 +1,213 @@
+#serviceFieldset {
+  margin-bottom:10px;
+}
+.groupControl {
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  min-width:100px;
+  float:left;
+  margin:3px;
+  padding:5px;
+  padding-right:7px;
+  background-color:white;
+  color:black;
+  font-weight:normal;
+}
+.groupControl:hover {
+  background-color: rgb(200,200,200);;
+  color:black;
+}
+.groupControlSelected {
+  color:black;
+  font-weight:bold;
+  border: 1px solid blue;
+  background-color:rgb(255,255,0);
+}
+.groupControlSelected:hover {
+  background-color:rgb(200,200,0);
+}
+.groupLabel {
+  margin-left:2px;
+}
+.groupLabelDisabled {
+  color:lightgrey;
+}
+.groupServiceLabel {
+  margin-left:5px;
+}
+.groupServiceLabelUnselected {
+  font-style:italic;
+}
+.groupServiceMore {
+  background-repeat: no-repeat;
+  background-position: -2px -4px;
+  width:22px;
+  height:22px;
+  margin-left: 5px;
+  cursor:default;
+}
+.groupServiceMore:hover {
+  cursor:pointer;
+  background-color:rgb(160,160,0);
+}
+.groupServiceMoreSelected {
+  width:22px;
+  height:22px;
+  margin-left: 5px;
+}
+.groupPanel {
+  min-width:300px;
+  box-shadow: 10px 10px 5px #888;
+  display:none;
+  cursor:pointer;
+  background-color:white;
+  padding:0px;
+  padding-top:5px;
+  border:none;
+  border-bottom:1px solid #aaa;
+}
+.groupPanelVisible {
+  display:block;
+  z-index:10000;
+  position:fixed;
+  x:200;
+  y:200;
+}
+.groupPanelHeader {
+  background-color:#666;
+  color:white;
+  font-weight:bold;
+  font-size:1.2em;
+  text-align:left;
+  margin:0px;
+  padding:5px;
+}
+.row {
+  border-left: 1px solid #aaa;
+  padding-right:10px;
+}
+
+[id^="editor"] .row {
+  border: 0;
+}
+
+[id^="editor"] input[type='text'] {
+  width: 100%;
+}
+
+[id^="editor"] input[type='float'] {
+  width: 100%;
+}
+
+.serviceLabel {
+  inline-block;;
+  color:black;
+  font-weight:bold;
+  margin-left:5px;
+}
+.serviceLabelDisabled {
+  color:lightgrey;
+}
+.serviceRadio {
+  margin-right:5px;
+}
+.serviceDesc {
+  margin-left:28px;
+  margin-bottom:5px;
+}
+.serviceNote {
+  margin-left:2em;
+  margin-bottom:5px;
+  font-style:italic;
+  font-weight:bold;
+  color:#993300;
+}
+.serviceLink {
+  display:inline-block;
+  margin-left:18px;
+  margin-top:0px;
+  margin-bottom:10px;
+}
+.optionsCtrlOpen {
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent;
+  background-position: -76px -424px;
+  width:75px;
+  height:20px;
+  margin-left: 10px;
+  margin-top:0px;
+  vertical-align:middle;
+  display:inline-block;
+}
+.optionsCtrlClose {
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent;
+  background-position: -152px -424px;
+  width:75px;
+  height:20px;
+  margin-left: 10px;
+  margin-top:0px;
+  vertical-align:middle;
+  display:inline-block;
+}
+.optionsArrowOpen {
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent;
+  background-position: -5px -445px;
+  width:22px;
+  height:15px;
+  margin-left: 0px;
+  vertical-align:middle;
+  display:inline-block;
+}
+.optionsArrowClose {
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent;
+  background-position: -29px -445px;
+  width:22px;
+  height:15px;
+  margin-left: 0px;
+  vertical-align:middle;
+  display:inline-block;
+}
+.optionsPanel {
+  display:none;
+}
+.optionsPanelVisible {
+  display:block;
+  background-color:rgb(240,240,240);
+  margin-left:26px;
+  margin-bottom:5px;
+  margin-right:10px;
+}
+.optionLabel {
+  float:left;
+  font-weight:bold;
+  margin-top:2px;
+  width: 7em;
+}
+.optionPanel {
+  margin-left:5px;
+  margin-top:5px;
+  clear:both;
+}
+.singleSelect {
+  border:1px solid black;
+  width:300px;
+}
+.singleSelectItem {
+  font-size:0.5em;
+}
+.small {
+  font-size:0.5em;
+}
+.medium {
+  font-size:1.0em;
+}
+.large {
+  font-size:1.5em;
+}

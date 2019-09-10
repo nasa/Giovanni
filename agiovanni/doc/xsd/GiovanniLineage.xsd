@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="lineage">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" name="step">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="input">
+                                <xs:complexType mixed="true">
+                                    <xs:attribute name="NAME" use="required"/>
+                                    <xs:attribute name="LABEL"/>
+                                    <xs:attribute name="TYPE" use="required">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="URL"/>
+                                                <xs:enumeration value="PARAMETER"/>
+                                                <xs:enumeration value="FILE"/>
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element name="output" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType mixed="true">
+                                    <xs:attribute name="NAME" use="required"/>
+                                    <xs:attribute name="LABEL"/>
+                                    <xs:attribute name="TYPE" use="required">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="URL"/>
+                                                <xs:enumeration value="FILE"/>
+                                                <xs:enumeration value="PARAMETER"/>
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element maxOccurs="unbounded" minOccurs="0" name="message"/>
+                        </xs:sequence>
+                        <xs:attribute name="NAME" use="required" type="xs:string"/>
+                        <xs:attribute name="LABEL" type="xs:string"/>
+                        <xs:attribute name="DISPLAY" type="xs:boolean"/>
+                        <xs:attribute name="VERSION" type="xs:string"/>
+                        <xs:attribute name="ENDTIME" type="xs:string"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="ELAPSED_TIME"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

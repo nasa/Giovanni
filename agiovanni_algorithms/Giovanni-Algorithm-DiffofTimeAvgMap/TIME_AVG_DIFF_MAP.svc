@@ -1,0 +1,18 @@
+# $Id: TIME_AVG_DIFF_MAP.svc,v 1.9 2015/04/03 20:54:57 csmit Exp $
+# Chris Lynnes, NASA/GSFC
+# Richard Strub, NASA/GSFC/Adnet Systems
+SERVICE_NAME = DiTmAvMp 
+SERVICE_DESCRIPTION = "Difference of two time averaged variable maps"
+SERVICE_LABEL = "Map, Difference of Time Averaged"
+PLOT_TYPE = INTERACTIVE_MAP
+ALGORITHM_CMD = g4_time_avg_diff_map.pl
+OUTPUT_FILE_ROOT = timeAvgDiffMap
+DATELINE_METHOD = stitch
+MAX_POINTS = 4552396800
+MAX_FRAMES_GUEST = 4
+SKIP_REGRID = 1
+COMPARISON = minus
+CONVERT_UNITS_STEP = ALGORITHM,WRAPPER
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.2mixwuvgimr9
+
+

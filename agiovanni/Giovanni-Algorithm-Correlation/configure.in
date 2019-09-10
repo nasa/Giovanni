@@ -1,0 +1,13 @@
+AC_INIT(src/nccorrelate.c)
+PACKAGE=nccorrelate
+VERSION=0.1
+AC_ARG_WITH(netcdf, AC_HELP_STRING([--with-netcdf=path],
+            [path to include and lib directories for netcdf]),
+            [NETCDF_PREFIX=$withval], [NETCDF_PREFIX="$prefix"])
+AC_SUBST(NETCDF_PREFIX)
+
+AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
+AC_PROG_CC
+# AC_PROG_LIBTOOL
+
+AC_OUTPUT(Makefile src/Makefile)

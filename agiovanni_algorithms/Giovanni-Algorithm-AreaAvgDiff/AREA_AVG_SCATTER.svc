@@ -1,0 +1,15 @@
+# $Id: AREA_AVG_SCATTER.svc,v 1.9 2015/04/03 16:53:05 csmit Exp $
+# Chris Lynnes, NASA/GSFC
+SERVICE_NAME = ArAvSc 
+SERVICE_DESCRIPTION = "Scatter plot comparing area averaged time series for two variables"
+SERVICE_LABEL = "Scatter, Area Averaged (Static)"
+PLOT_TYPE = SCATTER_PLOT_GNU
+ALGORITHM_CMD = g4_area_avg_scatter.pl
+OUTPUT_FILE_ROOT = areaAvgScatter
+MAX_POINTS = 301830144
+MAX_FRAMES_GUEST = 4
+DATELINE_METHOD =
+COMPARISON = vs.
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.2ty6ahj62qg9
+CONVERT_UNITS_STEP = POST,POST
+

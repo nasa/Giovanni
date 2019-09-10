@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <title>HistoryView Test</title>
+
+    <!-- Combo-handled YUI CSS files: -->
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.9.0/build/resize/assets/skins/sam/resize.css&2.9.0/build/treeview/assets/skins/sam/treeview.css">
+    <!-- Combo-handled YUI JS files: -->
+    <script type="text/javascript" src="http://yui.yahooapis.com/combo?2.9.0/build/utilities/utilities.js&2.9.0/build/element-delegate/element-delegate-min.js&2.9.0/build/event-delegate/event-delegate-min.js&2.9.0/build/event-mouseenter/event-mouseenter-min.js&2.9.0/build/event-simulate/event-simulate-min.js&2.9.0/build/resize/resize-min.js&2.9.0/build/treeview/treeview-min.js"></script>
+<!-- Required CSS -->
+<link type="text/css" rel="stylesheet" href="http://yui.yahooapis.com/2.9.0/build/progressbar/assets/skins/sam/progressbar.css">
+ 
+<!-- Dependency source file -->
+<script src = "http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom.event.js" ></script>
+<script src = "http://yui.yahooapis.com/2.9.0/build/element/element-min.js" ></script>
+<!-- Optional dependency source file -->
+<script src="http://yui.yahooapis.com/2.9.0/build/animation/animation-min.js" type="text/javascript"></script>
+ 
+<!-- ProgressBar source file -->
+<script src = "http://yui.yahooapis.com/2.9.0/build/progressbar/progressbar-min.js" ></script>
+    <script type="text/javascript" src="namespace.js"></script>   
+    <script type="text/javascript" src="Result.js"></script>
+    <script type="text/javascript" src="History.js"></script>    
+    <script type="text/javascript" src="HistoryView.js"></script>
+    <script type="text/javascript">
+      var historyView;
+      var hist;
+      var count=1;
+      
+      function resultAddEventHandler(type,args)
+      {
+          historyView.addResultNode(args[0]);
+      }
+      
+      function start()
+      {
+    	  hist=new giovanni.app.History({portal:"giovanni", urlPrefix:"HistoryViewTest.html"});
+    	  hist.resultAddEvent.subscribe(resultAddEventHandler)
+    	  historyView=new giovanni.ui.HistoryView("history",hist);
+      }
+      
+      function update()
+      {
+    	  var result=hist.createResult( 'xyz', "Title: "+count, '#Query'+count);
+    	  count++;
+      }
+      
+
+      
+    </script>
+        <style type="text/css">
+    .ygtvlabel, .ygtvlabel:link, .ygtvlabel:visited, .ygtvlabel:hover {
+        text-overflow:ellipsis;
+        overflow:hidden;
+    }
+    
+    #history {
+        width: 200px;
+        border: 0px solid #000000;
+        word-wrap: break-word;
+        overflow: hidden;
+    }
+    </style>
+  </head>
+  <body onLoad="start()">
+    <div id="history"></div>
+    <form>
+      <input type="button" value="Click Me" name="historyButton" onClick="update()"></input>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::ScienceCommand.
+
+0.01  Wed May  8 20:40:08 2013
+	- original version; created by h2xs 1.23 with options
+		-AXcO Giovanni::ScienceCommand
+

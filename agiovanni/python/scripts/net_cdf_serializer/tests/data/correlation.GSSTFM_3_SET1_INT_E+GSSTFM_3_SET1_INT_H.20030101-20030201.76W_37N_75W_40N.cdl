@@ -1,0 +1,81 @@
+netcdf correlation.GSSTFM_3_SET1_INT_E+GSSTFM_3_SET1_INT_H.20030101-20030201.76W_37N_75W_40N {
+dimensions:
+    lat = 11 ;
+    lon = 4 ;
+variables:
+    float GSSTFM_3_SET1_INT_E(lat, lon) ;
+        GSSTFM_3_SET1_INT_E:_FillValue = -999.f ;
+        GSSTFM_3_SET1_INT_E:long_name = "Wind Stress Vector, GSSTF, Monthly Grid, 0.25 x 0.25 deg." ;
+        GSSTFM_3_SET1_INT_E:units = "N/m^^2" ;
+        GSSTFM_3_SET1_INT_E:origname = "STu" ;
+        GSSTFM_3_SET1_INT_E:fullnamepath = "/HDFEOS/GRIDS/SET1_INT/Data Fields/STu" ;
+        GSSTFM_3_SET1_INT_E:orig_dimname_list = "XDim " ;
+        GSSTFM_3_SET1_INT_E:standard_name = "set1_int_stu" ;
+        GSSTFM_3_SET1_INT_E:coordinates = "time lat lon" ;
+        GSSTFM_3_SET1_INT_E:quantity_type = "Wind Stress Magnitude" ;
+        GSSTFM_3_SET1_INT_E:product_short_name = "GSSTFM" ;
+        GSSTFM_3_SET1_INT_E:product_version = "3" ;
+        GSSTFM_3_SET1_INT_E:Serializable = "True" ;
+        GSSTFM_3_SET1_INT_E:vector_component = "u of GSSTFM_3_SET1_INT_ST_vec" ;
+        GSSTFM_3_SET1_INT_E:plot_hint_axis_title = "dummy" ;
+    float GSSTFM_3_SET1_INT_H(lat, lon) ;
+        GSSTFM_3_SET1_INT_H:_FillValue = -999.f ;
+        GSSTFM_3_SET1_INT_H:long_name = "Wind Stress Vector, GSSTF, Monthly Grid, 0.25 x 0.25 deg." ;
+        GSSTFM_3_SET1_INT_H:units = "N/m^^2" ;
+        GSSTFM_3_SET1_INT_H:origname = "STv" ;
+        GSSTFM_3_SET1_INT_H:fullnamepath = "/HDFEOS/GRIDS/SET1_INT/Data Fields/STv" ;
+        GSSTFM_3_SET1_INT_H:orig_dimname_list = "XDim " ;
+        GSSTFM_3_SET1_INT_H:standard_name = "set1_int_stv" ;
+        GSSTFM_3_SET1_INT_H:coordinates = "time lat lon" ;
+        GSSTFM_3_SET1_INT_H:quantity_type = "Wind Stress Magnitude" ;
+        GSSTFM_3_SET1_INT_H:product_short_name = "GSSTFM" ;
+        GSSTFM_3_SET1_INT_H:product_version = "3" ;
+        GSSTFM_3_SET1_INT_H:Serializable = "True" ;
+        GSSTFM_3_SET1_INT_H:vector_component = "v of GSSTFM_3_SET1_INT_ST_vec" ;
+        GSSTFM_3_SET1_INT_H:plot_hint_axis_title = "dummy" ;
+    float lat(lat) ;
+        lat:standard_name = "latitude" ;
+        lat:units = "degrees_north" ;
+    float lon(lon) ;
+        lon:standard_name = "longitude" ;
+        lon:units = "degrees_east" ;
+
+// global attributes:
+        :Conventions = "CF-1.4" ;
+        :matched_start_time = "2003-01-01T00:00:00Z" ;
+        :matched_end_time = "2003-01-31T23:59:59Z" ;
+        :nco_openmp_thread_number = 1 ;
+        :NCO = "4.2.1" ;
+data:
+
+ GSSTFM_3_SET1_INT_E =
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -0.0288955,
+  -0.0288955, -0.0288955, -0.0288955, -1 ;
+
+ GSSTFM_3_SET1_INT_H =
+  -1, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336873, -0.07336873, -0.07336873, -0.07336873,
+  -0.07336872, -0.07336872, -0.07336872, -0.07336872 ;
+
+ lat = 87.37501, 87.62499, 87.87501, 88.12499, 88.37501, 88.62499, 88.87501, 
+    89.12499, 89.37501, 89.62499, 89.87501 ;
+
+ lon = 172.375, 172.625, 172.875, 173.125 ;
+}

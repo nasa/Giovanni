@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >divergent_rdbu_11_sld</se:Name>
+    <UserStyle>
+      <se:Name >Blue-Red (Div), 11</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#67001F</se:Value>
+                <se:Threshold/>
+                <se:Value>#B2182B</se:Value>
+                <se:Threshold/>
+                <se:Value>#D6604D</se:Value>
+                <se:Threshold/>
+                <se:Value>#F4A582</se:Value>
+                <se:Threshold/>
+                <se:Value>#FDDBC7</se:Value>
+                <se:Threshold/>
+                <se:Value>#F7F7F7</se:Value>
+                <se:Threshold/>
+                <se:Value>#D1E5F0</se:Value>
+                <se:Threshold/>
+                <se:Value>#92C5DE</se:Value>
+                <se:Threshold/>
+                <se:Value>#4393C3</se:Value>
+                <se:Threshold/>
+                <se:Value>#2166AC</se:Value>
+                <se:Threshold/>
+                <se:Value>#053061</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

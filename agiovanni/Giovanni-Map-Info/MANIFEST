@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Map-Info.t
+lib/Giovanni/Map/Info.pm

@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Map::Info.
+
+0.01  Wed Feb  3 19:07:05 2016
+	- original version; created by h2xs 1.23 with options
+		-AXc Giovanni::Map::Info
+

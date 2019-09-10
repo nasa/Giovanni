@@ -1,0 +1,34 @@
+{
+  "title": "Histogram",
+  "type": "object",
+  "properties": {
+    "Data": {
+      "propertyOrder": 1,
+      "type": "object",
+      "properties": {
+        "Label": {
+          "type": "string",
+          "readOnly": true
+        },
+        "Display at log10 scale": {
+          "type": "boolean",
+          "format": "checkbox"
+        }
+      }
+    },
+    "Y Axis": {
+      "type": "object",
+      "properties": {
+        "Label": {
+          "type": "string",
+          "readOnly": true
+        },
+        "Display at log10 scale": {
+          "type": "boolean",
+          "format": "checkbox"
+        }
+      }
+    }
+  },
+  "additionalProperties":false
+}

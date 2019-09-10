@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Algorithm::AreaAveragerNco.
+
+0.01  Thu Apr 12 18:30:57 2012
+	- original version; created by h2xs 1.23 with options
+		-X Giovanni::Algorithm::AreaAveragerNco
+

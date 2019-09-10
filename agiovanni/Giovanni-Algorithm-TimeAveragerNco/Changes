@@ -1,0 +1,7 @@
+Revision history for Perl extension Giovanni::Algorithm::TimeAveragerNco.
+
+0.02  Initial version of code and test (lacking POD)
+0.01  Thu Oct 13 15:12:51 2011
+	- original version; created by h2xs 1.23 with options
+		-X -n Giovanni::Algorithm::TimeAveragerNco
+

@@ -1,0 +1,48 @@
+{
+  "time": {
+    "data": 
+      [ "2004-12"]
+  },
+  "lat": {
+    "units": "degrees_north",
+    "data": 
+      [ 32.396, 32.438, 32.479 ]
+  },
+  "lon": {
+    "units": "degrees_east",
+    "data": 
+      [ -71.979, -71.937, -71.896, -71.854 ]
+  },
+  "x_MODISA_L3m_SST_2014_sst": {
+    "units": "C",
+    "quantity_type": "Energy",
+    "long_name": "Sea Surface Temperature",
+    "product_short_name": "MODISA_L3m_SST",
+    "product_version": "2014",
+    "plot_hint_axis_title": "Sea Surface Temperature monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C",
+    "data": 
+      [
+        [
+          [ 21.004, 21.065, 21.123, 21.123 ],
+          [ 20.901, 20.901, 20.915, 20.891 ],
+          [ 20.997, 21.103, 21.055, 21.02 ]
+        ]
+      ]
+  },
+  "y_MODISA_L3m_SST_2014_sst4": {
+    "units": "C",
+    "quantity_type": "Energy",
+    "long_name": "Sea Surface Temperature 4 micron",
+    "product_short_name": "MODISA_L3m_SST",
+    "product_version": "2014",
+    "plot_hint_axis_title": "Sea Surface Temperature 4 micron monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C",
+    "data": 
+      [
+        [
+          [ 18.771, 19.984, 20.74, 20.74 ],
+          [ 19.937, 19.937, 20.66, 20.662 ],
+          [ 20.849, 20.611, 20.487, 20.529 ]
+        ]
+      ]
+  }
+}

@@ -1,0 +1,63 @@
+netcdf pairedData.TRMM_3B42_007_precipitation+TRMM_3B42_long_shortname_007_precipitation.20030101T0000-20030101T0000.77W_38N_76W_39N {
+dimensions:
+	time = UNLIMITED ; // (1 currently)
+	lat = 2 ;
+	lon = 3 ;
+variables:
+	float lat(lat) ;
+		lat:long_name = "Latitude" ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	float lon(lon) ;
+		lon:long_name = "Longitude" ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	float x_TRMM_3B42_007_precipitation(time, lat, lon) ;
+		x_TRMM_3B42_007_precipitation:units = "mm/hr" ;
+		x_TRMM_3B42_007_precipitation:coordinates = "time lat lon" ;
+		x_TRMM_3B42_007_precipitation:long_name = "Precipitation" ;
+		x_TRMM_3B42_007_precipitation:_FillValue = -9999.9f ;
+		x_TRMM_3B42_007_precipitation:standard_name = "precipitation" ;
+		x_TRMM_3B42_007_precipitation:quantity_type = "Precipitation" ;
+		x_TRMM_3B42_007_precipitation:product_short_name = "TRMM_3B42" ;
+		x_TRMM_3B42_007_precipitation:product_version = "7" ;
+		x_TRMM_3B42_007_precipitation:plot_hint_axis_title = "Precipitation 3-hourly 0.25 deg. [TRMM TRMM_3B42 v7] mm/hr" ;
+	float y_TRMM_3B42_long_shortname_007_precipitation(time, lat, lon) ;
+		y_TRMM_3B42_long_shortname_007_precipitation:units = "mm/hr" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:coordinates = "time lat lon" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:long_name = "Precipitation" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:_FillValue = -9999.9f ;
+		y_TRMM_3B42_long_shortname_007_precipitation:standard_name = "precipitation" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:quantity_type = "Precipitation" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:product_short_name = "TRMM_3B42_with_a_34_char_shortname" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:product_version = "7" ;
+		y_TRMM_3B42_long_shortname_007_precipitation:plot_hint_axis_title = "Precipitation 3-hourly 0.25 deg. [TRMM TRMM_3B42_with_a_34_char_shortname v7] mm/hr" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:temporal_resolution = "3-hourly" ;
+		:nco_openmp_thread_number = 1 ;
+		:matched_start_time = "2003-01-01T00:00:00Z" ;
+		:matched_end_time = "2003-01-01T00:00:00Z" ;
+		:title = "Data match (77.3767W - 76.6406W, 38.6862N - 39.1366N): TRMM_3B42.7 TRMM_3B42_with_a_34_char_shortname.7" ;
+		:plot_hint_title = "Region 77.3767W, 38.6862N, 76.6406W, 39.1366N" ;
+		:plot_hint_subtitle = "2003-01-01 00Z - 2003-01-01 00:00:00Z" ;
+data:
+
+ lat = 38.875, 39.125 ;
+
+ lon = -77.375, -77.125, -76.875 ;
+
+ time = 1041379200 ;
+
+ x_TRMM_3B42_007_precipitation =
+  0, 0, 0,
+  0, 0, 0 ;
+
+ y_TRMM_3B42_long_shortname_007_precipitation =
+  0, 0, 0,
+  0, 0, 0 ;
+}

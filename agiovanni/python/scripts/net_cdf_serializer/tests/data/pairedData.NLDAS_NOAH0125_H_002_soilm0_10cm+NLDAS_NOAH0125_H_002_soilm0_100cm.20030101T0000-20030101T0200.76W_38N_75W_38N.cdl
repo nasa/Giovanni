@@ -1,0 +1,111 @@
+netcdf pairedData.NLDAS_NOAH0125_H_002_soilm0_10cm+NLDAS_NOAH0125_H_002_soilm0_100cm.20030101T0000-20030101T0200.76W_38N_75W_38N {
+dimensions:
+	time = UNLIMITED ; // (3 currently)
+	lat = 4 ;
+	lon = 4 ;
+variables:
+	float NLDAS_NOAH0125_H_002_soilm0_10cm(time, lat, lon) ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:units = "kg/m^2" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:long_name = "Soil moisture content (layer 1, 0-10 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg." ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:missing_value = -9999.f ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_param_name = "Soil_moisture_content" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_param_short_name = "SOILM" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_center_id = 7 ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_table_id = 130 ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_param_number = 86 ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_param_id = 1, 7, 130, 86 ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_product_definition_type = "Initialized analysis product" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_level_type = 112 ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:GRIB_VectorComponentFlag = "easterlyNortherlyRelative" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:standard_name = "soil_moisture_content" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:_FillValue = -9999.f ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:coordinates = "time lat lon" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:quantity_type = "Soil moisture 0-10 cm" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:product_short_name = "NLDAS_NOAH0125_H" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:product_version = "002" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:Serializable = "True" ;
+		NLDAS_NOAH0125_H_002_soilm0_10cm:plot_hint_axis_title = "Soil moisture content (layer 1, 0-10 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg. [NLDAS_NOAH0125_H v2] (kg/m^2)" ;
+	double lat(lat) ;
+		lat:_CoordinateAxisType = "Lat" ;
+		lat:grid_spacing = "0.125 degrees_north" ;
+		lat:long_name = "latitude coordinate" ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	double lon(lon) ;
+		lon:_CoordinateAxisType = "Lon" ;
+		lon:grid_spacing = "0.125 degrees_east" ;
+		lon:long_name = "longitude coordinate" ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int time(time) ;
+		time:long_name = "forecast time" ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	float NLDAS_NOAH0125_H_002_soilm0_100cm(time, lat, lon) ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:units = "kg/m^2" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:long_name = "Soil moisture content (top 1 meter, 0-100 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg." ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:missing_value = -9999.f ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_param_name = "Soil_moisture_content" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_param_short_name = "SOILM" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_center_id = 7 ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_table_id = 130 ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_param_number = 86 ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_param_id = 1, 7, 130, 86 ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_product_definition_type = "Initialized analysis product" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_level_type = 112 ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:GRIB_VectorComponentFlag = "easterlyNortherlyRelative" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:standard_name = "soil_moisture_content" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:_FillValue = -9999.f ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:coordinates = "time lat lon" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:quantity_type = "Soil moisture 0-100 cm" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:product_short_name = "NLDAS_NOAH0125_H" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:product_version = "002" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:Serializable = "True" ;
+		NLDAS_NOAH0125_H_002_soilm0_100cm:plot_hint_axis_title = "Soil moisture content (top 1 meter, 0-100 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg. [NLDAS_NOAH0125_H v2] (kg/m^2)" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:nco_openmp_thread_number = 1 ;
+		:NCO = "4.2.1" ;
+		:temporal_resolution = "hourly" ;
+		:matched_start_time = "2003-01-01T00:00:00Z" ;
+		:matched_end_time = "2003-01-01T02:59:59Z" ;
+		:title = "Data match (76W - 75.5W, 38N - 38.5N): NLDAS_NOAH0125_H.002 NLDAS_NOAH0125_H.002" ;
+		:history = "Wed Apr 24 16:24:11 2013: ncatted -a plot_hint_axis_title,NLDAS_NOAH0125_H_002_soilm0_100cm,c,c,Soil moisture content (top 1 meter, 0-100 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg. [NLDAS_NOAH0125_H v2] (kg/m^2) /var/tmp/www/TS2/giovanni/38A239AC-ACF9-11E2-9ACF-137C4CDB26BE/5F858310-ACFB-11E2-A835-46884CDB26BE/5F859E90-ACFB-11E2-A835-46884CDB26BE/pairedData.NLDAS_NOAH0125_H_002_soilm0_10cm+NLDAS_NOAH0125_H_002_soilm0_100cm.20030101T0000-20030101T0200.76W_38N_75W_38N.nc\n",
+			"Wed Apr 24 16:24:11 2013: ncatted -a plot_hint_axis_title,NLDAS_NOAH0125_H_002_soilm0_10cm,c,c,Soil moisture content (layer 1, 0-10 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg. [NLDAS_NOAH0125_H v2] (kg/m^2) /var/tmp/www/TS2/giovanni/38A239AC-ACF9-11E2-9ACF-137C4CDB26BE/5F858310-ACFB-11E2-A835-46884CDB26BE/5F859E90-ACFB-11E2-A835-46884CDB26BE/pairedData.NLDAS_NOAH0125_H_002_soilm0_10cm+NLDAS_NOAH0125_H_002_soilm0_100cm.20030101T0000-20030101T0200.76W_38N_75W_38N.nc" ;
+data:
+
+ NLDAS_NOAH0125_H_002_soilm0_10cm =
+  _, 28.58, 28.3, 22.38,
+  _, 28.63, 28.43, 19.03,
+  26.52, 28.66, 19.12, 22.74,
+  28.7, 19.09, 22.83, 22.78,
+  _, 28.6, 28.32, 22.37,
+  _, 28.65, 28.45, 19.01,
+  26.53, 28.69, 19.11, 22.73,
+  28.72, 19.08, 22.81, 22.77,
+  _, 28.62, 28.34, 22.37,
+  _, 28.68, 28.47, 18.99,
+  26.54, 28.71, 19.09, 22.72,
+  28.75, 19.06, 22.79, 22.76 ;
+
+ lat = 38.0625, 38.1875, 38.3125, 38.4375 ;
+
+ lon = -75.9375, -75.8125, -75.6875, -75.5625 ;
+
+ time = 1041379200, 1041382800, 1041386400 ;
+
+ NLDAS_NOAH0125_H_002_soilm0_100cm =
+  _, 302.7395, 298.7139, 240.8515,
+  _, 303.5139, 301.0819, 202.8931,
+  284.0579, 304.0963, 203.8659, 242.1763,
+  304.4803, 204.9603, 243.3283, 242.1699,
+  _, 302.7669, 298.7413, 240.8021,
+  _, 303.5541, 301.1349, 202.8309,
+  284.0405, 304.1429, 203.8037, 242.1269,
+  304.5205, 204.8917, 243.2725, 242.1269,
+  _, 302.8003, 298.7683, 240.7523,
+  _, 303.6003, 301.1875, 202.7683,
+  284.0227, 304.1891, 203.7347, 242.0835,
+  304.5667, 204.8163, 243.2163, 242.0835 ;
+}

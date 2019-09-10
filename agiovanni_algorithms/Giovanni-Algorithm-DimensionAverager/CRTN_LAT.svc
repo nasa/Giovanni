@@ -1,0 +1,17 @@
+# $Id: CRTN_LAT.svc,v 1.4 2015/07/16 15:46:22 mnardozz Exp $
+# Maksym Petrenko, NASA/GSFC
+SERVICE_NAME = CrLt
+SERVICE_DESCRIPTION = "Cross Section, Latitude-Pressure"
+SERVICE_LABEL = "Cross Section, Latitude-Pressure"
+PLOT_TYPE = CURTAIN
+ALGORITHM_CMD = g4_curtain_lat.pl
+OUTPUT_FILE_ROOT = curtainLatitude
+MAX_POINTS =
+MAX_FRAMES_GUEST = 4
+SLICE_LIMIT = 
+DATELINE_METHOD =
+CONVERT_UNITS_STEP = POST
+DEFAULT = true
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.7gc4x28aqfdl
+
+

@@ -1,0 +1,130 @@
+netcdf scrubbed.MOD08_D3_051_MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean.20030101.1.paired {
+dimensions:
+	time1 = 3 ; 
+	time2 = 3 ;
+	lat = 7 ;
+	lon = 12 ;
+variables:
+	short MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean(time1, lat, lon) ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:coordinates = "time1 lat lon" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:valid_range = -100s, 5000s ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:_FillValue = -9999s ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:long_name = "MOD08_D3.051: Aerosol Optical Thickness at 0.55 microns for both Ocean (best) and Land (corrected): Mean" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:units = "1" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:scale_factor = 0.001 ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:add_offset = 0. ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Level_2_Pixel_Values_Read_As = "Real" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Derived_From_Level_2_Data_Set = "Optical_Depth_Land_And_Ocean" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Included_Level_2_Nighttime_Data = "False" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Quality_Assurance_Data_Set = "None" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Statistic_Type = "Simple" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Aggregation_Data_Set = "None" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:standard_name = "optical_depth_land_and_ocean_mean" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:quantity_type = "Total Aerosol Optical Depth" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:product_short_name = "MOD08_D3" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:product_version = "051" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Serializable = "True" ;
+		MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:plot_hint_axis_title = "dummy";
+	double lat(lat) ;
+		lat:long_name = "Latitude" ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	double lon(lon) ;
+		lon:long_name = "Longitude" ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int time1(time1) ;
+		time1:standard_name = "time" ;
+		time1:units = "seconds since 1970-01-01 00:00:00" ;
+	int time2(time2) ;
+        time2:standard_name = "time" ;
+        time2:units = "seconds since 1970-01-01 00:00:00" ;
+	int dataday(time1) ;
+	    dataday:standard_name = "data day in YYYYDDD format" ;
+	short MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean(time2, lat, lon) ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:coordinates = "time2 lat lon" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Level_2_Pixel_Values_Read_As = "Real" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Quality_Assurance_Data_Set = "None" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Derived_From_Level_2_Data_Set = "Optical_Depth_Land_And_Ocean" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:long_name = "MYD08_D3.051: Aerosol Optical Thickness at 0.55 microns for both Ocean (best) and Land (corrected): Mean" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:valid_range = -100s, 5000s ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Included_Level_2_Nighttime_Data = "False" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Aggregation_Data_Set = "None" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:_FillValue = -9999s ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Statistic_Type = "Simple" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:add_offset = 0. ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:units = "1" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:scale_factor = 0.001 ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:standard_name = "optical_depth_land_and_ocean_mean" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:quantity_type = "Total Aerosol Optical Depth" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:product_short_name = "MYD08_D3" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:product_version = "051" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Serializable = "True" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:plot_hint_axis_title = "dummy";
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:temporal_resolution = "daily" ;
+		:nco_openmp_thread_number = 1 ;
+		:matched_start_time = "2003-01-01T00:00:00Z";
+		:matched_end_time = "2003-01-03T23:59:59Z";
+		:NCO = "20120717" ;
+		:title = "Data match (31.641E - 43.594E, 17.766N - 24.797N): MOD08_D3.051 MYD08_D3.051" ;
+data:
+
+ MOD08_D3_051_Optical_Depth_Land_And_Ocean_Mean =
+  178, 218, _, 53, 36, 40, 228, 160, _, _, _, _,
+  _, _, _, 87, 53, 62, 86, 149, 163, _, _, _,
+  _, _, _, 136, 94, 83, 116, 144, 142, _, _, _,
+  _, _, _, _, 217, 124, 213, 153, 147, _, _, _,
+  _, _, _, _, _, 209, 204, 80, 161, 137, _, _,
+  _, _, _, _, _, 195, 145, _, _, 175, 157, _,
+  _, _, _, _, _, 139, 140, _, _, 311, 159, _,
+  188, 137, _, 63, 58, 69, _, _, _, _, _, _,
+  _, _, _, 81, 66, 93, 103, _, _, _, _, _,
+  _, _, _, _, 81, 104, 121, _, _, _, _, _,
+  _, _, _, _, _, 110, _, _, _, _, _, _,
+  _, _, _, _, _, 130, _, 187, _, _, _, _,
+  _, _, _, _, _, _, _, 235, 248, _, _, _,
+  _, _, _, _, _, _, _, 257, 281, 276, _, _,
+  _, _, _, 159, 171, 128, 253, 195, _, _, _, _,
+  _, _, _, 109, 145, 114, 99, _, _, _, _, _,
+  _, _, _, 113, 134, 132, 110, _, 402, _, _, _,
+  _, _, _, _, 135, 129, 150, 272, 476, _, _, _,
+  _, _, _, _, _, 149, 194, 246, _, _, _, _,
+  _, _, _, _, _, 209, 271, 434, 394, 338, 429, _,
+  _, _, _, _, _, 266, 292, 363, 374, 433, 264, _ ;
+
+ lat = 24.5, 23.5, 22.5, 21.5, 20.5, 19.5, 18.5 ;
+
+ lon = 32.5, 33.5, 34.5, 35.5, 36.5, 37.5, 38.5, 39.5, 40.5, 41.5, 42.5, 43.5 ;
+
+ time1 = 1041379200, 1041465600, 1041552000 ;
+ 
+ time2 = 1041379200, 1041465600, 1041552000 ;
+ 
+ dataday = 2003001, 2003002, 2003003 ;
+
+ MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean =
+  136, 123, _, 67, 49, 42, _, _, _, _, _, _,
+  _, _, _, 85, 59, 58, 51, 64, _, _, _, _,
+  _, _, _, 96, 81, 69, 84, 69, 69, _, _, _,
+  _, _, _, _, _, 74, 141, _, 70, _, _, _,
+  _, _, _, _, _, 98, 155, 110, _, _, _, _,
+  _, _, _, _, _, 130, 121, 116, 160, _, _, _,
+  _, _, _, _, _, 102, 120, 130, 179, 249, _, _,
+  _, _, _, 63, 63, 93, 139, 165, _, _, _, _,
+  _, _, _, 72, 72, 106, 112, 166, 178, _, _, _,
+  _, _, _, _, 89, 126, 168, 194, 213, _, _, _,
+  _, _, _, _, _, 158, 189, 240, 211, _, _, _,
+  _, _, _, _, _, 248, 194, 186, 178, 171, _, _,
+  _, _, _, _, _, 280, 172, 196, _, 310, 200, _,
+  _, _, _, _, _, 262, 175, 208, _, _, 106, _,
+  182, 174, _, 110, 170, 122, _, _, _, _, _, _,
+  _, _, _, 116, 137, 160, 93, _, _, _, _, _,
+  _, _, _, 128, 107, 115, 77, _, _, _, _, _,
+  _, _, _, _, 143, 100, 109, 129, _, _, _, _,
+  _, _, _, _, _, 102, 165, 218, _, _, _, _,
+  _, _, 181, _, _, 178, 199, 235, _, _, _, _,
+  _, _, _, _, _, 201, 223, 350, 359, 320, _, _ ;
+}

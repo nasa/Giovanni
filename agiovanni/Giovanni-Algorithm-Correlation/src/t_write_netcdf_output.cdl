@@ -1,0 +1,81 @@
+netcdf t_write_netcdf_output {
+dimensions:
+	longitude = 2 ;
+	latitude = 3 ;
+variables:
+	double longitude(longitude) ;
+		longitude:long_name = "longitude" ;
+		longitude:standard_name = "longitude" ;
+		longitude:units = "degrees_east" ;
+	double latitude(latitude) ;
+		latitude:long_name = "latitude" ;
+		latitude:standard_name = "latitude" ;
+		latitude:units = "degrees_north" ;
+	double correlation(latitude, longitude) ;
+		correlation:long_name = "correlation" ;
+		correlation:_FillValue = -2. ;
+		correlation:quantity_type = "correlation" ;
+	double slope(latitude, longitude) ;
+		slope:long_name = "slope" ;
+		slope:_FillValue = -999. ;
+	double offset(latitude, longitude) ;
+		offset:long_name = "offset" ;
+		offset:_FillValue = -99999. ;
+	double time_matched_difference(latitude, longitude) ;
+		time_matched_difference:long_name = "time_matched_difference" ;
+		time_matched_difference:_FillValue = -99999. ;
+		time_matched_difference:quantity_type = "difference" ;
+	double sum_x(latitude, longitude) ;
+		sum_x:long_name = "sum_x" ;
+		sum_x:_FillValue = -99999. ;
+	double sum_y(latitude, longitude) ;
+		sum_y:long_name = "sum_y" ;
+		sum_y:_FillValue = -99999. ;
+	int n_samples(latitude, longitude) ;
+		n_samples:long_name = "Number of samples" ;
+		n_samples:quantity_type = "count" ;
+		n_samples:units = "count" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+data:
+
+ longitude = 40, 60 ;
+
+ latitude = 10, 20, 30 ;
+
+ correlation =
+  -1, -0.5,
+  0, _,
+  0.5, 1 ;
+
+ slope =
+  -1, -0.5,
+  0, _,
+  0.5, 1 ;
+
+ offset =
+  -2.5, -1.5,
+  0, _,
+  1.5, 2.5 ;
+
+ time_matched_difference =
+  _, _,
+  _, _,
+  _, _ ;
+
+ sum_x =
+  _, _,
+  _, _,
+  _, _ ;
+
+ sum_y =
+  _, _,
+  _, _,
+  _, _ ;
+
+ n_samples =
+  6, 5,
+  4, 3,
+  2, 1 ;
+}

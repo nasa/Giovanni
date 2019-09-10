@@ -1,0 +1,96 @@
+{
+  "title":"Cross Map",
+  "type":"object",
+  "properties":{
+    "Data":{
+      "propertyOrder":1,
+      "type":"object",
+      "properties":{
+        "Label":{
+          "propertyOrder": 1,
+          "type":"string",
+          "readOnly":true
+        },
+        "Range":{
+          "$ref":"#/definitions/range"
+        }
+      }
+    },
+    "Y Axis":{
+      "propertyOrder":2,
+      "$ref":"#/definitions/axis"
+    },
+    "Palette":{
+      "propertyOrder":3,
+      "type":"object",
+      "enum":[
+        {
+          "label":"placeholder - palette label",
+          "legend":"placeholder - palette icon url",
+          "sld":"placeholder - sld xml url"
+        }
+      ]
+    }
+  },
+  "definitions":{
+    "axis":{
+      "type":"object",
+      "properties":{
+        "Label":{
+          "propertyOrder":1,
+          "type":"string",
+          "readOnly":true
+        },
+        "Range":{
+          "propertyOrder":2,
+          "$ref":"#/definitions/range"
+        },
+        "Display at log10 scale": {
+          "type": "boolean",
+          "format": "checkbox"
+        }
+      }
+    },
+    "lineFit":{
+      "type":"boolean",
+      "format":"checkbox"
+    },
+    "scale":{
+      "type":"string",
+      "required":true,
+      "enum":[
+        "Linear",
+        "Log"
+      ]
+    },
+    "range":{
+      "type":"object",
+      "properties":{
+        "Min":{
+          "propertyOrder":1,
+          "type":"number"
+        },
+        "Max":{
+          "propertyOrder":2,
+          "type":"number"
+        }
+      }
+    },
+    "dateRange":{
+      "type":"object",
+      "properties":{
+        "From":{
+          "propertyOrder":1,
+          "type":"string",
+          "format":"datetime"
+        },
+        "To":{
+          "propertyOrder":2,
+          "type":"string",
+          "format":"datetime"
+        }
+      }
+    }
+  },
+  "additionalProperties":false
+}

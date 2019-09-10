@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Catalog.
+
+0.01  Wed Apr 11 14:17:31 2012
+	- original version; created by h2xs 1.23 with options
+		-X Giovanni::Catalog
+

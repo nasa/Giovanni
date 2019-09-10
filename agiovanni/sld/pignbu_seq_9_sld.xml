@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >pignbu_seq_9_sld</se:Name>
+    <UserStyle>
+      <se:Name >Pink-Yellow-Green-Blue (Seq), 11</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#FFEEEE</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#FFFFD9</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#EDF8B1</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#C7E9B4</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#7FCDBB</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#41B6C4</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#1D91C0</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#225EA8</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#253494</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#081D58</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#000000</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

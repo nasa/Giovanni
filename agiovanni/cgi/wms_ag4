@@ -1,0 +1,320 @@
+#!/usr/bin/perl -T 
+
+my ($rootPath);
+
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    push( @INC, $rootPath . 'share/perl5/' )
+        if defined $rootPath;
+}
+use strict;
+
+#use CGI qw/-oldstyle_urls/;
+use Safe;
+use Giovanni::OGC::WMS;
+use Giovanni::CGI;
+use Giovanni::Catalog;
+use Giovanni::Util;
+use File::Temp;
+
+$| = 1;
+
+## clean env and path
+$ENV{'PATH'} = '/usr/local/bin:/bin:/usr/bin:/usr/local/pkg/ncl/bin';
+delete @ENV{ 'IFS', 'CDPATH', 'ENV', 'BASH_ENV' };
+
+# Configuration file for Giovanni: contains environment variables and input validation rules
+my $cfgFile = ( defined $rootPath ? $rootPath : '/opt/giovanni4/' );
+$cfgFile .= 'cfg/giovanni.cfg';
+
+# Read the configuration file
+my $error = Giovanni::Util::ingestGiovanniEnv($cfgFile);
+Giovanni::Util::exit_with_error($error) if ( defined $error );
+
+
+my $q = Giovanni::CGI->new(
+    INPUT_TYPES     => \%GIOVANNI::INPUT_TYPES,
+    TRUSTED_SERVERS => \@GIOVANNI::TRUSTED_SERVERS,
+    REQUIRED_PARAMS =>
+        [ 'service', 'request', 'version' ]
+    ,
+);
+my $qStr = $q->query_string();
+
+# WMS getCapabilities request
+if ( $qStr =~ m/getcapabilities/i ) {
+    my $resultDir       = $GIOVANNI::SESSION_LOCATION;
+    my $wmsCapabilities = File::Temp->new(
+        TEMPLATE => 'agwms' . '_XXXX',
+        DIR      => $resultDir,
+        SUFFIX   => '.map'
+    );
+    my $mapResult = generateMapFile($wmsCapabilities);
+    exit_with_error("Not able to find map service capabilities")
+        unless $mapResult;
+    $ENV{'MS_MAPFILE'} = $wmsCapabilities;
+    my $mapServer
+        = defined $GIOVANNI::WMS{map_server}
+        ? $GIOVANNI::WMS{map_server}
+        : $rootPath . '/cgi-bin/mapserv';
+    exit_with_error("Not able to find map server") unless ( -x $mapServer );
+    exec $mapServer;
+}
+
+# WMS getMap request
+elsif ( $qStr =~ m/getmap/i ) {
+    my $parameters = $q->Vars;
+
+    # make the keys lowercase
+    for my $key ( grep { lc($_) ne $_ } keys %$parameters ) {
+        my $newkey = lc $key;
+        $parameters->{$newkey} = $parameters->{$key};
+        delete $parameters->{$key};
+    }
+    exit_with_error("Missed the layer value")
+        unless exists $parameters->{'layers'};
+    exit_with_error("Missed the bounding box")
+        unless exists $parameters->{'bbox'};
+
+    # Check 3rd dimension
+    my @tString   = split( /\./, $parameters->{'layers'} );
+    my %dInfo     = ();
+    my $layerName = $tString[1];
+    my $dimValue  = $parameters->{'vert_slice'}
+        if exists $parameters->{'vert_slice'};
+    my $fields     = [$layerName];
+    my $catalogUrl = $GIOVANNI::DATA_CATALOG;
+    my $catalog    = Giovanni::Catalog->new( { URL => $catalogUrl } );
+    my $layers
+        = $catalog->getActiveDataFields(qw(startTime endTime zDimValues));
+
+    unless ( exists $layers->{$layerName} ) {
+        exit_with_error(
+            "The layer, $parameters->{'layers'}, is not supported.");
+    }
+    my @zDimValues = split( / /, $layers->{$layerName}{zDimValues} );
+
+    # if data has 3rd dimension
+    if ( defined @zDimValues ) {
+
+        # 3rd dimension is not specified in user requests, then report error
+        exit_with_error(
+            "Please specify the 3rd dimension using parameter 'vert_slice'.")
+            if not defined $dimValue;
+        my $valueStr = join( ', ', @zDimValues );
+
+        # the value of 3rd dimension is not correct, then report error
+        exit_with_error(
+            "The value of 'vert_slice' is not correct. It should be one of '$valueStr'."
+        ) unless ( grep( /^$dimValue$/, @zDimValues ) );
+    }
+    elsif ( defined $dimValue ) {
+
+        # 3rd dimension is specified for non 3D variables, report error
+        exit_with_error("The 'vert_slice' is not a valid parameter");
+    }
+
+    # time values end with '.999Z' in catalogue, remove it
+    $layers->{$layerName}{startTime}
+        = ( $layers->{$layerName}{startTime} =~ /(\S+)\.\S+$/ )
+        ? $1 . "Z"
+        : $layers->{$layerName}{startTime};
+    $layers->{$layerName}{endTime}
+        = ( $layers->{$layerName}{endTime} =~ /(\S+)\.\S+$/ )
+        ? $1 . "Z"
+        : $layers->{$layerName}{endTime};
+
+    # specify end time as default time if time is not defined
+    if ( not defined $parameters->{'time'} ) {
+        $parameters->{'time'} = $layers->{$layerName}{endTime};
+    }
+
+    # parse time value
+    my @timeString = split( "/", $parameters->{"time"} );
+    my $startTime  = $timeString[0];
+    my $endTime    = defined $timeString[1] ? $timeString[1] : $timeString[0];
+
+    # replace space with T
+    $startTime =~ s/\s/T/;
+    $endTime   =~ s/\s/T/;
+    unless ( $startTime =~ m/T/i ) {
+        $startTime .= "T00:00:00Z";
+    }
+    unless ( $endTime =~ m/T/i ) {
+        $endTime .= "T23:59:59Z";
+    }
+
+    # validate time
+    exit_with_error( "The time '"
+            . $parameters->{"time"}
+            . "' is not valid. The end time should not be earlier than start time."
+    ) if $endTime lt $startTime;
+    exit_with_error( "The time '"
+            . $parameters->{"time"}
+            . "' is not valid. It should be between $layers->{$layerName}{startTime} and $layers->{$layerName}{endTime}."
+        )
+        if $startTime lt $layers->{$layerName}{startTime}
+            or $startTime gt $layers->{$layerName}{endTime};
+    exit_with_error( "The time '"
+            . $parameters->{"time"}
+            . "' is not valid. It should be between $layers->{$layerName}{startTime} and $layers->{$layerName}{endTime}."
+        )
+        if $endTime lt $layers->{$layerName}{startTime}
+            or $endTime gt $layers->{$layerName}{endTime};
+    $parameters->{"starttime"} = $startTime;
+    $parameters->{"endtime"}   = $endTime;
+
+    my $wmsHash = {};
+    $wmsHash->{'options'}  = $parameters;
+    $wmsHash->{'time_out'} = $GIOVANNI::WMS{'time_out'};
+    my $ogc = Giovanni::OGC::WMS->new($wmsHash);
+
+    my $ogcResponse = $ogc->submitRequest;
+
+    if ( $ogc->{_IS_SUCCESS} ) {
+        print "content-type: "
+            . $ogcResponse->header('Content-Type') . "\n\n";
+        print $ogcResponse->content;
+    }
+    else {
+        print $ogcResponse;
+    }
+}
+
+#Other WMS rquests are not supported
+else {
+    exit_with_error(
+        "Request is not supported. Please use \"getCapabilities\" to get more details."
+    );
+}
+
+sub generateMapFile {
+    my ($capaFile) = @_;
+    my $catalogUrl = $GIOVANNI::DATA_CATALOG;
+    open CFILE, ">$capaFile" or die "Error opening $capaFile";
+    print CFILE "MAP\n";
+    print CFILE "  NAME \"GES_DISC_Giovanni_WMS\"\n";
+    print CFILE "  STATUS ON\n";
+    print CFILE "  EXTENT  -180 -90 180 90\n";
+    print CFILE "  FONTSET \"/opt/giovanni4/cfg/fonts/font.list\"\n";
+    print CFILE "  IMAGETYPE \"PNG\"\n";
+    print CFILE "  PROJECTION\n";
+    print CFILE "    \"init=epsg:4326\"\n";
+    print CFILE "  END\n";
+    print CFILE "  SIZE 2000 1000\n";
+    print CFILE "  UNITS DD\n";
+    print CFILE "  WEB\n";
+    print CFILE "    IMAGEPATH \"/var/tmp/www\"\n";
+    print CFILE "    IMAGEURL \"WWW-TEMP\"\n";
+    print CFILE "    METADATA\n";
+    print CFILE "      \"wms_title\" \"OGC WMS for NASA Giovanni\"\n";
+    print CFILE
+        "      \"wms_contactelectronicmailaddress\" \"help-disc\@listserv.gsfc.nasa.gov\"\n";
+    print CFILE
+        "      \"wms_contactorganization\" \"Goddard Earth Sciences Data and Information Services Center\"\n";
+    print CFILE "      \"wms_contactperson\" \"Mahabaleshwa Hegde\"\n";
+    print CFILE "      \"wms_contactvoicetelephone\" \"301-614-5190\"\n";
+    print CFILE
+        "      \"wms_onlineresource\" \"http://giovanni.gsfc.nasa.gov/giovanni/daac-bin/wms_ag4\"\n";
+    print CFILE "      \"wms_srs\" \"EPSG:4326\"\n";
+    print CFILE "      \"ows_enable_request\" \"getCapabilities getMap\"\n";
+    print CFILE "    END\n";
+    print CFILE "  END\n";
+
+    my $catalog = Giovanni::Catalog->new( { URL => $catalogUrl } );
+    my $layers
+        = $catalog->getActiveDataFields(
+        qw(long_name startTime endTime west south east north zDimUnits zDimName zDimValues)
+        );
+    return 0 if not defined $layers;
+    foreach my $key ( keys %$layers ) {
+        print CFILE "  LAYER\n";
+        print CFILE "    NAME \"Time-Averaged.$key\"\n";
+        print CFILE "    TYPE RASTER\n";
+        print CFILE "    STATUS ON\n";
+        print CFILE "    PROJECTION\n";
+        print CFILE "      \"init=epsg:4326\"\n";
+        print CFILE "    END\n";
+        print CFILE "    METADATA\n";
+        print CFILE "      \"wms_title\" \""
+            . $layers->{$key}{'long_name'} . "\"\n";
+        print CFILE "      \"wms_timeextent\" \""
+            . $layers->{$key}{'startTime'} . "/"
+            . $layers->{$key}{'endTime'} . "\"\n";
+        print CFILE "      \"wms_srs\" \"EPSG:4326\"\n";
+        print CFILE "      \"wms_timedefault\" \""
+            . $layers->{$key}{'endTime'} . "\"\n";
+        print CFILE "      \"wms_extent\" \""
+            . $layers->{$key}{'west'} . " "
+            . $layers->{$key}{'south'} . " "
+            . $layers->{$key}{'east'} . " "
+            . $layers->{$key}{'north'} . "\"\n";
+
+        if ( defined $layers->{$key}{'zDimUnits'} ) {
+            my @bandCount = split( " ", $layers->{$key}{'zDimValues'} );
+            if ( @bandCount > 0 ) {
+                print CFILE "      \"wms_dimensionlist\" \"vert_slice\"\n";
+                print CFILE "      \"wms_vert_slice_item\" \"vert_slice\"\n";
+                print CFILE "      \"wms_vert_slice_extent\" \""
+                    . $layers->{$key}{'zDimValues'} . "\"\n";
+                print CFILE "      \"wms_vert_slice_units\" \""
+                    . $layers->{$key}{'zDimUnits'} . "\"\n";
+
+            }
+        }
+        print CFILE "    END\n";
+        print CFILE "  END\n";
+    }
+    print CFILE "END\n";
+    close CFILE;
+    return 1;
+}
+
+# A method to exit with 400 HTTP header with appropriate message
+sub exit_with_error {
+    my ($message) = @_;
+    print $q->header(
+        -status        => 400,
+        -type          => 'text/xml',
+        -cache_control => 'no-cache'
+    );
+
+    #my $ogcError = "Content-Type: text/xml\n\n";
+    my $ogcError
+        .= "<?xml version='1.0' encoding=\"ISO-8859-1\" standalone=\"no\" ?>\n";
+    $ogcError
+        .= "<!DOCTYPE ServiceExceptionReport SYSTEM \"http://schemas.opengis.net/wms/1.1.1/exception_1_1_1.dtd\">\n";
+    $ogcError .= "<ServiceExceptionReport version=\"1.1.1\">\n";
+    $ogcError .= "<ServiceException>\n";
+    $ogcError .= "  $message\n";
+    $ogcError .= "</ServiceException>\n";
+    $ogcError .= "</ServiceExceptionReport>\n";
+
+    print $ogcError;
+    exit;
+}
+
+__END__
+
+=head1 NAME
+
+wms_ag4 - CGI script for AG WMS interface 
+
+=head1 PROJECT
+
+Giovanni
+
+=head1 SYNOPSIS
+
+=head1 EXAMPLES
+
+perl wms_ag4 "VERSION=1.1.1&REQUEST=GetMap&SRS=EPSG:4326&WIDTH=700&HEIGHT=350&LAYERS=INTERACTIVE_MAP.AIRX3STD_006_Temperature_A&STYLES=default&TRANSPARENT=TRUE&FORMAT=image/png&time=2008-01-01T00:00:00Z/2008-01-04T23:59:59Z&bbox=-180,-90,180,90"
+
+=head1 AUTHOR
+
+Peisheng Zhao (peisheng.zhao-1@nasa.gov)
+
+=head1 SEE ALSO
+
+=cut 
+

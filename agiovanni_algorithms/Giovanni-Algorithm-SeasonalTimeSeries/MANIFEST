@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Algorithm-SeasonalTimeSeries.t
+lib/Giovanni/Algorithm/SeasonalTimeSeries.pm

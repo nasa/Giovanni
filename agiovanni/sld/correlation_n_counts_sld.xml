@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >correlation_n_counts_sld</se:Name>
+    <UserStyle>
+      <se:Name >Reds (Seq), 11</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#FFFFFF</se:Value>
+                <se:Threshold/>
+                <se:Value>#FFF0E9</se:Value>
+                <se:Threshold/>
+                <se:Value>#FEE0D2</se:Value>
+                <se:Threshold/>
+                <se:Value>#FCBBA1</se:Value>
+                <se:Threshold/>
+                <se:Value>#FC9272</se:Value>
+                <se:Threshold/>
+                <se:Value>#FB6A4A</se:Value>
+                <se:Threshold/>
+                <se:Value>#EF3B2C</se:Value>
+                <se:Threshold/>
+                <se:Value>#CB181D</se:Value>
+                <se:Threshold/>
+                <se:Value>#99000D</se:Value>
+                <se:Threshold/>
+                <se:Value>#900004</se:Value>
+                <se:Threshold/>
+                <se:Value>#900004</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

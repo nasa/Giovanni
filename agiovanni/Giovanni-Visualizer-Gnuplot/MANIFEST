@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Visualizer-Gnuplot.t
+lib/Giovanni/Visualizer/Gnuplot.pm

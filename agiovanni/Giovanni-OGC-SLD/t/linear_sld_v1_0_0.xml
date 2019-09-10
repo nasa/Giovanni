@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<StyledLayerDescriptor version="1.0.0" 
+    xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd" 
+    xmlns="http://www.opengis.net/sld" 
+    xmlns:ogc="http://www.opengis.net/ogc" 
+    xmlns:xlink="http://www.w3.org/1999/xlink" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <Name>Aerosol Optical Depth Color Map</Name>
+    <UserStyle>
+      <Title>Aerosol Optical Depth Color Map</Title>
+      <FeatureTypeStyle>
+        <Rule>
+          <RasterSymbolizer>
+            <ColorMap type="intervals">
+              <ColorMapEntry color="#FFFFFF" label="" quantity="-1"/>
+              <ColorMapEntry color="#FFFFE5" label="0.0" quantity="0"/>
+              <ColorMapEntry color="#FFF8C3" label="" quantity="0.1"/>
+              <ColorMapEntry color="#FEEAA0" label="0.2" quantity="0.2"/>
+              <ColorMapEntry color="#FED574" label="" quantity="0.3"/>
+              <ColorMapEntry color="#FEB946" label="0.4" quantity="0.4"/>
+              <ColorMapEntry color="#FD9828" label="" quantity="0.5"/>
+              <ColorMapEntry color="#EF7617" label="0.6" quantity="0.6"/>
+              <ColorMapEntry color="#D75808" label="" quantity="0.7"/>
+              <ColorMapEntry color="#B64203" label="0.8" quantity="0.8"/>
+              <ColorMapEntry color="#8C3005" label="" quantity="0.9"/>
+              <ColorMapEntry color="#662506" label="1.0" quantity="1.0"/>
+              <ColorMapEntry color="#000000" label="" quantity="2"/>
+            </ColorMap>
+          </RasterSymbolizer>
+        </Rule>
+      </FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

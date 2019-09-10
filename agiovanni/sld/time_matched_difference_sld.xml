@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >time_matched_difference_sld</se:Name>
+    <UserStyle>
+      <se:Name >Blue-Yellow-Red (Div), 12</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#0000FF</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#2288FF</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#55AAFF</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#99CCFF</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#CCEEFF</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#EEFFFF</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#FFFF44</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#FFE300</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#FF9933</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#FF5500</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#FF0000</se:Value>
+                <se:Threshold></se:Threshold>
+                <se:Value>#DD0000</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

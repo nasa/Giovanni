@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Serializer::TimeSeries.
+
+0.01  Wed Feb  6 18:54:05 2013
+	- original version; created by h2xs 1.23 with options
+		-AXcO Giovanni::Serializer::TimeSeries
+

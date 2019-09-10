@@ -1,0 +1,10 @@
+These are the directions on how to create the Non-Javascript Portal:
+Build in this directory and in ../xsl and in ../cgi
+
+This is the second version of the 508 Portal. This now is structured:
+noscript.cgi on top on NoScript.pm with a few .xsl files.
+It relies on
+my $template = "../../giovanni/noscript/noscriptTemplate.html";
+my $servicesXml = "cfg/giovanni/giovanni_services.xml";
+
+

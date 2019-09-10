@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >sequential_ylorbr_9_sld</se:Name>
+    <UserStyle>
+      <se:Name >Yellow-Orange-Brown (Seq), 9</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#ffffe5</se:Value>
+                <se:Threshold/>
+                <se:Value>#fff7bc</se:Value>
+                <se:Threshold/>
+                <se:Value>#fee391</se:Value>
+                <se:Threshold/>
+                <se:Value>#fec44f</se:Value>
+                <se:Threshold/>
+                <se:Value>#fe9929</se:Value>
+                <se:Threshold/>
+                <se:Value>#ec7014</se:Value>
+                <se:Threshold/>
+                <se:Value>#cc4c02</se:Value>
+                <se:Threshold/>
+                <se:Value>#993404</se:Value>
+                <se:Threshold/>
+                <se:Value>#662506</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

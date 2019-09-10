@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >sequential_gn_9_sld</se:Name>
+    <UserStyle>
+      <se:Name >Greens (Seq), 9</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#f7fcfd</se:Value>
+                <se:Threshold/>
+                <se:Value>#e5f5f9</se:Value>
+                <se:Threshold/>
+                <se:Value>#ccece6</se:Value>
+                <se:Threshold/>
+                <se:Value>#99d8c9</se:Value>
+                <se:Threshold/>
+                <se:Value>#66c2a4</se:Value>
+                <se:Threshold/>
+                <se:Value>#41ae76</se:Value>
+                <se:Threshold/>
+                <se:Value>#238b45</se:Value>
+                <se:Threshold/>
+                <se:Value>#006d2c</se:Value>
+                <se:Threshold/>
+                <se:Value>#00441b</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

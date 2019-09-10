@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<services>
+	<service name="CoMp" label="Map, Correlation" group="comparison"
+		groupLbl="Comparisons" plot_type="INTERACTIVE_MAP"
+		description="Simple linear regression of 2 variables at each grid cell"
+		helplink="./doc/UsersManualworkingdocument.docx.html#h.2yaifwcfni1x"
+		default="true" max_points="4557385728" max_frames_guest="4" />
+</services>

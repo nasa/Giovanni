@@ -1,0 +1,86 @@
+netcdf g4.iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N {
+dimensions:
+	time = UNLIMITED ; // (1 currently)
+	lat = 3 ;
+	lon = 4 ;
+variables:
+	float x_MODISA_L3m_SST_2014_sst(time, lat, lon) ;
+		x_MODISA_L3m_SST_2014_sst:long_name = "Sea Surface Temperature" ;
+		x_MODISA_L3m_SST_2014_sst:units = "C" ;
+		x_MODISA_L3m_SST_2014_sst:standard_name = "sea_surface_temperature" ;
+		x_MODISA_L3m_SST_2014_sst:display_scale = "linear" ;
+		x_MODISA_L3m_SST_2014_sst:display_min = -2. ;
+		x_MODISA_L3m_SST_2014_sst:display_max = 45. ;
+		x_MODISA_L3m_SST_2014_sst:quantity_type = "Energy" ;
+		x_MODISA_L3m_SST_2014_sst:product_short_name = "MODISA_L3m_SST" ;
+		x_MODISA_L3m_SST_2014_sst:product_version = "2014" ;
+		x_MODISA_L3m_SST_2014_sst:coordinates = "time lat lon" ;
+		x_MODISA_L3m_SST_2014_sst:plot_hint_axis_title = "Sea Surface Temperature monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C" ;
+	int datamonth(time) ;
+		datamonth:long_name = "Standardized Date Label" ;
+	float lat(lat) ;
+		lat:units = "degrees_north" ;
+		lat:_FillValue = -32767.f ;
+		lat:valid_min = -90.f ;
+		lat:valid_max = 90.f ;
+		lat:standard_name = "latitude" ;
+	float lon(lon) ;
+		lon:units = "degrees_east" ;
+		lon:_FillValue = -32767.f ;
+		lon:valid_min = -180.f ;
+		lon:valid_max = 180.f ;
+		lon:standard_name = "longitude" ;
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	float y_MODISA_L3m_SST_2014_sst4(time, lat, lon) ;
+		y_MODISA_L3m_SST_2014_sst4:long_name = "Sea Surface Temperature 4 micron" ;
+		y_MODISA_L3m_SST_2014_sst4:units = "C" ;
+		y_MODISA_L3m_SST_2014_sst4:standard_name = "sea_surface_temperature" ;
+		y_MODISA_L3m_SST_2014_sst4:display_scale = "linear" ;
+		y_MODISA_L3m_SST_2014_sst4:display_min = -2. ;
+		y_MODISA_L3m_SST_2014_sst4:display_max = 45. ;
+		y_MODISA_L3m_SST_2014_sst4:quantity_type = "Energy" ;
+		y_MODISA_L3m_SST_2014_sst4:product_short_name = "MODISA_L3m_SST" ;
+		y_MODISA_L3m_SST_2014_sst4:product_version = "2014" ;
+		y_MODISA_L3m_SST_2014_sst4:coordinates = "time lat lon" ;
+		y_MODISA_L3m_SST_2014_sst4:plot_hint_axis_title = "Sea Surface Temperature 4 micron monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C" ;
+
+// global attributes:
+		:NCO = "\"4.5.3\"" ;
+		:nco_openmp_thread_number = 1 ;
+		:Conventions = "CF-1.4" ;
+		:start_time = "2004-12-31T22:35:06Z" ;
+		:end_time = "2005-01-31T15:00:05Z" ;
+		:temporal_resolution = "monthly" ;
+		:history = "Wed Jul  6 18:46:29 2016: ncrename -v MODISA_L3m_SST_2014_sst4,y_MODISA_L3m_SST_2014_sst4 -O -o iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N.nc.0 iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N.nc.0\n",
+			"Wed Jul  6 18:46:29 2016: ncrename -v MODISA_L3m_SST_2014_sst,x_MODISA_L3m_SST_2014_sst -O -o iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N.nc.0 iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N.nc.0\n",
+			"Wed Jul  6 18:46:29 2016: ncks --3 -O -o iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N.nc.0 iascatter.MODISA_L3m_SST_2014_sst+MODISA_L3m_SST_2014_sst4.20050101-20050131.71W_32N_71W_32N.nc.0" ;
+		:matched_start_time = "2004-12-01T00:00:00Z" ;
+		:matched_end_time = "2004-12-31T23:59:59Z" ;
+		:userstartdate = "2005-01-01T00:00:00Z" ;
+		:userenddate = "2005-01-31T23:59:59Z" ;
+		:title = "Scatter (Interactive) of Sea Surface Temperature 4 micron monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C vs Sea Surface Temperature monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C" ;
+		:plot_hint_title = "Scatter (Interactive)" ;
+		:plot_hint_subtitle = "2004-12-31 22:35:06Z - 2005-01-31 15:00:05Z, Region 71.9934W, 32.3731N, 71.8451W, 32.4884N " ;
+		:plot_hint_caption = "- Selected data range was 2005-Jan - 2005-Jan. The data date range for Sea Surface Temperature monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C is 2004-12-31 22:35:06Z - 2005-01-31 15:00:05Z. The data date range for Sea Surface Temperature 4 micron monthly 4 km [MODIS-Aqua MODISA_L3m_SST v2014] C is 2004-12-31 22:35:06Z - 2005-01-31 15:00:05Z." ;
+data:
+
+ x_MODISA_L3m_SST_2014_sst =
+  21.00371, 21.06539, 21.12276, 21.12276,
+  20.90115, 20.90115, 20.91478, 20.89111,
+  20.99725, 21.10268, 21.05463, 21.0202 ;
+
+ datamonth = 200412 ;
+
+ lat = 32.39583, 32.4375, 32.47917 ;
+
+ lon = -71.97916, -71.93749, -71.89583, -71.85416 ;
+
+ time = 1104487806 ;
+
+ y_MODISA_L3m_SST_2014_sst4 =
+  18.77111, 19.98387, 20.7405, 20.7405,
+  19.93654, 19.93654, 20.66018, 20.66233,
+  20.8488, 20.61141, 20.48662, 20.52893 ;
+}

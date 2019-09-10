@@ -1,0 +1,217 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!--$Id: ServicesTest.html,v 1.2 2015/02/03 18:41:42 kbryant Exp $-->
+<!-- -@@@ Giovanni, Version $Name:  $ -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<!-- Always force IE 9 rendering engine (even in intranet) & use Chrome Frame if available -->
+<meta http-equiv="X-UA-Compatible" content="IE=9,chrome=1" />
+
+<title>Giovanni</title>
+
+<!-- core CSS -->
+<link rel="stylesheet" type="text/css" href="css/giovanni.css">
+<!-- portal css -->
+<link rel="stylesheet" type="text/css" href="css/tableless_layout.css">
+<!-- widget css -->
+<link rel="stylesheet" type="text/css" href="css/Workspace.css">
+<link rel="stylesheet" type="text/css" href="css/MessageBoard.css">
+<link rel="stylesheet" type="text/css" href="css/HistoryView.css">
+<link rel="stylesheet" type="text/css" href="css/Services.css">
+
+<!-- for now, and to avoid the IE complaint, load Calendar.js - giovanni.widget.Calendar extends -->
+<!-- YUI Calendar and so far, we can't load external classes with YUI Loader to avoid this error -->
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/yahoo-dom-event/yahoo-dom-event.js"></script>
+
+<!-- Load the YUI Loader script: -->
+<script
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/yuiloader/yuiloader-min.js"></script>
+
+<!-- local js refs -->
+<script type="text/javascript" src="namespace.js"></script>
+<script type="text/javascript" src="util.js"></script>
+<script type="text/javascript" src="app/Session.js"></script>
+<script type="text/javascript" src="app/History.js"></script>
+<script type="text/javascript" src="ui/DataSelector.js"></script>
+<script type="text/javascript" src="ui/MessageBoard.js"></script>
+<script type="text/javascript" src="ui/Workspace.js"></script>
+<script type="text/javascript" src="ui/ResultView.js"></script>
+<script type="text/javascript" src="ui/HistoryView.js"></script>
+<script type="text/javascript" src="util/Registry.js"></script>
+<script type="text/javascript" src="widget/ValidationResponse.js"></script>
+<script type="text/javascript" src="widget/Toolbar.js"></script>
+<script type="text/javascript" src="widget/Services.js"></script>
+<script type="text/javascript" src="util/BrowserCompatibilityCheck.js"></script>
+<script type="text/javascript" src="util/data_accessor.js"></script>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.collapsible.min.js"></script>
+
+<script type="text/javascript">
+// to avoid 'console' errors in browsers that lack a console or console is turned off
+(function() {
+    var method;
+    var noop = function () {};
+    var methods = [
+        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+        'timeStamp', 'trace', 'warn'
+    ];
+    var length = methods.length;
+    var console = (window.console = window.console || {});
+    while (length--) {
+        method = methods[length];
+        // Only stub undefined methods.
+        if (!console[method]) {
+            console[method] = noop;
+        }
+    }
+}());
+</script>
+
+<style type="text/css">
+  /*
+   *  YUI REQUIRES 0 margin and padding 
+   */
+  .body {
+    margin: 0;
+    padding: 0;
+  }
+  
+	.collapsible {
+		background: #cccccc;
+		/* border-top: #f0f0f0 1px solid; */
+		color: #000;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 1em;
+		/* height: 20px; */
+		margin: 0;
+		padding: 5px;
+		text-decoration: none;
+		/* text-transform: uppercase; */
+	}
+	
+	.collapse-open {
+		background: #000;
+		color: #fff;
+	}
+	
+	.collapse-open span {
+		background: url(images/open.png) 25% 25% no-repeat;
+		display: block;
+		float: left;
+		padding: 10px;
+	}
+	
+	.collapse-close span {
+		background: url(images/closed.png) 25% 25% no-repeat;
+		display: block;
+		float: left;
+		padding: 10px;
+	}
+</style>
+</head>
+
+<body class="yui-skin-sam">
+
+	<div id="session" class="yui-skin-sam"></div>
+
+	<!-- end body HTML content -->
+
+	<script type="text/javascript">
+    // session variable
+    var session = null;
+
+    // Instantiate and configure Loader:
+    var loader = new YAHOO.util.YUILoader({
+      // Identify the components you want to load.  Loader will automatically identify
+      // any additional dependencies required for the specified components.
+      require : ["animation", "autocomplete", "button", "calendar", "carousel", "connection", 
+                 "container", "datasource", "datatable", "dragdrop", "element", "event-delegate", 
+                 "get", "json", "menu", "progressbar", "resize", "treeview"],
+
+      // Configure loader to pull in optional dependencies.  For example, animation
+      // is an optional dependency for slider.
+      loadOptional : true,
+
+      // The function to call when all script/css resources have been loaded
+      onSuccess : onPortalLoad,
+
+      // Configure the Get utility to timeout after 10 seconds for any given node insert
+      timeout : 10000,
+
+      // Combine YUI files into a single request (per file type) by using the Yahoo! CDN combo service.
+      combine : true,
+    });
+
+    // Load the files using the insert() method. The insert method takes an optional
+    // configuration object, and in this case we have configured everything in
+    // the constructor, so we don't need to pass anything to insert().
+    loader.insert();
+
+    //callback function: to run after all specified YUI components have been loaded
+    function onPortalLoad() {
+
+/* DISABLED as part of 5903 (Download GeoTIFF) and in preparation for taking Sprint 59 to OPS
+      // intercept window unload to display a warning message
+      YAHOO.util.Event.addListener(window, "beforeunload", function (e) {
+        var msg = "This action will result in the LOSS OF SESSION DATA";
+        e.returnValue = msg;
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+        return msg;
+      });    
+*/  
+      
+      // create session
+      session = new giovanni.app.Session("session", {
+        "serviceManagerURL" : "./daac-bin/service_manager.pl?",
+        "portal" : "GIOVANNI"
+      });
+
+      // get data selector reference from session
+      var dataSelector = session.getDataSelector();
+      // add pickers to the data selector
+      var servicePicker = dataSelector.addWidget(giovanni.ui.DataSelector.SERVICE_PICKER, giovanni.portal.serviceDataAccessor, {
+        "view" : "radio"
+      });
+
+      // perform required dependency registrations (source,consumer(s))
+      //REGISTRY.addEventListener(servicePicker.getId(), variablePicker.getId(), datePicker.getId(),session.getDataSelector().getId());
+      //REGISTRY.addEventListener(variablePicker.getId(), datePicker.getId(), servicePicker.getId(),locationPicker.getId(), session.getDataSelector().getId());
+      //REGISTRY.addEventListener(datePicker.getId(), servicePicker.getId(),session.getDataSelector().getId());
+      //REGISTRY.addEventListener(locationPicker.getId(), servicePicker.getId(),session.getDataSelector().getId());
+
+      // process bookmark string # and load UI components appropriately
+/*
+      var queryString = window.location.hash.substring(1);
+      if(queryString.length>0){
+        REGISTRY.addAllReadyCallback(function() {
+          var comps = REGISTRY.getUIComponents();
+          if (setLoadInProgress instanceof Function) setLoadInProgress(true);
+          for (var i=0; i < comps.length; i++) {
+              if(comps[i].loadFromQuery instanceof Function){
+                 comps[i].loadFromQuery(queryString);
+              }
+          }
+          if (setLoadInProgress instanceof Function) setLoadInProgress(false);
+        });
+      }
+*/
+    }; // END OF onPortalLoad() function
+/*    
+    var setLoadInProgress = function(value) {
+      session.loadInProgress = Boolean(value);
+    };
+    
+    var isLoadInProgress = function() {
+      return session.loadInProgress;
+    };
+*/
+  </script>
+
+</body>
+</html>

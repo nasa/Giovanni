@@ -1,0 +1,65 @@
+{
+  "time": {
+    "data": 
+      [ "2014-04-01 00:00Z - 2014-06-01 01:59Z"]
+  },
+  "lat": {
+    "units": "degrees_north",
+    "data": 
+      [ 34.05, 34.15, 34.25, 34.35, 34.45, 34.55, 34.65, 34.75, 34.85, 34.95 ]
+  },
+  "lon": {
+    "units": "degrees_east",
+    "data": 
+      [ -80.95, -80.85, -80.75, -80.65, -80.55, -80.45, -80.35, -80.25, -80.15, -80.05 ]
+  },
+  "y_GPM_3IMERGHH_03_IRprecipitation": {
+    "units": "mm/hr",
+    "quantity_type": "Precipitation",
+    "long_name": "Instantaneous Precipitation - IR",
+    "product_short_name": "GPM_3IMERGHH",
+    "product_version": "03",
+    "_FillValue": [9.969210e+36],
+    "plot_hint_axis_title": "Instantaneous Precipitation - IR half-hourly .1 deg. [GPM GPM_3IMERGHH v03] mm/hr",
+    "data": 
+      [ 
+        [
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+        ]
+      ]
+  },
+  "x_GPM_3IMERGHH_03_precipitationCal": {
+    "units": "mm/hr",
+    "quantity_type": "Precipitation",
+    "long_name": "Instantaneous Precipitation - Calibrated",
+    "product_short_name": "GPM_3IMERGHH",
+    "product_version": "03",
+    "_FillValue": [9.969210e+36],
+    "plot_hint_axis_title": "Instantaneous Precipitation - Calibrated half-hourly .1 deg. [GPM GPM_3IMERGHH v03] mm/hr",
+    "data": 
+      [ 
+        [
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+        ]
+      ]
+  }
+}
+

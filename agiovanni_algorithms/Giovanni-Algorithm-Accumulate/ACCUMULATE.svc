@@ -1,0 +1,13 @@
+# $Id: ACCUMULATE.svc,v 1.11 2015/04/03 17:35:34 csmit Exp $
+# Chris Lynnes, NASA/GSFC
+SERVICE_NAME = AcMp 
+SERVICE_DESCRIPTION = "Accumulation of measurement over time at each grid point"
+SERVICE_LABEL = "Map, Accumulated"
+PLOT_TYPE = INTERACTIVE_MAP
+ALGORITHM_CMD = g4_accumulate.pl -y ttl
+OUTPUT_FILE_ROOT = accumulate
+MAX_POINTS = 7568640000
+MAX_FRAMES_GUEST = 4
+DATELINE_METHOD =
+CONVERT_UNITS_STEP = WRAPPER,WRAPPER
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.s26zjr1fzcou

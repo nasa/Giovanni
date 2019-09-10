@@ -1,0 +1,27 @@
+aggodir() { 
+    dir=`convertGiovanniUrlToDir.pl $1` 
+    if [ $? -eq 0 ]; then
+        cd $dir
+    else
+        echo "Failed to find Giovanni directory"
+    fi
+}
+
+makemyg4fromcvs() {
+   if [ -z "$1" ]
+   then
+     `createGiovanniSandbox.pl -task deploy -repo cvs`
+   else
+     `createGiovanniSandbox.pl -task deploy -repo cvs -version $1 -force`
+   fi
+}
+
+makemyg4() {
+   if [ -z "$1" ]
+   then
+     `createGiovanniSandbox.pl -task deploy -repo ecc`
+   else
+     `createGiovanniSandbox.pl -task deploy -repo ecc -config $1 -force`
+   fi
+}
+

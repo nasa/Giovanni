@@ -1,0 +1,18 @@
+{
+  "title": "Interactive Overlay Map",
+  "type": "object",
+  "properties": {
+    "name": {"type": "string"},
+    "projection": {"type": "string"},
+    "min": {"type": "number"},
+    "max": {"type": "number"},
+    "contourinterval": {"type": "number"},
+    "smooth": {"type": "string"},
+    "scale": {"type": "string"},
+    "sld": {"type": "string"},
+    "datafile": {"type": "string"},
+    "contourcolor": {"type": "string"},
+    "contourlinestyle": {"type": "string"},
+    "contoursize": {"type": "number"}
+  }
+}

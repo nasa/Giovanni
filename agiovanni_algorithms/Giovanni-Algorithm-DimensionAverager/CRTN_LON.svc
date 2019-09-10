@@ -1,0 +1,15 @@
+# $Id: CRTN_LON.svc,v 1.2 2015/06/30 17:56:04 mpetrenk Exp $
+# Maksym Petrenko, NASA/GSFC
+SERVICE_NAME = CrLn 
+SERVICE_DESCRIPTION = "Cross Section, Longitude-Pressure"
+SERVICE_LABEL = "Cross Section, Longitude-Pressure"
+PLOT_TYPE = CURTAIN
+ALGORITHM_CMD = g4_curtain_lon.pl
+OUTPUT_FILE_ROOT = curtainLongitude
+MAX_POINTS =
+MAX_FRAMES_GUEST = 4
+SLICE_LIMIT = 
+DATELINE_METHOD = stitch
+CONVERT_UNITS_STEP = POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.9qfx6omc8iy1
+

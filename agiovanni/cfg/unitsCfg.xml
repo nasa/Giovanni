@@ -1,0 +1,77 @@
+<units>
+    <linearConversions>
+        <linearUnit add_offset="0" destination="mm/day"
+            scale_factor="24" source="mm/hr"/>
+        <linearUnit add_offset="0" destination="inch/hr"
+            scale_factor="1.0/25.4" source="mm/hr"/>
+        <linearUnit add_offset="0" destination="inch/day"
+            scale_factor="24.0/25.4" source="mm/hr"/>
+        <linearUnit add_offset="0" destination="mm/hr"
+            scale_factor="1.0/24.0" source="mm/day"/>
+        <linearUnit add_offset="0" destination="inch/day"
+            scale_factor="1.0/25.4" source="mm/day"/>
+        <linearUnit add_offset="0" destination="mm" scale_factor="1" source="kg/m^2"/>
+        <linearUnit add_offset="-273.15" destination="C"
+            scale_factor="1" source="K"/>
+        <linearUnit add_offset="0" destination="mm/s" scale_factor="1" source="kg/m^2/s"/>
+        <linearUnit add_offset="0" destination="mm/hr"
+            scale_factor="3600" source="kg/m^2/s"/>
+        <linearUnit add_offset="0" destination="DU"
+            scale_factor="1.0/2.6868755e+16" source="molecules/cm^2"/>
+        <linearUnit add_offset="0" destination="mm/month"
+            scale_factor="1.0" source="kg/m^2"/>
+        <linearUnit add_offset="0" destination="mm/day"
+            scale_factor="86400" source="kg/m^2/s"/>
+        <linearUnit add_offset="0" destination="mm/s" scale_factor="1" source="kg m-2 s-1"/>
+        <linearUnit add_offset="0" destination="mm/hr"
+            scale_factor="3600" source="kg m-2 s-1"/>
+        <linearUnit add_offset="0" destination="mm/day"
+            scale_factor="86400" source="kg m-2 s-1"/>
+        <linearUnit add_offset="0" destination="mm/hr"
+            scale_factor="1.0/3600.0" source="kg/m^2/s"/>
+        <linearUnit add_offset="0" destination="kg m-2 s-1"
+            scale_factor="1.0" source="kg/m^2/s"/>
+        <linearUnit add_offset="0" destination="kg/m^2/s"
+            scale_factor="1.0" source="kg m-2 s-1"/>                      
+    </linearConversions>
+    <nonLinearConversions>
+        <timeDependentUnit
+            class="Giovanni::UnitsConversion::MonthlyAccumulation"
+            destination="mm/month" source="mm/hr"
+            temporal_resolutions="monthly" to_days_scale_factor="24.0"/>
+        <timeDependentUnit
+            class="Giovanni::UnitsConversion::MonthlyAccumulation"
+            destination="inch/month" source="mm/hr"
+            temporal_resolutions="monthly" to_days_scale_factor="24.0/25.4"/>
+        <timeDependentUnit
+            class="Giovanni::UnitsConversion::MonthlyAccumulation"
+            destination="mm/month" source="kg/m^2/s"
+            temporal_resolutions="monthly" to_days_scale_factor="86400"/>
+        <timeDependentUnit
+            class="Giovanni::UnitsConversion::MonthlyAccumulation"
+            destination="mm/month" source="mm/day"
+            temporal_resolutions="monthly" to_days_scale_factor="1"/>
+        <timeDependentUnit
+            class="Giovanni::UnitsConversion::MonthlyAccumulation"
+            destination="inch/month" source="mm/day"
+            temporal_resolutions="monthly" to_days_scale_factor="1/25.4"/>
+        <timeDependentUnit
+            class="Giovanni::UnitsConversion::MonthlyAccumulation"
+            destination="mm/month" source="kg m-2 s-1"
+            temporal_resolutions="monthly" to_days_scale_factor="86400"/>
+    </nonLinearConversions>
+    <fileFriendlyStrings>
+        <destinationUnit file="mmPday" original="mm/day"/>
+        <destinationUnit file="inPhr" original="inch/hr"/>
+        <destinationUnit file="inPday" original="inch/day"/>
+        <destinationUnit file="mmPhr" original="mm/hr"/>
+        <destinationUnit file="mm" original="mm"/>
+        <destinationUnit file="mmPs" original="mm/s"/>
+        <destinationUnit file="DU" original="DU"/>
+        <destinationUnit file="mmPmon" original="mm/month"/>
+        <destinationUnit file="inPmon" original="inch/month"/>
+        <destinationUnit file="C" original="C"/>
+        <destinationUnit file="kgSm-2Ss-1" original="kg m-2 s-1" />
+        <destinationUnit file="kgPmmPs" original="kg/m^2/s" />
+    </fileFriendlyStrings>
+</units>

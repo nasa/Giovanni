@@ -1,0 +1,14 @@
+giovanni-Algorithm-Accumulate version 0.01
+==========================================
+
+This is a driver for the NCO program ncra, to compute accumulation
+over time for each grid cell in a netCDF grid.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install

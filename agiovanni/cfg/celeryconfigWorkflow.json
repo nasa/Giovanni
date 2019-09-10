@@ -1,0 +1,32 @@
+{
+    "BROKER_URL" : "redis://localhost:6379",
+    "BROKER_TRANSPORT_OPTIONS" : {"visibility_timeout": 172800},
+    "CELERY_RESULT_BACKEND" : "redis://localhost:6379",
+    "CELERY_RESULT_SERIALIZER" : "json",
+    "CELERY_TASK_SERIALIZER" : "json",
+    "CELERY_TRACK_STARTED" : true,
+    "CELERY_ACCEPT_CONTENT" : ["json"],
+    "CELERYD_PREFETCH_MULTIPLIER" : 2,
+    "CELERYD_MAX_TASKS_PER_CHILD": 800,
+    "CELERY_ACKS_LATE" : true,
+
+    "CELERY_IMPORTS" : ["agiovanni.workflow"],
+
+    "CELERY_QUEUES" : {
+        "workflow_wwwuser": {
+            "binding_key": "workflow.wwwuser",
+            "min_number_of_workers": 2,
+            "max_number_of_workers": 10,
+            "time-limit": 86400,
+            "soft-time-limit": 43200
+        }
+    },
+
+    "CELERY_DEFAULT_EXCHANGE_TYPE" : "direct",
+    "CELERY_ROUTES" : {
+        "agiovanni.workflow.workflow": {
+            "queue": "workflow_wwwuser",
+            "routing_key": "workflow.wwwuser"
+        }
+    }
+}

@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Cache.
+
+0.01  Fri Jul  5 18:48:03 2013
+	- original version; created by h2xs 1.23 with options
+		-AXcO Giovanni::Cache
+

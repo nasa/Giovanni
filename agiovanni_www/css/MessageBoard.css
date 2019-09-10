@@ -1,0 +1,64 @@
+/*$Id: MessageBoard.css,v 1.9 2012/10/18 18:47:09 kbryant Exp $               ****************/
+/*-@@@ Giovanni, Version $Name:  $   ************/
+/**** MessageBoard css style ****/
+div#sessionMsgBoard {
+	padding:5px;
+	margin:0px;
+        z-index:3;
+        background-color:yellow;
+        box-shadow:0px 2px 2px #333;
+        margin-bottom:5px;
+}
+div#messageLineDiv {
+	margin:0px;
+	padding:0px;
+}
+span#headline {
+}
+span#headlineText {
+	font-weight:bold;
+	font-size:1.1em;
+}
+span#headlineCount {
+	padding-left:10px;
+	padding-right:10px;
+}
+span#headlineMore {
+	color: #436976; 
+	text-decoration: underline;
+	cursor:pointer;
+}
+span#headlineClose {
+	border:1px solid #999;
+	padding:0px 3px 0px 3px;
+	margin-left:15px;
+	cursor:pointer;
+	font-weight:bold;
+}
+div#messagePanel {
+	width: 550px;  
+}
+div#messagePanel_h {
+  	border: 1px solid black; 
+	line-height: 130%;
+	padding-bottom: 2px;
+	color: #006699 !important;
+	font-size:130%;
+}
+div#messagePanel .bd {
+	color:black;
+  	background: white; 
+  	border: 1px solid black;
+	white-space: normal;
+}
+span.messageItemDate {
+	font-weight: bold; 
+}
+span.messageItemTitle a{
+	color: #436976;
+	font-weight: bold;
+	margin-top: 5px;
+}
+span.messageItemFoot {
+	color: #436976; 
+}

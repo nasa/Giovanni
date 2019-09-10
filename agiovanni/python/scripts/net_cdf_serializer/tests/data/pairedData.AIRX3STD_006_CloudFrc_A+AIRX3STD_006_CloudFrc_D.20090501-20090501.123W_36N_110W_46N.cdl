@@ -1,0 +1,112 @@
+netcdf pairedData.AIRX3STD_006_CloudFrc_A+AIRX3STD_006_CloudFrc_D.20090501-20090501.123W_36N_110W_46N {
+dimensions:
+	time = UNLIMITED ; // (1 currently)
+	lat = 10 ;
+	lon = 13 ;
+	time1 = 1 ;
+variables:
+	float AIRX3STD_006_CloudFrc_A(time, lat, lon) ;
+		AIRX3STD_006_CloudFrc_A:coordinates = "time lat lon" ;
+		AIRX3STD_006_CloudFrc_A:_FillValue = -9999.f ;
+		AIRX3STD_006_CloudFrc_A:standard_name = "cloud_area_fraction" ;
+		AIRX3STD_006_CloudFrc_A:long_name = "Cloud Fraction (Daytime/Ascending)" ;
+		AIRX3STD_006_CloudFrc_A:quantity_type = "Cloud Fraction" ;
+		AIRX3STD_006_CloudFrc_A:product_short_name = "AIRX3STD" ;
+		AIRX3STD_006_CloudFrc_A:product_version = "006" ;
+		AIRX3STD_006_CloudFrc_A:plot_hint_axis_title = "Cloud Fraction (Daytime/Ascending) daily 1 deg. [AIRS AIRX3STD v006]" ;
+	int dataday(time) ;
+		dataday:long_name = "Standardized Date Label" ;
+	float lat(lat) ;
+		lat:_FillValue = -9999.f ;
+		lat:long_name = "Latitude" ;
+		lat:missing_value = -9999.f ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	float lon(lon) ;
+		lon:_FillValue = -9999.f ;
+		lon:long_name = "Longitude" ;
+		lon:missing_value = -9999.f ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	float AIRX3STD_006_CloudFrc_D(time1, lat, lon) ;
+		AIRX3STD_006_CloudFrc_D:coordinates = "time lat lon" ;
+		AIRX3STD_006_CloudFrc_D:_FillValue = -9999.f ;
+		AIRX3STD_006_CloudFrc_D:standard_name = "cloud_area_fraction" ;
+		AIRX3STD_006_CloudFrc_D:long_name = "Cloud Fraction (Nighttime/Descending)" ;
+		AIRX3STD_006_CloudFrc_D:quantity_type = "Cloud Fraction" ;
+		AIRX3STD_006_CloudFrc_D:product_short_name = "AIRX3STD" ;
+		AIRX3STD_006_CloudFrc_D:product_version = "006" ;
+		AIRX3STD_006_CloudFrc_D:plot_hint_axis_title = "Cloud Fraction (Nighttime/Descending) daily 1 deg. [AIRS AIRX3STD v006]" ;
+	int time1(time1) ;
+		time1:standard_name = "time" ;
+		time1:units = "seconds since 1970-01-01 00:00:00" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:temporal_resolution = "daily" ;
+		:nco_openmp_thread_number = 1 ;
+		:matched_start_time = "2009-05-01T00:00:00Z" ;
+		:matched_end_time = "2009-05-01T23:59:59Z" ;
+		:title = "Data match (123.0469W - 110.3906W, 36.7734N - 46.6172N): AIRX3STD.006 AIRX3STD.006" ;
+		:plot_hint_title = "Region 123.0469W, 36.7734N, 110.3906W, 46.6172N" ;
+		:plot_hint_subtitle = "2009-05-01" ;
+data:
+
+ AIRX3STD_006_CloudFrc_A =
+  _, _, 0.9453125, 0.8945312, 0.796875, 0.625, 0.84375, 0.96875, 0.8398438, 
+    0.8125, 0.546875, 0.6015625, 0.6875,
+  _, _, 0.96875, 0.8203125, 0.9257812, 0.6289062, 0.7539062, 0.859375, 
+    0.9609375, 0.9296875, 0.9101562, 0.8867188, 0.6132812,
+  _, 0.9726562, 0.9257812, 0.9375, 0.8085938, 0.6601562, 0.78125, 0.8164062, 
+    0.921875, 0.8710938, 0.9453125, 0.953125, 0.7929688,
+  _, 0.8632812, 0.9375, 0.9492188, 0.7890625, 0.5820312, 0.5546875, 
+    0.6367188, 0.7265625, 0.71875, 0.6914062, 0.8789062, 0.9101562,
+  0.9101562, 0.9257812, 0.890625, 0.8945312, 0.5429688, 0.484375, 0.6640625, 
+    0.7773438, 0.7460938, 0.5117188, 0.6757812, 0.8125, 0.8164062,
+  0.8984375, 0.9296875, 0.65625, 0.6875, 0.7460938, 0.7382812, 0.7695312, 
+    0.8359375, 0.8867188, 0.9101562, 0.8828125, 0.8984375, 0.8164062,
+  0.875, 0.7695312, 0.7851562, 0.8984375, 0.8515625, 0.78125, 0.90625, 
+    0.9882812, 0.859375, 0.7890625, 0.75, 0.7617188, 0.859375,
+  0.7304688, 0.8984375, 0.8085938, 0.7734375, 0.75, 0.6875, 0.7148438, 
+    0.7226562, 0.71875, 0.7460938, 0.4570312, 0.5351562, 0.6796875,
+  0.421875, 0.578125, 0.6875, 0.4980469, 0.515625, 0.4667969, 0.4921875, 
+    0.59375, 0.5234375, 0.6484375, 0.5117188, 0.4414062, 0.65625,
+  0.2001953, 0.4199219, 0.296875, 0.4433594, 0.5351562, 0.5195312, 0.4667969, 
+    0.5351562, 0.5351562, 0.7734375, 0.8046875, 0.6367188, 0.6367188 ;
+
+ dataday = 2009121 ;
+
+ lat = 37.5, 38.5, 39.5, 40.5, 41.5, 42.5, 43.5, 44.5, 45.5, 46.5 ;
+
+ lon = -122.5, -121.5, -120.5, -119.5, -118.5, -117.5, -116.5, -115.5, 
+    -114.5, -113.5, -112.5, -111.5, -110.5 ;
+
+ time = 1241136000 ;
+
+ AIRX3STD_006_CloudFrc_D =
+  _, 0.9570312, 0.8789062, 0.8984375, 0.5273438, 0.7617188, 0.6171875, 
+    0.6601562, 0.6875, 0.6679688, 0.6523438, 0.7460938, 0.8164062,
+  _, 0.90625, 0.9101562, 0.6015625, 0.6757812, 0.8984375, 0.65625, 0.6796875, 
+    0.7460938, 0.8515625, 0.5351562, 0.6210938, 0.7148438,
+  _, 0.9023438, 0.828125, 0.7265625, 0.9257812, 0.8710938, 0.6367188, 
+    0.84375, 0.8476562, 0.8046875, 0.734375, 0.609375, 0.8515625,
+  _, 0.4960938, 0.6289062, 0.8242188, 0.8867188, 0.7304688, 0.8789062, 
+    0.9609375, 0.9375, 0.9023438, 0.9453125, 0.7890625, 0.671875,
+  _, _, 0.9335938, 0.9335938, 0.8632812, 0.9375, 0.9726562, 0.9765625, 
+    0.9453125, 0.9414062, 0.9453125, 0.9101562, 0.8945312,
+  0.8476562, _, 0.9492188, 0.921875, 0.9648438, 0.9609375, 0.96875, 
+    0.9140625, 0.84375, 0.8007812, 0.7929688, 0.7460938, 0.9257812,
+  0.9335938, _, 0.9453125, 0.875, 0.8203125, 0.7421875, 0.6953125, 0.6054688, 
+    0.7304688, 0.7421875, 0.5664062, 0.5703125, 0.7304688,
+  0.7070312, 0.6757812, 0.6523438, 0.5117188, 0.4550781, 0.2138672, 0.46875, 
+    0.7148438, 0.5664062, 0.6523438, 0.625, 0.6796875, 0.6601562,
+  0.6875, 0.6054688, 0.3027344, 0.2949219, 0.4394531, 0.421875, 0.40625, 
+    0.5429688, 0.1748047, 0.5390625, 0.6875, 0.4238281, 0.6757812,
+  0.5195312, 0.5195312, 0.5820312, 0.46875, 0.3046875, 0.4160156, 0.4277344, 
+    0.5820312, 0.4550781, 0.7578125, 0.8046875, 0.609375, 0.3789062 ;
+
+ time1 = 1241136000 ;
+}

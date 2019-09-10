@@ -1,0 +1,16 @@
+# $Id: VERTICAL_PROFILE.svc,v 1.5 2015/07/17 15:52:22 mnardozz Exp $
+# Chris Lynnes, NASA/GSFC
+SERVICE_NAME = VtPf 
+SERVICE_DESCRIPTION = "Vertical Profile"
+SERVICE_LABEL = "Vertical Profile"
+PLOT_TYPE = VERTICAL_PROFILE_GNU
+ALGORITHM_CMD = g4_vt_pf.pl
+OUTPUT_FILE_ROOT = averaged
+MAX_POINTS =
+MAX_FRAMES_GUEST = 4
+SLICE_LIMIT = 
+DATELINE_METHOD =
+CONVERT_UNITS_STEP = POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.r15tvxt0d5jw
+
+

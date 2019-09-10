@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >sequential_pu_9_sld</se:Name>
+    <UserStyle>
+      <se:Name >Purples (Seq), 9</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#fcfbfd</se:Value>
+                <se:Threshold/>
+                <se:Value>#efedf5</se:Value>
+                <se:Threshold/>
+                <se:Value>#dadaeb</se:Value>
+                <se:Threshold/>
+                <se:Value>#bcbddc</se:Value>
+                <se:Threshold/>
+                <se:Value>#9e9ac8</se:Value>
+                <se:Threshold/>
+                <se:Value>#807dba</se:Value>
+                <se:Threshold/>
+                <se:Value>#6a51a3</se:Value>
+                <se:Threshold/>
+                <se:Value>#54278f</se:Value>
+                <se:Threshold/>
+                <se:Value>#3f007d</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

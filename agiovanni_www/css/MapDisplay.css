@@ -1,0 +1,167 @@
+.bboxMap {
+	position:relative;
+	height: 270px;
+	/* width: 544px; */
+	border: 0px solid black;
+	padding: 0px;
+	margin: 0px;
+}
+
+.station{
+	/*top:-92px;
+	left:210px;*/
+}
+
+.expanded {
+	height:250px;
+}
+
+.olMap {
+	width: 510px;
+	height: 94%;
+	float: left;
+	padding: 0px;
+	margin: 0px;
+        border: 1px solid lightslategray;
+}
+
+.bboxMapControl,#bboxBboxMapControl {
+	width: 32px;
+	float: left;
+	height: 95%;
+	padding: 0px;
+	padding-top: 2px;
+	margin-top:3px;
+}
+
+.bboxMapCursor,#bboxBboxMapCursor {
+	text-align: right;
+	font-size: 1em;
+	font-weight:bold;
+	padding: 3px;
+	margin: 0px;
+	position:absolute;
+	top:3em;
+	right:3em;
+	color:#993300;
+	background-color:white;
+	opacity:0.7;
+	z-index:999999;
+}
+
+.olControlBboxItemActive { 
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  height:22px;
+  width: 24px;
+  background-position: -1px -116px;
+  float:left;
+  margin-left:5px;
+}
+				
+.olControlBboxItemInactive { 
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  height:22px;
+  width: 24px;
+  background-position: -26px -116px;
+  float:left;
+  margin-left:5px;
+}
+
+.olControlNavigationItemActive { 
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  height:22px;
+  width: 24px;
+  background-position: -1px -93px;
+  border:0px;
+  float:left;
+  margin-left:5px;
+  margin-top: 5px;
+}
+.olControlNavigationItemInactive { 
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  height:22px;
+  width: 24px;
+  background-position: -26px -93px;
+  border:0px;
+  float:left;
+  margin-left:5px;
+  margin-top: 5px;
+}
+
+.bboxInputContainer {
+    background: white;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    vertical-align:middle;
+    margin-top:4px;
+    margin-right:2px;
+    margin-bottom:3px;
+    white-space:nowrap;
+    padding:3px 5px 2px 2px;
+    display: inline-block;
+}
+.bboxInput {
+    border:none;
+    vertical-align:top;
+    margin: 5px 0px 0px 5px;
+    padding: 0px 5px 0px 0px;
+}
+.mapIconButton {
+    vertical-align:bottom;
+    margin-left:5px;
+    width:22px;
+    height:22px;
+    cursor:pointer;
+}
+.mapStatus {
+    margin-left:30px 
+}
+
+.bboxHorizContainer {
+    vertical-align: middle;
+}
+
+#sessionDataSelBbPkmapLink, #sessionDataSelBbPkshapesLink {
+    display:inline;
+}
+
+
+.select2-selection__clear {
+	font-size: 24px;
+	color: #888;
+}
+.select2-container--default .select2-selection {
+    margin-left:4px;
+    margin-bottom:5px;
+    width:100%;
+}
+.select2-dropdown {
+    margin-left:4px;
+    margin-top:-5px;
+    width:100%;
+}
+.bboxSelIcon {
+  color:#0000b3;
+  padding:5px;
+}
+.bboxSelIcon:hover {
+  color:blue;
+  cursor:pointer;
+  background-color:#eee;
+}
+.iconMorph {
+  -ms-transform: rotate(-120deg); /* IE 9 */
+  -webkit-transform: rotate(-120deg); /* Safari, Opera */
+  transform: rotate(-120deg);
+}
+li[role="group"] > strong {
+  cursor: pointer !important; 
+}
+
+li[role="group"] > ul {
+  display: none;
+}

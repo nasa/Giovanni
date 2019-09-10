@@ -1,0 +1,6 @@
+Revision history for Perl extension DataAccess::OPeNDAP.
+
+0.01  Sat Nov  8 04:20:15 2014
+	- original version; created by h2xs 1.23 with options
+		-AX -n DataAccess::OPeNDAP
+

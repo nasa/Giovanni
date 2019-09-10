@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="locationList">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="location" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="country"  type="xs:string" use="required"><xs:annotation>
+                            <xs:documentation>a country name</xs:documentation>
+                        </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute name="longitude" type="xs:double" use="required"/>
+                        <xs:attribute name="latitude" type="xs:double" use="required"/>
+                        <xs:attribute name="principalinvestigator">
+                            <xs:annotation>
+                                <xs:documentation>principal investigator name</xs:documentation>
+                            </xs:annotation> 
+                        </xs:attribute>
+                        <xs:attribute name="region" type="xs:string" use="required">
+                            <xs:annotation>
+                                <xs:documentation>a region, usually either a state, a province, or a city etc</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute name="name" type="xs:string" use="required">
+                            <xs:annotation>
+                                <xs:documentation>a station name</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute name="type" type="xs:string" use="required">
+                            <xs:annotation>
+                                <xs:documentation>platform or instrument</xs:documentation>
+                            </xs:annotation>
+                        </xs:attribute>
+                        
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

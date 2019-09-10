@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+t/Giovanni-Cache_file.t
+t/Giovanni-Cache_file2.t
+lib/Giovanni/Cache.pm

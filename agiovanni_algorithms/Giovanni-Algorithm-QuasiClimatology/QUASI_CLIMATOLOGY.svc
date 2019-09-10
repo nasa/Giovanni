@@ -1,0 +1,13 @@
+SERVICE_NAME = QuCl
+SERVICE_DESCRIPTION = "Average of Specified Month or Season"
+SERVICE_LABEL = "Monthly and Seasonal Averages"
+PLOT_TYPE = INTERACTIVE_MAP
+ALGORITHM_CMD = g4_quasi_clim.py
+OUTPUT_FILE_ROOT = timeAvg
+DATELINE_METHOD =
+SKIP_REGRID = 1
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.k1vpfalyfmci
+MAX_POINTS = 6378344448
+MAX_FRAMES_GUEST = 4
+CONVERT_UNITS_STEP = WRAPPER,WRAPPER
+

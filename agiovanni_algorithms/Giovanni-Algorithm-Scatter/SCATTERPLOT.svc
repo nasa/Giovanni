@@ -1,0 +1,17 @@
+# $Id: SCATTERPLOT.svc,v 1.2 2015/04/09 16:33:43 rstrub Exp $
+# Chris Lynnes, NASA/GSFC
+# Richard Strub, NASA/GSFC/Adnet Systems
+SERVICE_NAME = StSc
+SERVICE_DESCRIPTION = "Static Scatter"
+SERVICE_LABEL = "Scatter (Static)"
+PLOT_TYPE = SCATTER_PLOT_GNU 
+ALGORITHM_CMD = g4_scatterplot.pl
+OUTPUT_FILE_ROOT = scatter
+DATELINE_METHOD = 
+MAX_POINTS = 61915680
+MAX_FRAMES_GUEST = 4
+COMPARISON = vs
+CONVERT_UNITS_STEP = POST,POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.gsmwzuzfgfsf
+
+

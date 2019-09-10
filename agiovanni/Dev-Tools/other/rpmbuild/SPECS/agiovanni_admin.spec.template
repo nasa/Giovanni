@@ -1,0 +1,67 @@
+# pkgname must match the beginning of the tar file name.
+# The tar file name must be %{pkgname}-%{version}.tar.gz
+%define pkgname agiovanni_admin 
+%define filelist %{pkgname}-%{version}-filelist
+%define prefix_ops /opt/giovanni4
+
+%define __spec_install_post %{nil}
+%define debug_package %{nil}
+%define __os_install_post %{_dbpath}/brp-compress
+%define _unpackaged_files_terminate_build 0
+
+version:   __VERSION__
+name:      agiovanni_admin
+summary:   Admin-Tools - Administrative Tools and Session Viewer for giovanni4
+release:   GESDISC
+buildarch: __ARCH__
+License:   GESDISC Internal
+Group:     GESDISC
+prefix:    %{prefix_ops}
+source:    %{pkgname}-%{version}.tar.gz
+buildroot: %{_tmppath}/%{name}-%{version}-%(id -u -n)
+
+BuildRequires: autoconf
+BuildRequires: gcc
+BuildRequires: netcdf-devel >= 4.2.1.1
+
+# Don't use auto req to browse through source code
+AutoReq:  no
+
+# General dependencies
+Requires: giovanni4 >= Sprint_97_A.00
+Requires: make >= 3.81
+
+%description
+Admin-Tools - Administrative Tools and Session Viewer for giovanni4
+
+%prep
+%setup -q -n %{pkgname}-%{version}
+echo %{buildroot}%{prefix_ops}
+chmod -R u+w %{_builddir}/%{pkgname}-%{version}
+
+%install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}%{prefix_ops}
+
+# aGiovanni_Admin Cache-Admin
+cd agiovanni_admin/Giovanni-Cache-Admin
+perl Makefile.PL PREFIX=%{buildroot}%{prefix_ops}
+make install
+cd ..
+cd ..
+
+# aGiovanni_Admin Session-Viewer
+cd agiovanni_admin/Giovanni-Session-Viewer
+perl Makefile.PL PREFIX=%{buildroot}%{prefix_ops}
+make install
+cd ..
+cd ..
+find . -name perllocal.pod -delete
+find %{buildroot}%{prefix_ops}/lib64/perl5/ -name perllocal.pod -delete 
+find . -name .packlist -delete
+find %{buildroot}%{prefix_ops}/lib64/perl5/ -name .packlist -delete
+find %{buildroot}%{prefix_ops} -type f -o -type l | sed s@%{buildroot}@@ | grep -v egg-info >> %{filelist} 
+
+%clean
+rm -rf %{buildroot}
+%files -f %filelist

@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-GSocial-Scrape.t
+lib/Giovanni/GSocial/Scrape.pm

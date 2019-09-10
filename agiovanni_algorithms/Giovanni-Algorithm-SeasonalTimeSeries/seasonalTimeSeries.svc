@@ -1,0 +1,19 @@
+# $Id: seasonalTimeSeries.svc,v 1.3 2015/04/27 19:06:12 csmit Exp $
+# Christine Smit
+
+SERVICE_NAME = InTs
+SERVICE_DESCRIPTION = "Seasonal (inter annual) time series"
+SERVICE_LABEL = "Time Series, Seasonal"
+PLOT_TYPE = INTERACTIVE_TIME_SERIES
+ALGORITHM_CMD = seasonalTimeSeries.pl
+OUTPUT_FILE_ROOT = ints
+DATELINE_METHOD = 
+SKIP_REGRID = 0
+CONVERT_UNITS_STEP = POST,WRAPPER
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.xolunysls4pn
+MAX_POINTS = 6378344448
+MAX_FRAMES_GUEST = 4
+DEFAULT = false
+GROUP_DEFAULT = false
+LATITUDE_WEIGHTING_FUNCTION = Apply
+

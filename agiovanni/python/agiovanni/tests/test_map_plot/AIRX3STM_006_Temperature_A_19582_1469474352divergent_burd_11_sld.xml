@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd">
+  <NamedLayer>
+    <se:Name>divergent_burd_11_sld</se:Name>
+    <UserStyle>
+      <se:Name>Blue-Red (Div), 11</se:Name>
+      <se:FeatureTypeStyle>
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#053061</se:Value>
+                <se:Threshold>205</se:Threshold>
+                <se:Value>#2166ac</se:Value>
+                <se:Threshold>206.1</se:Threshold>
+                <se:Value>#4393c3</se:Value>
+                <se:Threshold>207.2</se:Threshold>
+                <se:Value>#92c5de</se:Value>
+                <se:Threshold>208.3</se:Threshold>
+                <se:Value>#d1e5f0</se:Value>
+                <se:Threshold>209.4</se:Threshold>
+                <se:Value>#f7f7f7</se:Value>
+                <se:Threshold>210.6</se:Threshold>
+                <se:Value>#fddbc7</se:Value>
+                <se:Threshold>211.7</se:Threshold>
+                <se:Value>#f4a582</se:Value>
+                <se:Threshold>212.8</se:Threshold>
+                <se:Value>#d6604d</se:Value>
+                <se:Threshold>213.9</se:Threshold>
+                <se:Value>#b2182b</se:Value>
+                <se:Threshold>215</se:Threshold>
+                <se:Value>#67001f</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

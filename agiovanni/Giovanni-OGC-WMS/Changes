@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::OGC::WMS.
+
+0.01  Fri Nov 22 22:06:45 2013
+	- original version; created by h2xs 1.23 with options
+		-AXc Giovanni::OGC::WMS
+

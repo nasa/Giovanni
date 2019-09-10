@@ -1,0 +1,232 @@
+ .splash-dialog {
+     display: block;
+     position: fixed;
+     z-index: 1;
+     left: 0;
+     top: 0;
+     height: 100%;
+     width: 100%;
+     overflow: auto;
+}
+ .splash-content {
+     position: relative;
+     background-color: #fff;
+     margin: 20% auto;
+     padding: 5px;
+     width: 50%;
+     min-width: 800px;
+     box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+     outline: 0;
+     border: 1px solid rgba(0,0,0,0.2);
+     border-radius: 6px;
+     background-clip: padding-box;
+     box-sizing: border-box;
+     animation-name: modalopen;
+     animation-duration: 500ms;
+}
+ .splash-header {
+     background: #fff;
+     border-top-left-radius: 5px;
+     border-top-right-radius: 5px;
+     padding: 10px;
+     min-height: 16.42857143px;
+     position: relative;
+}
+ .splash-body {
+     max-height: calc(100% - 120px);
+     position: relative;
+     padding: 20px;
+     padding-left: 20px;
+}
+/* The modal-container */
+ .splash-container {
+     color: #94939d;
+     display: block;
+     position: relative;
+     padding-left: 25px;
+     margin-bottom: 12px;
+     cursor: pointer;
+     font-size: 16px;
+     -webkit-user-select: none;
+     -moz-user-select: none;
+     -ms-user-select: none;
+     user-select: none;
+}
+/* Hide the browser's default checkbox */
+ .splash-container input {
+     position: absolute;
+     opacity: 0;
+     cursor: pointer;
+}
+/* Create a custom checkbox */
+ .splash-checkmark {
+     position: absolute;
+     top: 0;
+     left: 0;
+     height: 18px;
+     width: 18px;
+     background-color: #dddddd;
+     -webkit-box-shadow: 0px 0px 0px 1px rgba(0,0,0,1);
+}
+/* On mouse-over, add a grey background color */
+ .splash-container:hover input ~ .splash-checkmark {
+     background-color: #ccc;
+}
+/* When the checkbox is checked, add a blue background */
+ .splash-container input:checked ~ .splash-checkmark {
+     background-color: #2196F3;
+}
+/* Create the modal-checkmark/indicator (hidden when not checked) */
+ .splash-checkmark:after {
+     content: "";
+     position: absolute;
+     display: none;
+}
+/* Show the modal-checkmark when checked */
+ .splash-container input:checked ~ .splash-checkmark:after {
+     display: block;
+}
+/* Style the modal-checkmark/indicator */
+ .splash-container .splash-checkmark:after {
+     left: 7px;
+     top: 2px;
+     width: 5px;
+     height: 10px;
+     border: solid white;
+     border-width: 0 3px 3px 0;
+     -webkit-transform: rotate(45deg);
+     -ms-transform: rotate(45deg);
+     transform: rotate(45deg);
+}
+ .splash-button {
+     background-color: #4783eb;
+     color: white;
+     padding: 10px 22px;
+     margin: 3px;
+     text-align: center;
+     text-decoration: none;
+     display: inline-block;
+     border: 1px solid transparent;
+     border-radius: 8px;
+     font-size: 18px;
+     font-weight: bold;
+     cursor: pointer;
+}
+ .splash-button:hover {
+     background-color: #2763cb;
+}
+ .splash-continue-button {
+     background-color: #d9d9d9;
+     padding: 10px 22px;
+     margin: 3px;
+     padding-left: 22px;
+     text-align: center;
+     text-decoration: none;
+     display: inline-block;
+     border-radius: 8px;
+     font-size: 18px;
+     font-weight: normal;
+     cursor: pointer;
+}
+ .splash-continue-button:hover {
+     background-color: #b9b9b9;
+}
+
+.splash-link {
+  	color: #1a0dab;
+        margin-left:3px;
+        margin-right:3px;
+        white-space:nowrap;
+        text-decoration:none;
+        font-style:italic;
+} 
+.splash-link:visited {
+  	color: #609;
+}
+.splash-link:hover {
+	text-decoration:underline;
+        cursor:pointer;
+}
+ .splash-footer {
+     padding: 10px;
+     text-align: right;
+     margin: 0;
+}
+ .splash-fa {
+     display: inline-block;
+     font: normal normal normal 14px/1 FontAwesome;
+     color: #888;
+     font-size: 14px;
+     font-size: inherit;
+     text-rendering: auto;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+}
+ a:link.splash-a, a:visited.splash-a {
+    color: #2980b9;
+}
+ a:link.splash-close, a:visited.splash-close {
+     color: #888;
+}
+ .splash-close {
+     position: absolute;
+     right: 1em;
+     top: 50%;
+     transform: translateY(-50%);
+}
+ .splash-title {
+     font-size: 24px;
+     margin: 0;
+     line-height: 1.42857143;
+}
+ .splash-fa-times-circle::before {
+     content: "\f057";
+}
+ .splash-fa-times-circle:hover,.splash-fa-times-circle:focus {
+     content: "\f057";
+     color: #000;
+     text-decoration: none;
+}
+ ::before, ::after {
+     -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+     box-sizing: border-box;
+}
+ .splash-pull-left {
+     float: left !important;
+}
+ .splash-body-welcome {
+     background: url(https://www.nasa.gov/sites/all/themes/custom/nasatwo/images/nasa-logo.svg) no-repeat left;
+     padding-left: 130px;
+     font-size: 20px;
+     color: #666666;
+}
+ @keyframes modalopen{
+     from{
+         opacity: 0
+    }
+     to {
+        opacity: 1
+    }
+}
+ .progress-modal {
+     display: block;
+     position: fixed;
+     z-index: 3;
+     left: 0;
+     top: 0;
+     height: 100%;
+     width: 100%;
+     overflow: auto;
+     background-color: rgba(192, 192, 192, 0.5);
+     background-size: 128px;
+     background-image: url('../img/inprogress.gif');
+     background-position: center;
+     background-repeat: no-repeat;
+}
+.showProgress {
+     display:block;
+}
+.hideProgress {
+     display:none;
+}

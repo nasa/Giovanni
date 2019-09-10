@@ -1,0 +1,11 @@
+SERVICE_NAME = HiGm 
+SERVICE_DESCRIPTION = "Distribution of values over time and space"
+SERVICE_LABEL = "Histogram"
+PLOT_TYPE = HISTOGRAM
+ALGORITHM_CMD = g4_histogram.py
+OUTPUT_FILE_ROOT = histogram
+MAX_POINTS =  910479360
+MAX_FRAMES_GUEST = 4
+DATELINE_METHOD = 
+CONVERT_UNITS_STEP = WRAPPER,WRAPPER
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.dd29dyqivqe3

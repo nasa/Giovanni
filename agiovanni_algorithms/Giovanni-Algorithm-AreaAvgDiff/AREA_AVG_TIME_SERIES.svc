@@ -1,0 +1,15 @@
+# $Id: AREA_AVG_TIME_SERIES.svc,v 1.9 2015/04/03 16:24:57 csmit Exp $
+# Chris Lynnes, NASA/GSFC
+SERVICE_NAME = ArAvTs 
+SERVICE_DESCRIPTION = "Time series of area-averaged values"
+SERVICE_LABEL = "Time Series, Area-Averaged"
+PLOT_TYPE = TIME_SERIES_GNU
+ALGORITHM_CMD = g4_area_avg_diff_time_series.pl -a
+OUTPUT_FILE_ROOT = areaAvgTimeSeries
+MAX_FRAMES_GUEST = 4
+DATELINE_METHOD =
+CONVERT_UNITS_STEP = POST,POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.sqh76fexahh5
+LATITUDE_WEIGHTING_FUNCTION = Prep
+DEFAULT = true
+

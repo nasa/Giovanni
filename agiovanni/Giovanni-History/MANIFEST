@@ -1,0 +1,5 @@
+Changes
+Makefile.PL
+MANIFEST
+t/Giovanni-History.t
+lib/Giovanni/History.pm

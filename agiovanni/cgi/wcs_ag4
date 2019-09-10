@@ -1,0 +1,214 @@
+#!/usr/bin/perl -T 
+
+my ($rootPath);
+
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    push( @INC, $rootPath . 'share/perl5/' )
+        if defined $rootPath;
+}
+use strict;
+
+use Safe;
+use Giovanni::CGI;
+use Giovanni::OGC::WCS;
+use Giovanni::Catalog;
+use Giovanni::Util;
+use File::Temp;
+
+$| = 1;
+
+$ENV{PATH} = '';
+
+# Read the configuration file
+my $cfgFile = $rootPath . 'cfg/giovanni.cfg';
+my $error   = Giovanni::Util::ingestGiovanniEnv($cfgFile);
+Giovanni::Util::exit_with_error($error) if ( defined $error );
+
+my $q = Giovanni::CGI->new(
+    INPUT_TYPES     => \%GIOVANNI::INPUT_TYPES,
+    TRUSTED_SERVERS => \@GIOVANNI::TRUSTED_SERVERS,
+);
+
+my $parameters = $q->Vars;
+
+# make the keys lowercase
+for my $key ( grep { lc($_) ne $_ } keys %$parameters ) {
+    my $newkey = lc $key;
+    $parameters->{$newkey} = $parameters->{$key};
+    delete $parameters->{$key};
+}
+
+# make sure service is wcs
+exit_with_error("The service should be wcs")
+    unless $parameters->{'service'} =~ /^wcs$/i;
+
+my $mapServer
+    = defined $GIOVANNI::WMS{map_server}
+    ? $GIOVANNI::WMS{map_server}
+    : $rootPath . '/cgi-bin/mapserv';
+exit_with_error("Not able to find map server") unless ( -x $mapServer );
+
+# WCS getCapabilities or describeCoverage request
+if (   $parameters->{"request"} =~ m/getcapabilities/i
+    || $parameters->{"request"} =~ m/describecoverage/i )
+{
+    my $mapResult = Giovanni::OGC::WCS::generateMapFile();
+    exit_with_error("Not able to find map service capabilities")
+        unless -f $mapResult;
+    $ENV{'MS_MAPFILE'} = $mapResult;
+    exec $mapServer;
+}
+
+# WCS getCoverage request
+elsif ( $parameters->{"request"} =~ m/getcoverage/i ) {
+    my ( $service, $data, $startTime, $endTime, $bbox, $format, $width,
+        $height );
+
+    exit_with_error("WCS Server only support VERSION 1.0.0")
+        if $parameters->{'version'} ne "1.0.0";
+
+    exit_with_error("Missed the time value")
+        unless exists $parameters->{'time'};
+
+    my @timeString = split( "/", $parameters->{"time"} );
+    $startTime = $timeString[0];
+    $endTime = defined $timeString[1] ? $timeString[1] : $timeString[0];
+    unless ( $startTime =~ m/T/i ) {
+        $startTime .= "T00:00:00Z";
+    }
+    unless ( $endTime =~ m/T/i ) {
+        $endTime .= "T23:59:59Z";
+    }
+    exit_with_error("Missed the coverage value")
+        unless exists $parameters->{'coverage'};
+    my @tString = split( /\./, $parameters->{'coverage'} );
+    $data = $tString[1];
+    $service = $tString[0] =~ m/Time-Averaged/i ? "TmAvMp" : $tString[0];
+
+    exit_with_error("Missed the bounding box")
+        unless exists $parameters->{'bbox'};
+
+    $bbox = $parameters->{'bbox'};
+    if ( defined $parameters->{"resx"} && defined $parameters->{'resy'} ) {
+        my @bb = split( ",", $bbox );
+        exit_with_error("Bounding box is not correct") if @bb != 4;
+        $width  = int( ( $bb[2] - $bb[0] ) / $parameters->{'resx'} );
+        $height = int( ( $bb[3] - $bb[1] ) / $parameters->{'resy'} );
+    }
+    elsif (defined $parameters->{"width"}
+        && defined $parameters->{'height'} )
+    {
+        $width  = $parameters->{"width"};
+        $height = $parameters->{"height"};
+    }
+    else {
+        exit_with_error(
+            "Please specify width and height or resolution x and resolution y"
+        );
+    }
+
+    my $path = $ENV{'SCRIPT_NAME'};
+
+    # get everything up to 'giovanni'
+    $path =~ /^(.*)\/giovanni/;
+    $path = $1;
+    my $wcsHash = {};
+    $wcsHash->{'service'}   = $service;
+    $wcsHash->{'data'}      = $data;
+    $wcsHash->{'startTime'} = $startTime;
+    $wcsHash->{'endTime'}   = $endTime;
+    $wcsHash->{'bbox'}      = $bbox;
+    $wcsHash->{'width'}     = $width;
+    $wcsHash->{'height'}    = $height;
+    $wcsHash->{'bands'}     = $parameters->{'bands'}
+        if defined $parameters->{'bands'};
+    $wcsHash->{'format'} = $parameters->{'format'};
+    my ( $outName, $outType, $outEncoding );
+
+    if ( $parameters->{'format'} =~ m/tiff/i ) {
+        $outName     = "GIOVANNI-$data.tif";
+        $outType     = "image/tiff";
+        $outEncoding = "binary";
+    }
+    elsif ( $parameters->{'format'} =~ m/netcdf/i ) {
+        $outName     = "GIOVANNI-$data.nc";
+        $outType     = "image/netCDF";
+        $outEncoding = "binary";
+    }
+    elsif ( $parameters->{'format'} =~ m/asc/i ) {
+        $outName     = "GIOVANNI-$data.xyz";
+        $outType     = "text/plain";
+        $outEncoding = "base64";
+    }
+    else {
+        exit_with_error( $parameters->{'format'} . " is not supported" );
+    }
+    my $coverage = Giovanni::OGC::WCS::getCoverage($wcsHash);
+    exit_with_error($coverage) unless -f $coverage;
+    print $q->header(
+        -status                => 200,
+        -type                  => $outType,
+        -cache_control         => 'no-cache',
+        -'Content-Disposition' => 'attachment; filename="' . $outName . '"',
+        -'Content-Transfer-Encoding' => $outEncoding,
+        -'Accept-Ranges'             => 'bytes\n\n'
+    );
+    print `/bin/cat $coverage`;
+    exit;
+
+}
+
+#Other WCS rquests are not supported
+else {
+    exit_with_error("Request is not supported");
+}
+
+# A method to exit with 400 HTTP header with appropriate message
+sub exit_with_error {
+    my ($message) = @_;
+    print $q->header(
+        -status        => 400,
+        -type          => 'text/xml',
+        -cache_control => 'no-cache'
+    );
+
+    #my $ogcError = "Content-Type: text/xml\n\n";
+    my $ogcError
+        .= "<?xml version='1.0' encoding=\"ISO-8859-1\" standalone=\"no\" ?>\n";
+    $ogcError
+        .= "<!DOCTYPE ServiceExceptionReport SYSTEM \"http://www.opengis.net/ogc http://schemas.opengis.net/wcs/1.0.0/OGC-exception.xsd\">\n";
+    $ogcError .= "<ServiceExceptionReport version=\"1.0.0\">\n";
+    $ogcError .= "<ServiceException>\n";
+    $ogcError .= "  $message\n";
+    $ogcError .= "</ServiceException>\n";
+    $ogcError .= "</ServiceExceptionReport>\n";
+
+    print $ogcError;
+    exit;
+}
+
+__END__
+
+=head1 NAME
+
+wcs_ag4 - CGI script for AG WCS interface 
+
+=head1 PROJECT
+
+Giovanni
+
+=head1 SYNOPSIS
+
+=head1 EXAMPLES
+
+perl wms_ag4 "service=WCS&version=1.0.0&request=GetCoverage&coverage=Time-Averaged.MOD08_D3_6_Deep_Blue_Aerosol_Optical_Depth_550_Land_Mean&crs=epsg:4326&bbox=-180,-90,180,90&width=360&height=180&format=netCDF&time=2004-01-01T00:00:00Z/2004-01-03T23:59:59Z"
+
+=head1 AUTHOR
+
+Peisheng Zhao (peisheng.zhao-1@nasa.gov)
+
+=head1 SEE ALSO
+
+=cut 
+

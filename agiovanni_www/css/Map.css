@@ -1,0 +1,658 @@
+
+.plotMap {
+	position:relative;
+	width: 572px;
+	height: 281px;
+	border: 0px solid black;
+	padding: 0px;
+	margin: 0px 0px 0px 10px;
+	white-space:nowrap;
+}
+.plotMidMap {
+	position:relative;
+	width: 828px;
+	height: 409px;
+	border: 0px solid black;
+	padding: 0px;
+	margin: 0px;
+}
+.plotBigMap {
+	position:relative;
+	width: 1084px;
+	height: 587px;
+	border: 0px solid black;
+	padding: 0px;
+	margin: 0px;
+}
+
+.plotMapTitle {
+        font-size: 1.2em;
+        text-align:center;
+        margin-top: 12px;
+        white-space:normal;
+}
+.plotMapTitleText {
+	width:80%;
+}
+.plotMapSubTitle {
+        font-size: 0.9em;
+        text-align:center;
+        white-space:normal;
+}
+.plotMapCaption {
+        font-size: 0.9em;
+        text-align: left;
+        float:left;
+        white-space:normal;
+}
+.plotOverlayMapTitle {
+        font-size: 1.2em;
+        white-space:normal;
+        letter-spacing:1px;
+        z-index:1;
+        padding:0.5em;
+        line-height:1.5em;
+        margin-top:0.3em;
+        font-weight:bold;
+        margin-right:-0.15em;
+}
+.plotMapSubTitle_map {
+        font-size: 0.9em;
+        padding-left:0.5em;
+        color:#868686;
+        font-style:italic;
+        letter-spacing:0.1em;
+}
+.plotMapSubTitle_contour {
+        font-size: 0.9em;
+        padding-left:0.5em;
+        color:#868686;
+        font-style:italic;
+        letter-spacing:0.1em;
+}
+.plotMapSubTitle_vector {
+        font-size: 0.9em;
+        padding-left:0.5em;
+        color:#868686;
+        font-style:italic;
+        letter-spacing:0.1em;
+}
+.plotOverlayMapTitleChild {
+        padding-left:0.5em;
+        width:75%;
+}
+
+.plotOverlayMapCaption {
+        white-space:normal;
+        padding:0.5em;
+        font-size:1.15em;
+        margin-top:-4px;
+        margin-right:-0.14em;
+}
+
+.legendDiv {
+	vertical-align:top;
+        display:inline-block;
+        margin-left:0.3em;
+}
+
+img.extLegendSmall {
+	width:4em; 
+	height:16em;
+}
+
+img.extLegend {
+	width:5em; 
+	height:20em;
+}
+
+img.extLegendLarge {
+	width:6em; 
+	height:24em;
+}
+
+.expanded {
+	height:250px;
+}
+
+.olPlotMap {
+	width: 100%;
+        height: 100%;
+	padding: 0px;
+	margin: 0px;
+	background-color:#cfcfdf;
+        border:1px solid #aaa;
+}
+.olPlotMap_IE11 {
+        height: 500px;
+}
+canvas {
+  display:block;
+}
+.olPlotOverlayMap {
+	background-color:#797979;
+}
+.olPlotMidMap {
+	width: 768px; 
+	height: 384px;
+	padding: 0px;
+	margin: 0px;
+}
+.olPlotBigMap {
+	width: 1024px;
+	height: 512px;
+	padding: 0px;
+	margin: 0px;
+}
+
+.plotMapControl {
+	width: 32px;
+	float: left;
+	height: 95%;
+	padding: 0px;
+	padding-top: 2px;
+}
+
+.plotMapCursor {
+	width: 100%;
+	float: right;
+	text-align: right;
+	font-family: serif;
+	font-size: 0.9em;
+	padding: 0px;
+	margin: 0px;
+	clear:both;
+}
+
+.paletteContainer {
+	text-align: left;
+	border: 1px inset #eee;
+	background: #dfdfe5;
+	margin-bottom:10px;
+	padding:5px;
+}
+.paletteLabel {
+	margin-left: 10px;
+}
+.paletteIcon {
+	margin-left: 10px;
+	margin-bottom: 2px;
+	border: 1px solid #777;
+	vertical-align: middle;
+}
+.paletteRefreshContainer {
+	text-align:right;
+	margin-bottom:0px;
+}
+.iconContainer {
+  padding-bottom:10px;
+}
+.optionsButton {
+  padding:0px;
+  margin:0px;
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent;
+  background-position: -77px -424px;
+  width:75px;
+  height:22px;
+  float:right;
+  cursor:pointer;
+  border:none;
+}
+.optionsButton:hover {
+  background-image: url("../img/giovanni_icons.png");
+  background-position: -152px -424px;
+  cursor:pointer;
+}
+.optionsButtonDisabled {
+  padding:0px;
+  margin:0px;
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent;
+  background-position: -227px -424px;
+  width:75px;
+  height:22px;
+  float:right;
+  cursor:default;
+  border:none;
+}
+.optionsButtonDisabled:hover {
+  background-position: -1px -424px;
+}
+.view-all-palettes {
+  background-color:#eee;
+  border-radius:5px;
+  padding: 5px 10px;
+}
+.view-all-palettes:hover {
+  background-color:#fff;
+}
+.mapOptionsTitle {
+  font-style: italic;
+  margin-bottom: 5px;
+}
+.mapOptionsHeader {
+  font-weight: bold;
+  clear:both;
+  margin-bottom:5px;
+}
+.mapOptionsBody {
+  margin-left:20px;
+  margin-bottom:10px;
+}
+.mapOptionsCol {
+  float:left;
+  text-align:left;
+  margin-left:20px;
+}
+.mapOptionsLabel {
+  margin-right:10px;
+  margin-top:5px;
+}
+.mapOptionsField {
+  margin-bottom:3px;
+}
+.paletteUploadPanel {
+  margin-left:5px;
+  padding:5px;
+}
+.paletteUploadForm {
+  float:left;
+  width:70%;
+  padding:3px;
+  padding-top:0px;
+}
+.paletteShowUploadButton {
+  margin-top:5px;
+}
+.paletteUploadButtonContainer {
+  margin-top:5px;
+  text-align:right;
+}
+.left {
+  float:left;
+}
+.clear {
+  clear:left;
+}
+#uploadPanel {
+  padding: 5px !important; 
+}
+.paletteUploadHint {
+  clear:both;
+  font-style: italic;
+  font-size: 0.9em;
+  color: gray;
+  padding-top:0px;
+  margin-top:0px;
+}
+.paletteUploadClose {
+  text-align:right;
+}
+.yui-button#plotMapContainer0PaletteUploadCloseBTN button {
+  text-align:right;
+  color: #555;
+  background: white;
+  border: none;
+  line-height:1;
+  min-height:1em;
+  padding-bottom:2px;
+  padding-left:3px;
+  padding-right:3px;
+}
+#plotMapContainer0UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer1UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer2UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer3UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer4UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer5UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer6UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer7UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer8UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+#plotMapContainer9UploadPanel.yui-overlay .bd {
+  border: 1px solid #ddd !important;
+}
+.mapFrame {
+  padding:0px;
+  margin:0px;
+}
+.animatedMap {
+  display:inline-block;
+}
+.mapImg {
+  width:600px;
+  height:300px;
+  border: 1px solid #bbb;
+}
+.bufImg {
+  display:none;
+}
+
+.giovanni-layer-switcher {
+  position:absolute;
+  top:0.6em;
+  right: 11em;
+  z-index:3;
+  background-color: rgba(25,25,25,0.8); 
+  border:3px solid rgba(255,255,255,0.8);
+  border-radius:4px;
+}
+.giovanni-layer-switcher:hover {
+  background-color: rgba(25,25,25,0.9); 
+  border:3px solid rgba(255,255,255,0.9);
+}
+
+:focus {outline:none;color:yellow:}
+
+.giovanni-layer-switcher:not(.giovanni-layer-switcher-active) {
+  width: 8em;
+}
+
+.giovanni-layer-switcher-active {
+  padding-right:15px;
+  padding-bottom:15px;
+  background-color:rgba(25,25,25,0.9);
+  z-index:4;
+}
+
+.giovanni-layer-switcher > .layer-groups {
+  display: none;
+  border:none !important;
+}
+
+.giovanni-layer-switcher button {
+  background: transparent;
+  border:none !important;
+  font-weight: 500;
+  padding: 10px 10px;
+  width: 100%;
+  text-align: left;
+  color:#ccc;
+  text-transform:capitalize;
+  border-radius:2px;
+  white-space:normal;
+}
+.giovanni-layer-switcher button:hover:enabled {
+  color:white;
+  cursor:pointer;
+}
+
+.giovanni-layer-switcher .layersButton {
+  white-space:nowrap;
+}
+.giovanni-layer-switcher .layersButton:hover:enabled {
+  border-radius: 0;
+}
+
+.giovanni-layer-switcher h3,
+.giovanni-layer-switcher h4 {
+  border: none !important;
+  margin: 0;
+  color:#ccc;
+  white-space:nowrap;
+}
+.giovanni-layer-switcher h3 {
+  border: none !important;
+  margin-left:5px;
+}
+
+.giovanni-layer-switcher h4 {
+  text-transform:capitalize;
+}
+
+.giovanni-layer-switcher ul {
+  list-style: none;
+  padding: 0;
+  text-align:left;
+  margin-left:25px;
+}
+
+.giovanni-layer-switcher.giovanni-layer-switcher-active > .layer-groups {
+  display: block;
+  margin: 0px;
+  margin-left:20px;
+  color:#ddd;
+  border:none !important;
+}
+
+.checkboxLabel {
+  cursor:pointer;
+}
+.checkboxLabel:hover {
+  color:white;
+}
+
+.layer-label:not(.options-button) {
+  /* color:#fff !important; */
+  font-size:14px !important;
+}
+.layer-label:not(.options-button):hover {
+  color: white !important;
+  cursor:pointer;
+}
+.radio-label {
+  margin-left:0.46em;
+}
+.layer-group-label {
+  text-transform:capitalize;
+}
+.options-button:not(.layer-label) {
+  margin:5px 0px 15px 26px;
+  padding:0px;
+  /* color:#fff; */
+}
+.options-button:not(.layer-label):hover {
+  color:white !important;
+  cursor:pointer;
+}
+
+.options-button-single-layer:not(.layer-label) {
+  margin:0px 0px 10px 2px !important;
+}
+.options-button-single-layer:not(.layer-label):hover {
+  color:white !important;
+  cursor:pointer;
+}
+
+.options-button-disabled:not(.layer-label) {
+  margin:5px 0px 15px 26px;
+  padding:0px;
+  color:#888;
+}
+.options-button-disabled:not(.layer-label):hover {
+  color:#888 !important;
+  cursor:default;
+}
+
+.options-button-single-layer-disabled:not(.layer-label) {
+  margin:5px 0px 15px 26px;
+  padding:0px;
+  color:#888;
+}
+.options-button-single-layer-disabled:not(.layer-label):hover {
+  color:#888 !important;
+  cursor:default;
+}
+
+.map-download {
+  position: absolute;
+  top: 0.6em;
+  right: 0.7em;
+  z-index:3;
+  background-color: rgba(25,25,25,0.8);
+  border:3px solid rgba(255,255,255,0.8);
+  color:#ccc;
+  border-radius:4px;
+}
+.map-download:hover {
+  background-color:rgba(25,25,25,0.9);
+  border:3px solid rgba(255,255,255,0.9);
+}
+.map-download:not(.map-download-active) {
+  width: 9.5em;        
+}
+.map-download-active {
+  width:9.5em;
+  background-color:rgba(25,25,25,0.9);
+  z-index:4;
+}
+
+.map-download > .download-menu {
+  display: none;
+}
+
+.map-download button {
+  background: transparent;
+  border: none;
+  font-weight: 500;
+  /* font-size: 14px; */
+  padding: 10px 10px;
+  text-align: left;
+  color:inherit;
+}
+.map-download button:hover {
+  color:white;
+}
+
+.map-download .downloadButton:hover {
+  border-radius: 0;
+}
+
+.map-download h3,
+.map-download h4 {
+  margin: 0px 0px;
+}
+
+.map-download h4 {
+  text-transform:capitalize;
+}
+
+.map-download ul {
+  list-style: none;
+  padding: 0;
+  text-align:left;
+}
+
+.map-download.map-download-active > .download-menu {
+  display: block;
+  margin: 0px;
+  margin-left:20px;
+  color:#ddd;
+}
+
+.legend {
+  position:absolute;
+  top:4.4em;
+  right:-0.45em;
+  bottom:0.26em;
+  color:#ddd;
+  padding:0.6em 0.1em 0.1em 0.1em;
+  z-index:1;
+  min-height:10em;
+  width:9.25em;
+}
+.shadedLegendImg {
+  width:6em;
+  border:4px solid white;
+  border-radius:4px;
+  box-shadow:3px 3px 0 #aaa;
+}
+.vectorLegendImg {
+  width:6em;
+  border:4px solid white;
+  border-radius:4px;
+  box-shadow:3px 3px 0 #aaa;
+}
+.shadedLegend {
+  display:none;
+  padding:0.5em:
+}
+.vectorLegend {
+  display:none;
+  padding:0.5em;
+}
+.contourLegend {
+  display:none;
+  padding:0.5em;
+}
+.legendLabel {
+  padding: 5px 10px;
+  text-align:left;
+}
+.layerStatusContainer {
+  position:absolute;
+  font-size:1.5em;
+  font-weight:bold;
+  color:#555;
+  background-color:#ffeb80;
+  border-radius:5px;
+  border:1px solid #555;
+  box-shadow: 0.5em 1em 0.3em rgba(0, 0, 0, .5);
+  width:10em;
+  padding:1em 3em;
+  top:10em;
+  left:calc(50% - 7em);
+  z-index:999999;
+}
+
+svg {
+  -webkit-transform: none !important;
+}
+.olTileImage {
+  -webkit-backface-visibility: visible !important;
+  -webkit-transform: none !important;
+}
+
+.giovanni-map-mouse-position {
+  position:absolute;
+  top:0.8em;
+  left:3.5em;
+  color:black;
+  text-shadow:-1px -1px 0 #dbde12, 1px -1px 0 #dbde12, -1px 1px 0 #dbde12, 1px 1px 0 #dbde12;
+  font-weight:bold;
+  font-size:1.7em;
+  letter-spacing:0.2em;
+}
+.ol-mouse-position-override { color:red; }
+
+/* Make openlayers map buttons consitent with other map controls */
+.ol-zoom {
+  font-size:1.8em;
+  top:0.3em !important;
+  left:0.3em !important;
+}
+.ol-zoom-in, .ol-zoom-out {
+  color:#ddd !important;
+  background:rgba(25,25,25,0.6) !important;
+  width:1.4em;
+  height:1.4em;
+  font-weight:normal !important;
+}
+.ol-zoom-in:hover, .ol-zoom-out:hover {
+  color:white !important;
+  background:rgba(25,25,25,0.7) !important;
+}
+.control-panel {
+  position:absolute;
+  width:100%;
+}

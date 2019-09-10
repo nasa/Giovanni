@@ -1,0 +1,40 @@
+# Names of nodes to start
+#   most people will only start one node:
+#CELERYD_NODES="worker1"
+#   but you can also start multiple and configure settings
+#   for each in CELERYD_OPTS (see `celery multi --help` for examples):
+#CELERYD_NODES="worker1 worker2 worker3"
+#   alternatively, you can specify the number of nodes to start:
+#CELERYD_NODES=10
+CELERYD_NODES="workflow_wwwuser visualizationManager_wwwuser visualizationTask_wwwuser"
+
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/opt/anaconda/bin/celery"
+
+# App instance to use
+# comment out this line if you don't use an app
+#CELERY_APP="proj"
+# or fully qualified:
+#CELERY_APP="proj.tasks:app"
+CELERY_APP="agiovanni.celeryGiovanni"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/var/lib/celery"
+
+# Extra command-line arguments to the worker
+# CELERYD_OPTS="--time-limit=300 --concurrency=8"
+CELERYD_OPTS="-l info --without-mingle --without-heartbeat --without-gossip -Ofair --umask=002 -Q:workflow_wwwuser workflow_wwwuser -c:workflow_wwwuser 30 --time-limit:workflow_wwwuser=86400 --soft-time-limit:workflow_wwwuser=43200 -Q:visualizationManager_wwwuser visualizationManager_wwwuser -c:visualizationManager_wwwuser 45 --time-limit:visualizationManager_wwwuser=86400 --soft-time-limit:visualizationManager_wwwuser=43200 -Q:visualizationTask_wwwuser visualizationTask_wwwuser -c:visualizationTask_wwwuser 20 --time-limit:visualizationTask_wwwuser=7200 --soft-time-limit:visualizationTask_wwwuser=3600"
+
+# %N will be replaced with the first part of the nodename.
+CELERYD_LOG_FILE="/var/log/celery/%N.log"
+CELERYD_PID_FILE="/var/run/celery/%N.pid"
+
+# Workers should run as an unprivileged user.
+#   You need to create this user manually (or you can choose
+#   a user/group combination that already exists, e.g. nobody).
+CELERYD_USER="celery"
+CELERYD_GROUP="wwwuser"
+
+# If enabled pid and log directories will be created if missing,
+# and owned by the userid/group configured.
+CELERY_CREATE_DIRS=1

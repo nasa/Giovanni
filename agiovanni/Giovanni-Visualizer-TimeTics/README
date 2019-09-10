@@ -1,0 +1,28 @@
+Giovanni-Visualizer-TimeTics version 0.02
+=========================================
+
+This helps plotting programs (esp. ncl) create aesthetically pleasing 
+time axes, based on the time difference between the userstartdate and
+userenddate.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires:
+  ncdump
+  ncgen
+  ncatted (part of nco)
+
+TO RUN
+  All of the logic needed is embedded within the set_plot_hint_time_axis() 
+method. Consequently, it can be run from the command line like so:
+
+perl -e 'use Giovanni::Visualizer::TimeTics; exit(Giovanni::Visualizer::TimeTics::set_plot_hint_time_axis("t_time_series_2day.nc")==0)'

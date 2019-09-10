@@ -1,0 +1,16 @@
+# $Id: IASCATTER.svc,v 1.4 2015/05/18 16:42:44 csmit Exp $
+# Chris Lynnes, NASA/GSFC
+# Richard Strub, NASA/GSFC/Adnet Systems
+SERVICE_NAME = IaSc
+SERVICE_DESCRIPTION = "Interactive Scatter"
+SERVICE_LABEL = "Scatter (Interactive)"
+PLOT_TYPE = INTERACTIVE_SCATTER_PLOT
+ALGORITHM_CMD = g4_scatterplot.pl
+OUTPUT_FILE_ROOT = iascatter
+DATELINE_METHOD = 
+MAX_POINTS = 30000
+MAX_POINTS_GUEST = 15000
+COMPARISON = vs
+CONVERT_UNITS_STEP = POST,POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.odwbqii1r1k
+

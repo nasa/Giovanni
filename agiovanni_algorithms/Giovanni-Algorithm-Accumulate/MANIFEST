@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+scripts/g4_accumulate.pl
+t/t_accumulate.pl

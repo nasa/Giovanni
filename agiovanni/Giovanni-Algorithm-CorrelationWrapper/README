@@ -1,0 +1,22 @@
+Giovanni-Algorithm-CorrelationWrapper version 0.01
+==================================================
+
+This program wraps the nccorrelate function (at present).
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires that nccorrelate be in the executable
+PATH.
+
+COPYRIGHT AND LICENCE
+
+TBD

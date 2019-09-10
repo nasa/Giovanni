@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Algorithm::CorrelationWrapper.
+
+0.01  Thu Jul  5 11:07:46 2012
+	- original version; created by h2xs 1.23 with options
+		-AXc Giovanni::Algorithm::CorrelationWrapper
+

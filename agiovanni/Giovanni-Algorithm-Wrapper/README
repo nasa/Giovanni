@@ -1,0 +1,22 @@
+Giovanni-Algorithm-Wrapper version 0.01
+=======================================
+
+Giovanni-Algorithm-Wrapper provides wrapper utilities and executables
+for call scientist-provided algorithms within the Giovanni-4 workflow.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+None yet.
+
+COPYRIGHT AND LICENCE
+
+TBD

@@ -1,0 +1,7 @@
+{
+  "title":"Interactive Time Series",
+  "type":"object",
+  "properties":{
+  },
+  "additionalProperties":false
+}

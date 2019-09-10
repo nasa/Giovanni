@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:element name="varList">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" minOccurs="0" name="var">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" name="slds">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element maxOccurs="unbounded" name="sld">
+                                            <xs:complexType>
+                                                <xs:attribute name="url" use="required"/>
+                                                <xs:attribute name="label" use="required"/>
+                                            </xs:complexType>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                        <xs:attribute name="id" type="xs:string" use="required"/>
+                        <xs:attribute name="long_name" type="xs:string" use="required"/>
+                        <xs:attribute name="dataProductTimeInterval" type="xs:string" use="required"/>
+                        <xs:attribute name="dataProductVersion" type="xs:byte" use="required"/>
+                        <xs:attribute name="sdsName" type="xs:string" use="required"/>
+                        <xs:attribute name="dataProductShortName" type="xs:string" use="required"/>
+                        <xs:attribute name="dataProductStartTimeOffset" type="xs:byte"
+                            use="required"/>
+                        <xs:attribute name="url" type="xs:anyURI" use="required"/>
+                        <xs:attribute name="resolution" type="xs:string" use="required"/>
+                        <xs:attribute name="quantity_type" type="xs:string" use="required"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

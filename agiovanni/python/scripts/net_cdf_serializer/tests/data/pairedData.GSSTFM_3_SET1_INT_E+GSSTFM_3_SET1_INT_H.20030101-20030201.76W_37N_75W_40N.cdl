@@ -1,0 +1,125 @@
+netcdf pairedData.GSSTFM_3_SET1_INT_E+GSSTFM_3_SET1_INT_H.20030101-20030201.76W_37N_75W_40N {
+dimensions:
+	time = UNLIMITED ; // (2 currently)
+	lat = 12 ;
+	lon = 4 ;
+	time1 = 2 ;
+variables:
+	float GSSTFM_3_SET1_INT_E(time, lat, lon) ;
+		GSSTFM_3_SET1_INT_E:_FillValue = -999.f ;
+		GSSTFM_3_SET1_INT_E:long_name = "Latent Heat Flux, GSSTF, Monthly Grid, 0.25 x 0.25 deg." ;
+		GSSTFM_3_SET1_INT_E:units = "W/m^^2" ;
+		GSSTFM_3_SET1_INT_E:origname = "E" ;
+		GSSTFM_3_SET1_INT_E:fullnamepath = "/HDFEOS/GRIDS/SET1_INT/Data Fields/E" ;
+		GSSTFM_3_SET1_INT_E:orig_dimname_list = "XDim " ;
+		GSSTFM_3_SET1_INT_E:standard_name = "set1_int_e" ;
+		GSSTFM_3_SET1_INT_E:coordinates = "time lat lon" ;
+		GSSTFM_3_SET1_INT_E:quantity_type = "Latent Heat Flux" ;
+		GSSTFM_3_SET1_INT_E:product_short_name = "GSSTFM" ;
+		GSSTFM_3_SET1_INT_E:product_version = "3" ;
+		GSSTFM_3_SET1_INT_E:Serializable = "True" ;
+		GSSTFM_3_SET1_INT_E:plot_hint_axis_title = "Latent Heat Flux, GSSTF, Monthly Grid, 0.25 x 0.25 deg. [GSSTFM v3] (W/m^^2)" ;
+	int datamonth(time) ;
+		datamonth:standard_name = "Standardized Date Label" ;
+	float lat(lat) ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+	float lon(lon) ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	float GSSTFM_3_SET1_INT_H(time1, lat, lon) ;
+		GSSTFM_3_SET1_INT_H:_FillValue = -999.f ;
+		GSSTFM_3_SET1_INT_H:long_name = "Sensible Heat Flux, GSSTF, Monthly Grid, 0.25 x 0.25 deg." ;
+		GSSTFM_3_SET1_INT_H:units = "W/m^^2" ;
+		GSSTFM_3_SET1_INT_H:origname = "H" ;
+		GSSTFM_3_SET1_INT_H:fullnamepath = "/HDFEOS/GRIDS/SET1_INT/Data Fields/H" ;
+		GSSTFM_3_SET1_INT_H:orig_dimname_list = "XDim " ;
+		GSSTFM_3_SET1_INT_H:standard_name = "set1_int_h" ;
+		GSSTFM_3_SET1_INT_H:coordinates = "time lat lon" ;
+		GSSTFM_3_SET1_INT_H:quantity_type = "Sensible Heat Flux" ;
+		GSSTFM_3_SET1_INT_H:product_short_name = "GSSTFM" ;
+		GSSTFM_3_SET1_INT_H:product_version = "3" ;
+		GSSTFM_3_SET1_INT_H:Serializable = "True" ;
+		GSSTFM_3_SET1_INT_H:plot_hint_axis_title = "Sensible Heat Flux, GSSTF, Monthly Grid, 0.25 x 0.25 deg. [GSSTFM v3] (W/m^^2)" ;
+	int time1(time1) ;
+		time1:standard_name = "time" ;
+		time1:units = "seconds since 1970-01-01 00:00:00" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:temporal_resolution = "monthly" ;
+		:nco_openmp_thread_number = 1 ;
+		:matched_start_time = "2003-01-01T00:00:00Z" ;
+		:matched_end_time = "2003-02-01T23:59:59Z" ;
+		:title = "Data match (76W - 75W, 37N - 40N): GSSTFM.3 GSSTFM.3" ;
+		:plot_hint_title = "Region 76W, 37N, 75W, 40N" ;
+		:plot_hint_subtitle = "2003-01 - 2003-02-01" ;
+		:plot_hint_caption = " " ;
+data:
+
+ GSSTFM_3_SET1_INT_E =
+  235.2111, 234.5831, 231.4265, 218.8163,
+  _, 233.951, 230.6924, 220.088,
+  _, _, 228.8559, 221.1337,
+  235.2777, _, 226.2819, 221.3817,
+  _, _, _, 219.5469,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, 207.3026,
+  _, _, _, 206.9997,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, _,
+  184.9141, 184.406, 181.7532, 171.1519,
+  _, 183.8698, 181.134, 172.2901,
+  _, _, 179.607, 173.2296,
+  184.9648, _, 177.4812, 173.4743,
+  _, _, _, 171.9883,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, 161.9002,
+  _, _, _, 161.643,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, _ ;
+
+ datamonth = 200301, 200302 ;
+
+ lat = 37.125, 37.375, 37.625, 37.875, 38.125, 38.375, 38.625, 38.875, 
+    39.125, 39.375, 39.625, 39.875 ;
+
+ lon = -75.875, -75.625, -75.375, -75.125 ;
+
+ time = 1041379200, 10440090000 ;
+
+ GSSTFM_3_SET1_INT_H =
+  111.0828, 111.2592, 111.989, 114.1161,
+  _, 111.3976, 112.0247, 113.6961,
+  _, _, 112.2858, 113.4272,
+  111.0632, _, 112.6663, 113.3409,
+  _, _, _, 113.5624,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, 115.0736,
+  _, _, _, 115.1115,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, _,
+  66.23036, 66.34755, 66.79291, 67.85593,
+  _, 66.4296, 66.77474, 67.54136,
+  _, _, 66.88011, 67.38212,
+  66.21671, _, 67.04745, 67.33872,
+  _, _, _, 67.43117,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, 68.02473,
+  _, _, _, 68.03759,
+  _, _, _, _,
+  _, _, _, _,
+  _, _, _, _ ;
+
+ time1 = 1041379200, 1044057600 ;
+}

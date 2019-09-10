@@ -1,0 +1,44 @@
+netcdf MOD08_2 {
+dimensions:
+	Latitude = 2 ;
+	Longitude = 2 ;
+        time = UNLIMITED ; // (1 currently)
+variables:
+	double Latitude(Latitude) ;
+		Latitude:long_name = "Latitude" ;
+		Latitude:units = "degrees_north" ;
+	double Longitude(Longitude) ;
+		Longitude:long_name = "Longitude" ;
+		Longitude:units = "degrees_east" ;
+	short Optical_Depth_Land_And_Ocean_Mean(Latitude, Longitude) ;
+		Optical_Depth_Land_And_Ocean_Mean:coordinates = "Latitude Longitude" ;
+		Optical_Depth_Land_And_Ocean_Mean:valid_range = -100s, 5000s ;
+		Optical_Depth_Land_And_Ocean_Mean:_FillValue = -9999s ;
+		Optical_Depth_Land_And_Ocean_Mean:long_name = "Aerosol Optical Thickness at 0.55 microns for both Ocean (best) and Land (corrected): Mean" ;
+		Optical_Depth_Land_And_Ocean_Mean:units = "none" ;
+		Optical_Depth_Land_And_Ocean_Mean:scale_factor = 0.001 ;
+		Optical_Depth_Land_And_Ocean_Mean:add_offset = 0. ;
+		Optical_Depth_Land_And_Ocean_Mean:Level_2_Pixel_Values_Read_As = "Real" ;
+		Optical_Depth_Land_And_Ocean_Mean:Derived_From_Level_2_Data_Set = "Optical_Depth_Land_And_Ocean" ;
+		Optical_Depth_Land_And_Ocean_Mean:Included_Level_2_Nighttime_Data = "False" ;
+		Optical_Depth_Land_And_Ocean_Mean:Quality_Assurance_Data_Set = "None" ;
+		Optical_Depth_Land_And_Ocean_Mean:Statistic_Type = "Simple" ;
+		Optical_Depth_Land_And_Ocean_Mean:Aggregation_Data_Set = "None" ;
+        int time ;
+                time:units = "seconds since 1970-01-01T00:00:00" ;
+
+
+// global attributes:
+		:history = "Sun Jun 24 18:21:52 2012: ncrename -a .h4__FillValue,_FillValue -O MOD08_2.nc\n",
+			"Sun Jun 24 18:07:19 2012: ncatted -O -a ,global,d,, MOD08_2.nc" ;
+data:
+
+ Latitude = 26.5, 25.5 ;
+
+ Longitude = -59.5, -58.5 ;
+
+ Optical_Depth_Land_And_Ocean_Mean =
+  _, _,
+  _, _ ;
+ time = 1009843200 ;
+}

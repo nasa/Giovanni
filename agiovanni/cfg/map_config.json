@@ -1,0 +1,80 @@
+{
+  "baseLayer": {
+    "type": "TileWMS",
+    "url":["https://disc1.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+           "https://disc1-a.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+           "https://disc1-b.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+           "https://disc1-c.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+           "https://disc1-d.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc"],
+    "params":{
+      "LAYERS":"coastline"
+    },
+    "extent":[-180,-90,180,90],
+    "projection":"EPSG:4326"
+  },
+  "overlayLayers": [
+    {
+      "type": "TileWMS",
+      "url":["https://disc1.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-a.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-b.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-c.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-d.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc"],
+      "params":{
+        "LAYERS":"coastline"
+      },
+      "name": "coastlines",	
+      "projection":"EPSG:4326"
+    },
+    {
+      "type": "TileWMS",
+      "url":["https://disc1-a.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-a.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-b.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-c.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-d.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc"],
+      "params":{
+        "LAYERS":"countries,us_states"
+      },
+      "name": "countries",
+      "projection":"EPSG:4326"
+    },
+    {
+      "type": "grid",
+      "url":["https://disc1-joey.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-a.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-b.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-c.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc",
+             "https://disc1-d.gesdisc.eosdis.nasa.gov/daac-bin/wms_ogc"],
+      "params":{
+        "LAYERS":"grid45"
+      },
+      "name": "grid",
+      "projection":"EPSG:4326"
+    }
+  ],
+  "projections":[
+    {
+      "name":"Equidistant Cylindrical",
+      "code":"EPSG:4326",
+      "proj4":"+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+      "extent": [-180,-90,180,90],
+      "default": 1
+    },
+    {
+      "name":"North Polar",
+      "code":"EPSG:3413",
+      "proj4":"+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "extent": [-12337671.679198, -12400328.320802, 12400328.320802, 12337671.679198],
+      "default": 0
+    },
+    {
+      "name":"South Polar",
+      "code":"EPSG:3031",
+      "proj4":"+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+      "extent": [-12337671.679198, -12400328.320802, 12400328.320802, 12337671.679198],
+      "default": 0
+    }
+  ]
+}
+

@@ -1,0 +1,87 @@
+netcdf pairedData.AIRNOW_PM_001_pmfine+MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean.20030101-20030101.93W_32N_80W_39N {
+dimensions:
+	time = UNLIMITED ; // (1 currently)
+	lat = 6 ;
+	lon = 13 ;
+variables:
+	float AIRNOW_PM_001_pmfine(time, lat, lon) ;
+		AIRNOW_PM_001_pmfine:_FillValue = NaNf ;
+		AIRNOW_PM_001_pmfine:Serializable = "True" ;
+		AIRNOW_PM_001_pmfine:coordinates = "time lat lon" ;
+		AIRNOW_PM_001_pmfine:long_name = "Fine Particulate Matter - PM2.5" ;
+		AIRNOW_PM_001_pmfine:missing_value = NaNf ;
+		AIRNOW_PM_001_pmfine:product_short_name = "AIRNOW_PM" ;
+		AIRNOW_PM_001_pmfine:product_version = "001" ;
+		AIRNOW_PM_001_pmfine:quantity_type = "Particulate Matter" ;
+		AIRNOW_PM_001_pmfine:standard_name = "pmfine" ;
+		AIRNOW_PM_001_pmfine:units = "unknown" ;
+		AIRNOW_PM_001_pmfine:plot_hint_axis_title = "Fine Particulate Matter - PM2.5 [AIRNOW_PM v1]" ;
+	double lat(lat) ;
+		lat:standard_name = "latitude" ;
+		lat:units = "degrees_north" ;
+		lat:long_name = "Latitude" ;
+	double lon(lon) ;
+		lon:standard_name = "longitude" ;
+		lon:units = "degrees_east" ;
+		lon:long_name = "Longitude" ;
+	int time(time) ;
+		time:standard_name = "time" ;
+		time:units = "seconds since 1970-01-01 00:00:00" ;
+	short MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean(time, lat, lon) ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:coordinates = "time lat lon" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Level_2_Pixel_Values_Read_As = "Real" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Quality_Assurance_Data_Set = "None" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Derived_From_Level_2_Data_Set = "Optical_Depth_Land_And_Ocean" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:long_name = "Aerosol Optical Depth 550 nm (Dark Target), MODIS-Aqua, 1 x 1 deg." ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:valid_range = -100s, 5000s ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Included_Level_2_Nighttime_Data = "False" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Aggregation_Data_Set = "None" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:_FillValue = -9999s ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Statistic_Type = "Simple" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:add_offset = 0. ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:units = "1" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:scale_factor = 0.001 ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:standard_name = "optical_depth_land_and_ocean_mean" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:quantity_type = "Total Aerosol Optical Depth" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:product_short_name = "MYD08_D3" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:product_version = "051" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:Serializable = "True" ;
+		MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean:plot_hint_axis_title = "Aerosol Optical Depth 550 nm (Dark Target), MODIS-Aqua, 1 x 1 deg. [MYD08_D3 v51]" ;
+
+// global attributes:
+		:Conventions = "CF-1.4" ;
+		:temporal_resolution = "daily" ;
+		:nco_openmp_thread_number = 1 ;
+		:matched_start_time = "2003-01-01T00:00:00Z";
+		:matched_end_time = "2003-01-01T23:59:59Z";
+		:title = "Data match (93.867W - 80.684W, 32.566N - 39.422N): AIRNOW_PM.001 MYD08_D3.051" ;
+		:plot_hint_title = "Region 93.867W, 32.566N, 80.684W, 39.422N" ;
+		:plot_hint_subtitle = "2003-01-01" ;
+data:
+
+ AIRNOW_PM_001_pmfine =
+  3, _, _, 4, 4, 4.619897, 4.291145, 5.131148, 4.993948, 4, 4.180291, 
+    4.753905, 4.245776,
+  _, _, _, 5.906775, 6.021682, _, 5.16761, 5.284514, 5.036174, 4.530077, 
+    4.77744, 6.365196, 6.233678,
+  _, _, 5.941635, 5.912313, 6.166534, 6.073044, 14, 14, 9.728836, 6.629189, 
+    6.015062, 5.920609, 7.128726,
+  _, _, _, _, _, _, 14, 14, 14, 8.991961, 8.548682, 8.586589, 3,
+  _, _, _, 6, 6, 6, 6, 5.846466, 4.712209, 4.680907, _, _, _,
+  _, _, 6, 6, 6, 6, 5.884675, 4.934155, 4.65795, 4.828776, 5, _, _ ;
+
+ lat = 33.5, 34.5, 35.5, 36.5, 37.5, 38.5 ;
+
+ lon = -93.5, -92.5, -91.5, -90.5, -89.5, -88.5, -87.5, -86.5, -85.5, -84.5, 
+    -83.5, -82.5, -81.5 ;
+
+ time = 1041379200 ;
+
+ MYD08_D3_051_Optical_Depth_Land_And_Ocean_Mean =
+  -33, -27, _, _, _, _, _, _, _, _, _, _, _,
+  -39, -22, _, _, _, _, _, _, _, _, _, _, _,
+  -16, _, _, _, _, _, _, _, _, _, _, _, _,
+  _, _, _, _, _, _, _, _, _, _, _, _, _,
+  _, _, _, _, _, _, _, _, _, _, _, _, _,
+  _, _, _, _, _, _, _, _, _, _, _, _, _ ;
+}

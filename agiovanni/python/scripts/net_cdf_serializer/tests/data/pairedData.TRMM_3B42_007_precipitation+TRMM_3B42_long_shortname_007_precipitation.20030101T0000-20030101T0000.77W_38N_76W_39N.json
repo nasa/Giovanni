@@ -1,0 +1,48 @@
+{
+  "time": {
+    "data": 
+      [ "2003-01-01 00Z"]
+  },
+  "lat": {
+    "units": "degrees_north",
+    "data": 
+      [ 38.875, 39.125 ]
+  },
+  "lon": {
+    "units": "degrees_east",
+    "data": 
+      [ -77.375, -77.125, -76.875 ]
+  },
+  "x_TRMM_3B42_007_precipitation": {
+    "units": "mm/hr",
+    "quantity_type": "Precipitation",
+    "long_name": "Precipitation",
+    "product_short_name": "TRMM_3B42",
+    "product_version": "7",
+    "_FillValue": [-9999.9],
+    "plot_hint_axis_title": "Precipitation 3-hourly 0.25 deg. [TRMM TRMM_3B42 v7] mm/hr",
+    "data": 
+      [
+        [
+          [ 0, 0, 0 ],
+          [ 0, 0, 0 ]
+        ]
+      ]
+  },
+  "y_TRMM_3B42_long_shortname_007_precipitation": {
+    "units": "mm/hr",
+    "quantity_type": "Precipitation",
+    "long_name": "Precipitation",
+    "product_short_name": "TRMM_3B42_with_a_34_char_shortname",
+    "product_version": "7",
+    "_FillValue": [-9999.9],
+    "plot_hint_axis_title": "Precipitation 3-hourly 0.25 deg. [TRMM TRMM_3B42_with_a_34_char_shortname v7] mm/hr",
+    "data": 
+      [
+        [
+          [ 0, 0, 0 ],
+          [ 0, 0, 0 ]
+        ]
+      ]
+  }
+}

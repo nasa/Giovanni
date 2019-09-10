@@ -1,0 +1,399 @@
+<!-- -@@@ Giovanni, Version $Name:  $ -->
+<!DOCTYPE html>
+<html>
+<head>
+<noscript><meta http-equiv="refresh" content="0; url=/giovanni/daac-bin/noscript.cgi" /></noscript>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<!-- Always force IE 9 rendering engine (even in intranet) & use Chrome Frame if available -->
+<meta http-equiv="X-UA-Compatible" content="IE=10,chrome=1" />
+
+<title>Giovanni</title>
+
+<link rel="icon" type="image/ico" href="img/favicon.ico">
+
+<!-- core CSS -->
+<link rel="stylesheet" type="text/css" href="css/giovanni.css">
+<!-- portal css -->
+<link rel="stylesheet" type="text/css" href="css/tableless_layout.css">
+<!-- widget css -->
+<link rel="stylesheet" type="text/css" href="css/MapDisplay.css">
+<link rel="stylesheet" type="text/css" href="css/DateBox.css">
+<link rel="stylesheet" type="text/css" href="css/Workspace.css">
+<link rel="stylesheet" type="text/css" href="css/ScatterPlot.css">
+<link rel="stylesheet" type="text/css" href="css/HistoryView.css">
+<link rel="stylesheet" type="text/css" href="css/MessageBoard.css">
+<link rel="stylesheet" type="text/css" href="css/Map.css">
+<link rel="stylesheet" type="text/css" href="css/MapAnimation.css">
+<link rel="stylesheet" type="text/css" href="css/Services.css">
+<link rel="stylesheet" type="text/css" href="css/TableView.css">
+<link rel="stylesheet" type="text/css" href="css/Splash.css">
+<!-- LOADING YUI dependencies manually (NOT USING YUILoader) to avoid hop back to yui.yahooapis.com -->
+<!-- css -->
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/fonts-min.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/button.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/container.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/autocomplete.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/datatable.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/calendar-min.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/progressbar-min.css">
+<link rel="stylesheet" type="text/css" href="https://disc.gsfc.nasa.gov/common/css/yui/treeview-min.css">
+
+<!-- font-awesome CDN -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" defer>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" defer>
+
+<!-- javascript -->
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/calendar/calendar-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/element/element-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/get/get-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/datasource/datasource-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/connection/connection-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/json/json-min.js"></script>
+<script type="text/javascript"
+        src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/animation/animation-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/autocomplete/autocomplete-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/button/button-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/container/container-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/dragdrop/dragdrop-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/datatable/datatable-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/progressbar/progressbar-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/resize/resize-min.js"></script>
+<script type="text/javascript"
+	src="https://disc.gsfc.nasa.gov/common/lib/yui/2.9.0/treeview/treeview-min.js"></script>
+
+<!-- proj4js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.15/proj4.js"></script>
+<!-- open layers for map -->
+<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>
+<!-- openlayers3 -->
+<link rel="stylesheet" href="https://disc.gsfc.nasa.gov/common/css/ol3.css" type="text/css">
+<script src="https://disc.gsfc.nasa.gov/common/js/ol3.js"></script>
+
+<!-- overlay map dependency -->
+<script type="text/javascript" src="js/jscolor.min.js"></script>
+
+<!-- top hat reference -->
+<script src="https://cdn.earthdata.nasa.gov/tophat2/tophat2.js" id="earthdata-tophat-script" data-show-status="false" data-status-api-url="https://status.earthdata.nasa.gov/api/v1/notifications" async="async" defer="defer"></script>
+
+<!-- jquery dependancies -->
+<script src="https://code.jquery.com/jquery-2.2.3.js" integrity="sha256-laXWtGydpwqJ8JA+X9x2miwmaiKhn8tVmOVEigRNtP4=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="js/jquery.collapsible.min.js"></script>
+
+<!-- jquery ui -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.css" />
+
+<!-- json editor -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/json-editor/0.7.28/jsoneditor.js"></script>
+
+<!-- highcharts dependencies -->
+<script type="text/javascript" src="js/highcharts.js"></script>
+<script type="text/javascript" src="js/exporting.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/js/select2.full.js"></script>
+
+<!-- local js refs -->
+<script type="text/javascript" src="js/namespace.js"></script>
+<script type="text/javascript" src="js/util.js"></script>
+<script type="text/javascript" src="js/footer.js"></script>
+<script type="text/javascript" src="js/app/History.js"></script>
+<script type="text/javascript" src="js/app/Result.js"></script>
+<script type="text/javascript" src="js/app/Session.js"></script>
+<script type="text/javascript" src="js/app/SessionManager.js"></script>
+<script type="text/javascript" src="js/ui/Panel.js"></script>
+<script type="text/javascript" src="js/ui/DataSelector.js"></script>
+<script type="text/javascript" src="js/ui/Workspace.js"></script>
+<script type="text/javascript" src="js/ui/HistoryView.js"></script>
+<script type="text/javascript" src="js/ui/ResultView.js"></script>
+<script type="text/javascript" src="js/widget/Toolbar.js"></script>
+<script type="text/javascript" src="js/util/Registry.js"></script>
+<script type="text/javascript" src="js/widget/ValidationResponse.js"></script>
+<script type="text/javascript" src="js/widget/Services.js"></script>
+<script type="text/javascript" src="js/ui/ServicesFilter.js"></script>
+<script type="text/javascript" src="js/widget/DatePicker.js"></script>
+<script type="text/javascript" src="js/widget/DateRangePicker.js"></script>
+<script type="text/javascript" src="js/widget/SeasonalDatePicker.js"></script>
+<script type="text/javascript" src="js/widget/Calendar.js"></script>
+<script type="text/javascript" src="js/widget/StaticPlot.js"></script>
+<script type="text/javascript" src="js/util/DateTime.js"></script>
+<script type="text/javascript" src="js/widget/BoundingBoxPicker.js"></script>
+<script type="text/javascript" src="js/widget/MapDisplay.js"></script>
+<script type="text/javascript" src="js/widget/VariablePicker.js"></script>
+<script type="text/javascript" src="js/util/BrowserCompatibilityCheck.js"></script>
+<script type="text/javascript" src="js/util/data_accessor.js"></script>
+<script type="text/javascript" src="js/widget/Facet.js"></script>
+<script type="text/javascript" src="js/widget/FacetedResult.js"></script>
+<script type="text/javascript" src="js/widget/FacetedSelector.js"></script>
+<script type="text/javascript" src="js/ui/MessageBoard.js"></script>
+<script type="text/javascript" src="js/widget/MapAnimation.js"></script>
+<script type="text/javascript" src="js/widget/OverlayMap.js"></script>
+<script type="text/javascript" src="js/widget/PaletteSelection.js"></script>
+<script type="text/javascript" src="js/app/Login.js"></script>
+<script type="text/javascript" src="js/widget/Splash.js"></script>
+<!-- local js refs for ScatterPlot -->
+<script type="text/javascript" src="js/widget/ScatterPlot.js"></script>
+<script type="text/javascript" src="js/widget/VerticalProfile.js"></script>
+<script type="text/javascript" src="js/widget/InteractiveTimeSeries.js"></script>
+<!-- local js refs for shapefile support -->
+<script type="text/javascript" src="js/widget/TableView.js"></script>
+<script type="text/javascript">
+// to avoid 'console' errors in browsers that lack a console or console is turned off
+(function() {
+    var method;
+    var noop = function () {};
+    var methods = [
+        'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+        'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+        'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+        'timeStamp', 'trace', 'warn'
+    ];
+    var length = methods.length;
+    var console = (window.console = window.console || {});
+    while (length--) {
+        method = methods[length];
+        // Only stub undefined methods.
+        if (!console[method]) {
+            console[method] = noop;
+        }
+    }
+}());
+</script>
+
+<style type="text/css">
+  /*
+   *  YUI REQUIRES 0 margin and padding 
+   */
+  .body {
+    margin: 0;
+    padding: 0;
+  }
+  
+	.collapsible {
+		background: #cccccc;
+		/* border-top: #f0f0f0 1px solid; */
+		color: #000;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 1em;
+		/* height: 20px; */
+		margin: 0;
+		padding: 5px;
+		text-decoration: none;
+		/* text-transform: uppercase; */
+	}
+	
+	.collapse-open {
+		background: #000;
+		color: #fff;
+	}
+	
+	.collapse-open span {
+		background: url(img/open.png) 25% 25% no-repeat;
+		display: block;
+		float: left;
+		padding: 10px;
+	}
+	
+	.collapse-close span {
+		background: url(img/closed.png) 25% 25% no-repeat;
+		display: block;
+		float: left;
+		padding: 10px;
+	}
+</style>
+</head>
+
+<body class="yui-skin-sam">
+
+        <!--#include virtual="header.html" -->
+	<div id="progressModal" class="progress-modal"></div>
+	<div id="splashModal" class="splash-dialog"></div>
+
+	<div id="session" class="yui-skin-sam"></div>
+
+	<div id="pageFooter"></div>
+
+	<!-- end body HTML content -->
+
+	<script type="text/javascript">
+    // session variable
+    var session = null;
+    var login = new giovanni.app.Login();
+    var enableLogin = null;
+    var earthdataLoginCfg;
+    var splash = null;
+    var splashModalElm = document.getElementById('splashModal');
+    var progressModalElm = document.getElementById('progressModal');
+    var sessionManager = null;
+    // user sessions cookie name
+    var USESSIONS = 'userSessions';
+
+    //setTimeout(onPortalLoad, 100);
+
+    //callback function: to run after all specified YUI components have been loaded
+    //function onPortalLoad() {
+      // check the browser compatibility
+      window.browserChecker.validate(false);
+
+      function createSessionManager (app) {
+        sessionManager = new giovanni.app.SessionManager({
+            "serviceManagerURL" : "daac-bin/service_manager.pl?",
+            "portal" : "GIOVANNI",
+            "application" : app
+        });
+      }
+
+      // get the configured application name
+      try {
+        $.ajax({
+                type : "GET",
+                dataType : "json",
+                url : "daac-bin/getGiovanniConfig.pl?cfg=APPLICATION",
+                success : handleApplicationCfg,
+                error : function (jqXHR, textStatus) {
+                    console.log("ERROR reading configuration: " + textStatus + " (" + jqXHR.responseText + ")");
+                    createSessionManager('GIOVANNI-DEV');
+                }
+             });
+      } catch (err) {
+          createSessionManager('GIOVANNI-DEV');
+      }
+
+      var GIOVANNI_APP;
+      function handleApplicationCfg (cfg, textStatus, jqXHR) {
+        if (cfg) {
+          GIOVANNI_APP = cfg.APPLICATION;
+        } else {
+          GIOVANNI_APP = 'GIOVANNI-DEV';
+        }
+        createSessionManager(GIOVANNI_APP);
+      }; 
+
+      // enableLogin can be included as a query parameter to enable login
+      enableLogin = giovanni.util.extractQueryValue(window.location.href, 'enableLogin');
+
+      // Obtain configuration for Earthdata Login, and once we have it,
+      // create 'login' object if enabled.
+      // Once a user has logged in, methods of the 'login' object may be
+      // used to obtain profile information, e.g. login.getRoles()
+      // to obtain an array of user roles.
+      $.ajax({
+                type : "GET",
+                dataType : "json",
+                url : "daac-bin/getGiovanniConfig.pl?cfg=EARTHDATA_LOGIN",
+                success : handleEarthdataLoginCfg,
+                error : function (jqXHR, textStatus, errorThrown) {
+                    console.log("ERROR reading configuration: " + textStatus + " " + errorThrown + " (" + jqXHR.responseText + ")");
+                },
+                //context : this
+             });
+    //}; // END OF onPortalLoad() function
+
+    function handleEarthdataLoginCfg(cfg, textStatus, jqXHR) {
+
+      // Handle return from async call that obtained configuration
+
+      if (cfg) {
+        earthdataLoginCfg = cfg.EARTHDATA_LOGIN;
+      }
+
+      // Initialize login if enabled in the configuration
+      if (earthdataLoginCfg && (earthdataLoginCfg.enabled || enableLogin)) {
+        if (enableLogin) {
+          earthdataLoginCfg.enabled = enableLogin;
+        }
+        login.initialize("login", earthdataLoginCfg);
+        if (login.enabled) {
+          login.loginCheckingEvent.subscribe(showProgress);
+          login.loginCheckedEvent.subscribe(displaySplash);
+          login.checkLogin();
+        }
+      } else {
+        clearSplash();
+        if (!sessionManager) createSessionManager(GIOVANNI_APP);
+        sessionManager.getSession();
+      }
+      return false;
+    }
+
+    var showProgress = function(eventType, args, o) {
+      console.log("index showProgress");
+      progressModalElm.classList.remove("hideProgress");
+      progressModalElm.classList.add("showProgress");
+    }
+
+    var hideProgress = function(eventType, args, o) {
+      console.log("index hideProgress");
+      progressModalElm.classList.remove("showProgress");
+      progressModalElm.classList.add("hideProgress");
+    }
+
+    function readCookie(name) {
+      var nameEQ = encodeURIComponent(name) + "=";
+      var ca = document.cookie.split(';');
+      for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+      }
+      return null;
+    }
+
+    var displaySplash = function(eventType, args, o) {
+      // Display Splash Page
+      if (splash == null && !login.isLoggedIn) {
+        // Read the value of the "doNotShowSplashPage" cookie
+        // and pass as the second argument of giovanni.widget.Splash()
+        // Stubbed out if you want to test create cookie use:
+        // var valueOfSplashCookie = "false";
+        // createCookie('doNotShowSplashPage', valueOfSplashCookie);
+        var doNotShowSplashPage = readCookie("doNotShowSplashPage");
+        if (doNotShowSplashPage != "true") {
+          splash = new giovanni.widget.Splash("splashModal");
+        } else {
+          clearSplash();
+        }
+      } else {
+        if (login.isLoggedIn || login.checkFailed) {
+          clearSplash();
+        }
+      }
+    }
+
+    var clearSplash = function(eventType, args, o) {
+      console.log("index clearSplash");
+      splashModalElm.style.display = 'none';
+      var panel = document.getElementById('splashContent');
+      if (panel) panel.style.display = 'none';
+    }
+
+    var setLoadInProgress = function(value) {
+      session.loadInProgress = Boolean(value);
+    };
+    
+    var isLoadInProgress = function() {
+      return session.loadInProgress;
+    };
+  </script>
+  <!-- Google/Universal Analytics Code -->
+  <script language="javascript" id="_fed_an_ua_tag" src="https://dap.digitalgov.gov/Universal-Federated-Analytics-Min.js?agency=NASA&amp;sub-agency=GSFC&amp;sp=data,find,giovanni,visualize,GESDISC&amp;dclink=true" defer="defer"></script>
+  <div id='footerSpacer' style='height:5em'>&nbsp;</div>
+
+</body>
+</html>

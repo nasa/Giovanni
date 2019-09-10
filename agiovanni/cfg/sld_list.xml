@@ -1,0 +1,55 @@
+<slds>
+  <sld url="/opt/giovanni4/www/sld/albedo_sld.xml" label="Blue-Pink (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/burd_div_10_sld.xml" label="Blue-Red (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/buylrd_div_10_sld.xml" label="Blue-Yellow-Red (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/buylrd_div_11_sld.xml" label="Blue-Yellow-Red (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/buylrd_div_12_panoply_sld.xml" label="Blue-Yellow-Red (Div), 12 (Source: Panoply)" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/cloud_fraction_sld.xml" label="Blues (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/co_sld.xml" label="Yellow-Orange-Red (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/correlation_n_counts_sld.xml" label="Reds (Seq), 11" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/divergent_burd_11_sld.xml" label="Blue-Red (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/divergent_rdbu_10_sld.xml" label="Red-Blue (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/divergent_rdylbu_10_sld.xml" label="Red-Yellow-Blue (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/divergent_rdylbu_11_sld.xml" label="Red-Yellow-Blue (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/gyrd_div_10_sld.xml" label="Grey-Red (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/gyrd_div_11_sld.xml" label="Grey-Red (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/land_surface_temp_sld.xml" label="Cyan-Red-Yellow (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/leaf_area_index_sld.xml" label="Leaf Area Index (Cust), 65" type="Special"/>
+  <sld url="/opt/giovanni4/www/sld/net_primary_productivity_sld.xml" label="Pink-Green (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/net_radiation_sld.xml" label="Blue-Yellow-Red (Div), 65" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/no2_sld.xml" label="Yellow-Orange-Brown (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/outgoing_longwave_radiation_sld.xml" label="White-Blue-Red-Yellow (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/ozone_sld.xml" label="Cyan-Blue (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/pignbu_seq_9_sld.xml" label="Pink-Yellow-Green-Blue (Seq), 11" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/qualitative_airnow_sld.xml" label="Air Quality Index (Cust), 8" type="Special"/>
+  <sld url="/opt/giovanni4/www/sld/rainfall_sld.xml" label="Green-Blue (Seq), 65" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/rdbu_div_11_sld.xml" label="Red-Blue (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/rdgy_div_10_sld.xml" label="Red-Grey (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/rdgy_div_11_sld.xml" label="Red-Grey (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/sat_hue_value_1_sld.xml" label="Red-Blue-White (Seq), 1" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_broryl_9_sld.xml" label="Brown-Orange-Yellow (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_bu_9_flipped_sld.xml" label="Blues, Dark to Light (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_bu_9_sld.xml" label="Blues, Light to Dark (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_bugnyl_9_sld.xml" label="Blue-Green-Yellow (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_gn_9_flipped_sld.xml" label="Greens, Dark to Light (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_gn_9_sld.xml" label="Greens (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_gnbu_9_sld.xml" label="Green-Blue (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_greys_9_flipped_sld.xml" label="Greys, Dark to Light (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_greys_9_sld.xml" label="Greys, Light to Dark (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_grylrd_9_sld.xml" label="Grey-Yellow-Red (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_or_9_flipped_sld.xml" label="Oranges, Dark to Light (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_or_9_sld.xml" label="Oranges (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_pu_9_flipped_sld.xml" label="Purples, Light to Dark (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_pu_9_sld.xml" label="Purples (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_rd_9_flipped_sld.xml" label="Reds, Dark to Light (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_rd_9_sld.xml" label="Reds (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_ylgn_9_sld.xml" label="Yellow-Green (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_ylgnbu_9_sld.xml" label="Yellow-Green-Blue (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/sequential_ylorbr_9_sld.xml" label="Yellow-Orange-Brown (Seq), 9" type="Sequential"/>
+  <sld url="/opt/giovanni4/www/sld/spectral_div_10_inv_sld.xml" label="Spectral, Inverted (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/spectral_div_10_sld.xml" label="Spectral (Div), 10" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/spectral_div_11_inv_sld.xml" label="Spectral, Inverted (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/spectral_div_11_sld.xml" label="Spectral (Div), 11" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/time_matched_difference_sld.xml" label="Blue-Yellow-Red (Div), 12" type="Divergent"/>
+  <sld url="/opt/giovanni4/www/sld/water_vapor_sld.xml" label="Yellow-Indigo (Seq), 65" type="Sequential"/>
+</slds>

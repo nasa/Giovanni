@@ -1,0 +1,6 @@
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Algorithm-Wrapper.t
+lib/Giovanni/Algorithm/Wrapper.pm
+lib/Giovanni/Algorithm/Wrapper/Test.pm

@@ -1,0 +1,5 @@
+Changes
+Makefile.PL
+MANIFEST
+t/Giovanni-Serializer-TimeSeries.t
+lib/Giovanni/Serializer/TimeSeries.pm

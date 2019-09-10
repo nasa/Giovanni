@@ -1,0 +1,108 @@
+#pageHeader {
+        position:inherit;
+        font-family:sans-serif;
+    	color: white;
+        width:100%;
+        padding:5px;
+        background:transparent;
+        font-size:1.8em;
+}
+.pageCell {
+    	vertical-align: top;
+    	font-family: sans-serif;
+        padding:5px;
+        font-weight:normal;
+}
+#banner {
+        float:left;
+}
+#bannerLogo {
+        font-variant:small-caps;
+        font-size:1.17em;
+        font-style:italic;
+        font-weight:bold;
+}
+#bannerSlogan {
+        font-size:0.83em;
+}
+#bannerVersion {
+        font-size:0.56em;
+}
+.bannerText {
+        display:inline-block;
+        font-size:0.8em;
+        margin-left:3px;
+        margin-right:3px;
+}
+#bannerLinks {
+        float:left;
+	font: italic 1.2em sans-serif;
+  	color: #eee;
+        font-style:italic;
+        text-decoration:none;
+        margin:0.5em 0em 0.2em 9.5%;
+}
+.bannerLink {
+        margin-left:3px;
+        margin-right:3px;
+        white-space:nowrap;
+} 
+.bannerLink:visited {
+  	color: #ddd;
+}
+.bannerLink:hover {
+        color:white;
+	text-decoration:underline;
+        cursor:pointer;
+}
+.bannerHelpLink {
+  	font: bold 0.7em sans-serif;
+  	vertical-align: middle;
+  	color: white;
+	margin-left: 3px;
+	margin-right: 3px;
+	padding: 2px;
+	padding-left: 6px;
+	padding-right: 6px;
+	border: solid 1px white;
+} 
+.bannerHelpLink:visited {
+  	color: #ddd;
+}
+.bannerHelpLink:hover {
+	color: white;
+}
+.bannerElement {
+  float:left;
+  margin-left:10px;
+}
+#nasaFooter {
+    position:inherit;
+    padding: 5px;
+    padding-top: 5px;
+    margin-top: 5px;
+    margin-left: 5px;
+    font-family: sans-serif;
+    width: 100%;
+    background: transparent;
+}
+.nasaFooterCell {
+    	text-align: left;
+    	vertical-align: top;
+	white-space: nowrap;
+	color: #ddd;
+	padding: 3px;
+}
+#nasaFooterContact {
+	width: 5%; 
+	text-align: right; 
+}
+.footerLink {
+	color: #eee;
+}
+.footerLink:hover {
+        color:white;
+}
+.footerLink:visited {
+        color:#ddd;
+}

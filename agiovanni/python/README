@@ -1,0 +1,15 @@
+# Introduction
+
+This packages reusable Python 2.5 code for Agile Giovanni. Executable python
+scripts do not need to be part of this package. 
+
+# Quick Commands
+
+To install run the following command:
+
+    $ ./setup.py install --prefix=~/public_html/giovanni4
+
+To run tests run the following command:
+
+    $ nosetests -s
+

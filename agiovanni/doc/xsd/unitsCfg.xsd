@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="units">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="linearConversions">
+                    <xs:complexType>
+                        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+                            <xs:element name="linearUnit">
+                                <xs:complexType>
+                                    <xs:attribute name="source" type="xs:string"/>
+                                    <xs:attribute name="destination" type="xs:string"/>
+                                    <xs:attribute name="scale_factor" type="xs:string"/>
+                                    <xs:attribute name="add_offset" type="xs:string"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="nonLinearConversions">
+                    <xs:complexType>
+                        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+                            <xs:element name="timeDependentUnit">
+                                <xs:complexType>
+                                    <xs:attribute name="source" type="xs:string"/>
+                                    <xs:attribute name="destination" type="xs:string"/>
+                                    <xs:attribute name="class" type="xs:string"/>
+                                    <xs:attribute name="to_days_scale_factor" type="xs:string"/>
+                                    <xs:attribute name="temporal_resolutions" type="xs:string"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="fileFriendlyStrings">
+                    <xs:complexType>
+                        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+                            <xs:element name="destinationUnit">
+                                <xs:complexType>
+                                    <xs:attribute name="original" type="xs:string"/>
+                                    <xs:attribute name="file" type="xs:string"/>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -1,0 +1,307 @@
+.datebox { font: bold 12px Arial,Helvetica,sans-serif; width:500px; margin-top:20px; margin-left: 20px;}
+.datebox hint{ margin:0 0 0 10px; }
+.datebox .maxrange{color:#aaaaaa; font: 10px Arial, Helvetica, sans-serif; display:block; position:relative; left:20px; top 5px; }
+.datebox .maxrange p{display:block;}
+/*
+.datebox .status{color:red; font: 10px Arial, Helvetica, sans-serif; display:block; position:relative; left:20px; top:10px; }
+.datebox .status p{display:block;}
+*/
+.datebox label{width:120px; margin: 5px 0 5px 0; text-align:right;}
+.datebox input{margin:5px 0 0 10px; width:120px; border:none;}
+.datebox span{margin:5px 0px 0 10px; font-weight:normal; text-align:left;}
+.datebox img{border:none; margin:0px 0 0 0;}
+.TimeSelect {font: 12px/12px Arial,Helvetica,sans-serif; display:block; overflow:hidden;}
+.TimeSelect input{width:22px; height:24px; }
+.TimeSelect div.scroller{width:12px; height:24px; display:block;}
+.TimeSelect div.scroller a{text-decoration:none; }
+.TimeSelect div.scroller img{width:12px; height:12px; border:none;}
+
+/*
+.combo label{ display:inline-block; }
+.combo input{ display:inline-block; }
+*/
+
+.recurring {font: bold 12px arial,helvetica,sans-serif; width:500px; margin-top:20px; margin-left:20px;}
+.recurring hint{ margin:0 0 0 0; }
+/*
+.recurring .status{color:red; font: 10px arial,helvetica,sans-serif; display:block; margin-left:10px; }
+.recurring .status p{}
+*/
+.recurring label{ margin: 5px 0 5px 0; }
+.recurring input{  }
+.recurring span{  }
+.recurring img{ border:none; margin:5px 0 0 0;}
+.selectContainer { padding-top: 8px; }
+.repeatingMonths { margin-left: 5px; }
+.repeatingYears { margin-left: 30px; }
+
+
+.yui-skin-sam .yui-calcontainer{border:none !important;}
+
+.yui-skin-sam .yui-panel .hd, .yui-skin-sam .yui-panel .bd, .yui-skin-sam .yui-panel .ft{ display:block; overflow:hidden; border-style:none; }
+.yui-skin-sam .yui-calendar td.calcell.today a {border-style:none;}
+
+.yui-skin-sam .yui-calendar .calnavleft {
+	width: 0px !important;
+	height: 0px !important;
+}
+.yui-skin-sam .yui-calendar .calnavright {
+	width: 0px !important;
+	height: 0px !important;
+}
+
+.yui-skin-sam .yui-dialog .ft .button-group {
+    height:20px;
+    margin-top:10px;
+    display: block;
+    text-align: center;
+}
+
+.datePickerContainer {
+    padding:0px;
+    margin:0px;
+    white-space:normal !important;
+}
+.dateTimeContainer {
+    white-space:nowrap;
+    padding:0px;
+    margin:0px;
+    margin-bottom:2px;
+    float:left;
+}
+#dateRangeSeparator {
+    float:left;
+    font-weight:bold;
+    font-style:italic;
+    padding:8px 3px 0px; 3px;
+    color:#666;
+}
+#yearRangeSeparator {
+    font-weight:bold;
+    font-style:italic;
+    padding:8px 3px 0px; 3px;
+    color:#666;
+}
+.dateContainer {
+    height:1.3em;
+    background: white;
+    padding: 5px 3px 6px 3px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    vertical-align:middle;
+    margin:2px;
+    margin-bottom:3px;
+    /* white-space:nowrap; */
+    float:left;
+    color:black;
+}
+/*
+.dateContainer:hover {
+    margin:1px;
+    border: 2px solid #ffff00;
+    background:#ccc;
+}
+*/
+.dateContainerFocus {
+    margin:1px;
+    border: 2px solid #ffff00;
+    background:#ccc;
+}
+#dateRangeContainer {
+    display:inline-block;
+}
+.dateInput {
+    border:none;
+    float:left;
+    margin-right:10px;
+}
+.textFieldInput {
+    border:none;
+    float:left;
+    padding:0px;
+    margin:0px;
+    font-size:1.1em;
+}
+.textFieldInputDisabled {
+    color:#ccc;
+}
+.dateFieldSeparator {
+    float:left;
+    margin-left:3px;
+    margin-right:3px;
+    font-weight:bold;
+}
+.dateHourSelectorContainer {
+    padding:0px;
+    margin:0px;
+    float:left;
+    overflow:hidden;
+    width:66px;
+    height:27px;
+    border:1px solid #aaa;
+    border-radius: 5px;
+    padding:0px 5px 0px 2px;
+    /* box-shadow: 1px 1px 11px #330033; */
+    background:white;
+}
+.dateHourSelectorContainerDisabled {
+    float:left;
+    overflow:hidden;
+    width:66px;
+    height:27px;
+    border:1px solid #ddd;
+    border-radius: 5px;
+    padding:0px 5px 0px 2px;
+    /* box-shadow: 1px 1px 11px #330033; */
+    background:white;
+    margin:2px;
+}
+.dateHourSelector {
+    padding:0px;
+    margin:0px;
+    height:2.5em;
+    border:1px solid #666;
+    border-radius:5px;
+    padding: 6px;
+    margin-bottom:0px;
+    background:white !important;
+}
+.dateHourSelect {
+    border: 0;
+    background: transparent;
+    padding:4px 0px 3px 4px;
+    width:110px;
+/*
+    *width:30px;
+    *background:white;
+*/
+    -webkit-appearance:none;
+    float:left;
+}
+.dateHourImage {
+    background: url("../img/giovanni_icons.png");
+    background-position: -162px -447px;
+    width:60px;
+    height:15px;
+    margin-left:28px;
+    margin-top:7px;
+}
+.dateHourImageDisabled {
+    background: url("../img/giovanni_icons.png");
+    background-position: -214px -447px;
+    width:60px;
+    height:15px;
+    margin-left:25px;
+    margin-top:7px;
+}
+.calendarIcon {
+    vertical-align:bottom;
+    margin-bottom:9px;
+    margin-left:5px;
+    width:22px;
+    height:22px;
+}
+/*
+#dateRangeDisplay {
+    float:left;
+}
+*/
+#startDateCalendarLink {
+    cursor:pointer;
+}
+#endDateCalendarLink {
+    cursor:pointer;
+}
+
+.nobody {
+    display:none;
+}
+.normalcalbody {
+    display:table-row-group;
+}
+.normalcalheader {
+    display:table-header-group;
+}
+#seasonalUmbrellaContainer {
+    display: inline-block;
+}
+#seasonsContainer {
+    display:inline-block;
+    vertical-align:top;
+    margin-right:5px;
+}
+#seasonsListContainer {
+    /* height:6em; */
+    border:1px solid #bbb;
+}
+#monthsContainer {
+    display:inline-block;
+    vertical-align:top;
+    margin-right:5px;
+}
+#monthsListContainer {
+    /* height:6em; */
+    /*overflow-y:scroll;*/
+    border:1px solid #bbb;
+}
+#yearRangeContainer {
+    display:inline-block;
+    vertical-align:top;
+    margin: 4px;
+    margin-top:0px;
+}
+.seasonalDateContainer {
+    height:1.3em;
+    background: white;
+    padding: 5px 3px 6px 3px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    vertical-align:middle;
+    margin:2px;
+    margin-bottom:3px;
+    display:inline-block;
+    color:black;
+}
+.monthsLabel {
+    color: black;
+}
+.monthsLabelDisabled {
+    color: #bbb;
+}
+.seasonsLabel {
+    color: black;
+    cursor:default;
+}
+.seasonsLabel:hover {
+    color:blue;
+}
+.seasonsLabelDisabled {
+    color: #bbb;
+}
+.yearRangeTextInput {
+    width: 2.5em;
+    margin-left: 3px;
+    margin-right:3px;
+}
+.checkboxList {
+}
+.yearList {
+    padding:5px;
+}
+.yearListItem {
+    font-size:1.5em;
+}
+#timePickerHint {
+    margin-left:5.3em;
+}
+.calIcon {
+  color:#0000b3;
+  padding:5px;
+  margin-top:-5px;
+  margin-left:-5px;
+}
+.calIcon:hover {
+  color:blue;
+  cursor:pointer;
+  background-color:#eee;
+}

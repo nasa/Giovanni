@@ -1,0 +1,15 @@
+SERVICE_NAME = TmAvSc
+SERVICE_DESCRIPTION = "Time-averaged, interactive X-Y plot of 2 variables"
+SERVICE_LABEL = "Scatter, Time-Averaged (Interactive)"
+PLOT_TYPE = INTERACTIVE_SCATTER_PLOT
+ALGORITHM_CMD = g4_time_avg_scatter.py
+OUTPUT_FILE_ROOT = scatter
+POINTS_LIMIT = 4677120000
+SLICE_LIMIT = 45000
+MAX_POINTS = 30000
+MAX_POINTS_GUEST = 15000
+DATELINE_METHOD =
+COMPARISON = vs.
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.tkn2gvvbsfbn
+CONVERT_UNITS_STEP = POST,WRAPPER
+

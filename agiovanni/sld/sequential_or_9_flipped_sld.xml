@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd" xmlns="http://www.opengis.net/sld"  xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <se:Name >sequential_or_9_flipped_sld</se:Name>
+    <UserStyle>
+      <se:Name >Oranges, Dark to Light (Seq), 9</se:Name>
+      <se:FeatureTypeStyle >
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#7f2704</se:Value>
+                <se:Threshold/>
+                <se:Value>#a63603</se:Value>
+                <se:Threshold/>
+                <se:Value>#d94801</se:Value>
+                <se:Threshold/>
+                <se:Value>#f16913</se:Value>
+                <se:Threshold/>
+                <se:Value>#fd8d3c</se:Value>
+                <se:Threshold/>
+                <se:Value>#fdae6b</se:Value>
+                <se:Threshold/>
+                <se:Value>#fdd0a2</se:Value>
+                <se:Threshold/>
+                <se:Value>#fee6ce</se:Value>
+                <se:Threshold/>
+                <se:Value>#fff5eb</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

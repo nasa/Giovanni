@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Algorithm-CorrelationWrapper.t
+lib/Giovanni/Algorithm/CorrelationWrapper.pm

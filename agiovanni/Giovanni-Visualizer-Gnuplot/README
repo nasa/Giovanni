@@ -1,0 +1,20 @@
+Giovanni-Visualizer-Gnuplot version 0.01
+========================================
+
+This provides a set of Perl functions to drive gnuplot.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  gnuplot, ideally with the pngcairo terminal
+

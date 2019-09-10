@@ -1,0 +1,76 @@
+{
+  "time": {
+    "data": 
+      [ "2003-01-01 00Z", "2003-01-01 01Z", "2003-01-01 02Z"]
+  },
+  "lat": {
+    "units": "degrees_north",
+    "data": 
+      [ 38.062, 38.188, 38.312, 38.438 ]
+  },
+  "lon": {
+    "units": "degrees_east",
+    "data": 
+      [ -75.938, -75.812, -75.688, -75.562 ]
+  },
+  "NLDAS_NOAH0125_H_002_soilm0_10cm": {
+    "units": "kg/m^2",
+    "quantity_type": "Soil moisture 0-10 cm",
+    "long_name": "Soil moisture content (layer 1, 0-10 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg.",
+    "product_short_name": "NLDAS_NOAH0125_H",
+    "product_version": "002",
+    "_FillValue": [-9999],
+    "plot_hint_axis_title" : "Soil moisture content (layer 1, 0-10 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg. [NLDAS_NOAH0125_H v2] (kg/m^2)",
+    "data": 
+      [
+        [
+          [ -9999, 28.58, 28.3, 22.38 ],
+          [ -9999, 28.63, 28.43, 19.03 ],
+          [ 26.52, 28.66, 19.12, 22.74 ],
+          [ 28.7, 19.09, 22.83, 22.78 ]
+        ],
+        [
+          [ -9999, 28.6, 28.32, 22.37 ],
+          [ -9999, 28.65, 28.45, 19.01 ],
+          [ 26.53, 28.69, 19.11, 22.73 ],
+          [ 28.72, 19.08, 22.81, 22.77 ]
+        ],
+        [
+          [ -9999, 28.62, 28.34, 22.37 ],
+          [ -9999, 28.68, 28.47, 18.99 ],
+          [ 26.54, 28.71, 19.09, 22.72 ],
+          [ 28.75, 19.06, 22.79, 22.76 ]
+        ]
+      ]
+  },
+  "NLDAS_NOAH0125_H_002_soilm0_100cm": {
+    "units": "kg/m^2",
+    "quantity_type": "Soil moisture 0-100 cm",
+    "long_name": "Soil moisture content (top 1 meter, 0-100 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg.",
+    "product_short_name": "NLDAS_NOAH0125_H",
+    "product_version": "002",
+    "_FillValue": [-9999],
+    "plot_hint_axis_title": "Soil moisture content (top 1 meter, 0-100 cm), NLDAS Phase 2 Noah Land Surface Model Parameters, 0.125 x 0.125 deg. [NLDAS_NOAH0125_H v2] (kg/m^2)",
+    "data": 
+      [
+        [
+          [ -9999, 302.74, 298.71, 240.85 ],
+          [ -9999, 303.51, 301.08, 202.89 ],
+          [ 284.06, 304.1, 203.87, 242.18 ],
+          [ 304.48, 204.96, 243.33, 242.17 ]
+        ],
+        [
+          [ -9999, 302.77, 298.74, 240.8 ],
+          [ -9999, 303.55, 301.13, 202.83 ],
+          [ 284.04, 304.14, 203.8, 242.13 ],
+          [ 304.52, 204.89, 243.27, 242.13 ]
+        ],
+        [
+          [ -9999, 302.8, 298.77, 240.75 ],
+          [ -9999, 303.6, 301.19, 202.77 ],
+          [ 284.02, 304.19, 203.73, 242.08 ],
+          [ 304.57, 204.82, 243.22, 242.08 ]
+        ]
+      ]
+  }
+}

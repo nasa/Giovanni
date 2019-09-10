@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Agent.
+
+0.01  Wed Feb  6 16:16:42 2013
+	- original version; created by h2xs 1.23 with options
+		-X Giovanni::Agent
+

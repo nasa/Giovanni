@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd">
+  <NamedLayer>
+    <se:Name>Time-Averaged.OMAEROe_003_AbsorbingAerosolOpticalThicknessMW_388_0</se:Name>
+    <UserStyle>
+      <se:Name>Reds (Seq), 9</se:Name>
+      <se:FeatureTypeStyle>
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#fff5f0</se:Value>
+                <se:Threshold>0</se:Threshold>
+                <se:Value>#fee0d2</se:Value>
+                <se:Threshold>0.143</se:Threshold>
+                <se:Value>#fcbba1</se:Value>
+                <se:Threshold>0.286</se:Threshold>
+                <se:Value>#fc9272</se:Value>
+                <se:Threshold>0.429</se:Threshold>
+                <se:Value>#fb6a4a</se:Value>
+                <se:Threshold>0.572</se:Threshold>
+                <se:Value>#ef3b2c</se:Value>
+                <se:Threshold>0.715</se:Threshold>
+                <se:Value>#cb181d</se:Value>
+                <se:Threshold>0.857</se:Threshold>
+                <se:Value>#a50f15</se:Value>
+                <se:Threshold>1</se:Threshold>
+                <se:Value>#67000d</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<!-- Always force IE 9 rendering engine (even in intranet) & use Chrome Frame if available -->
+<meta http-equiv="X-UA-Compatible" content="IE=10,chrome=1" />
+
+<title>Earthdata Login for Giovanni</title>
+
+<script type="text/javascript">
+</script>
+</head>
+
+<body>
+  <div id="main">
+    <p id="par1"></p>
+  </div>
+
+  <script type="text/javascript">
+    var url = window.location.href;
+    var code = extractQueryValue(url, 'code');
+    var par1 = document.getElementById('par1');
+    if (code) {
+      console.log('code: ' + code);
+      createCookie('profileCode', code);
+      var status = "You have successfully logged into Giovanni using your Earthdata credentials.";
+      par1.innerHTML = status;
+    } else {
+      console.log('No code parameter found in query');
+      createCookie('profileErrorUrl', url);
+
+      // error=access_denied msg=user_profile_locked
+      var error = extractQueryValue(url, 'error');
+      var msg = extractQueryValue(url, 'msg');
+      var error_msg = extractQueryValue(url, 'error_msg');
+
+        var link = document.createElement("a");
+        link.setAttribute('href', 'https://urs.earthdata.nasa.gov/');
+        link.innerHTML = "Earthdata Login";
+    
+        var status = "Your Earthdata Login was unsuccessful.";
+        if (error_msg) {
+          status = status + ' ' + error_msg;
+        }
+        if (msg == 'user_profile_locked') {
+          status = status + ' Your Earthdata Login profile has been locked. Please visit ';
+        } else {
+          status = status + ' Please visit ';
+        }
+        par1.innerHTML = status;
+        par1.appendChild(link);
+        var status2 = document.createTextNode(" to manage your profile, and then try Giovanni again.");
+        par1.appendChild(status2);
+    }
+
+    function createCookie(name,value,days) {
+      if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+      }
+      else var expires = "";
+      document.cookie = encodeURIComponent(name) + "=" + encodeURIComponent(value) + expires + "; path=/";
+    }
+
+    function extractQueryValue(url, fieldName) {
+      fieldName = fieldName.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&;]" + fieldName + "(=([^&#;]*)|&|#|;|$)"),
+          results = regex.exec(url);
+      // This routine would be more useful if it returned null if fieldName
+      // is not found in the query string, but for backward compatibility
+      // we'll return an empty string instead
+      //if (!results) return null;
+      if (!results) return '';
+      if (!results[2]) return '';
+
+      // After extracting the value in results[2], handle any URI encoding
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    };
+  </script>
+</body>
+</html>

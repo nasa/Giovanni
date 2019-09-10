@@ -1,0 +1,18 @@
+Giovanni-Algorithm-TimeAveragerNco version 0.02
+===============================================
+
+Giovanni-Algorithm-TimeAveragerNco
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires ncrename and ncea from the nco package and ncdump 
+from the netcdf library.

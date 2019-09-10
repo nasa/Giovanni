@@ -1,0 +1,12 @@
+Add even more comments
+Less common cases
+  Handle case where dataset does not fill bbox
+  Handle case where lat/lon are switched
+  Handle case of mismatched spatial resolution
+Add nc_strerror every place a netcdf call is made
+Add PERCENT done
+Fix attributes
+  Correct latitude/longitude long name
+  Add :title
+  Add var:long_name to output
+Refactor DEBUG statements to something that checks s_verbose

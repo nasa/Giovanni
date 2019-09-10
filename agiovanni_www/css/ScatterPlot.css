@@ -1,0 +1,120 @@
+.interactivePlot {
+        border: 1px solid lightgrey;
+        margin: 0px 3px 0px 3px;
+}
+.scatterGraph {
+         width: 95%; 
+	/*width:600px;
+	height:600px;*/
+	float:left;
+}
+.scatterMap {
+        width: 360px;
+        height: 180px;
+	float:left;
+	border-bottom:none;
+	background-color:#cfcfdf;
+}
+
+.graphMapReset {
+	padding: 5px;
+	font-size: 1.2em;
+	cursor:pointer;
+}
+
+.olControlPanPanel {
+	margin-top: 60px;
+}
+
+.olControlNavToolbarScatter {
+	top: 60px;
+	left: 5px;
+	border: none;
+	background:transparent;
+}
+
+.olControlNavToolbarScatterItemActive {
+	float:left;
+  	background-image: url("../img/giovanni_icons.png");
+  	background-repeat: no-repeat;
+  	height:22px;
+  	width: 24px;
+	background-position: -1px -93px;
+}
+.olControlNavToolbarScatterItemInactive {
+	float:left;
+  	background-image: url("../img/giovanni_icons.png");
+  	background-repeat: no-repeat;
+  	height:22px;
+  	width: 24px;
+	background-position: -26px -93px;
+}
+
+.olControlNavToolbarScatterZoomItemActive {
+	float:left;
+  	background-image: url("../img/giovanni_icons.png");
+  	background-repeat: no-repeat;
+  	height:22px;
+  	width: 24px;
+	background-position: -1px -116px;
+	margin-top:26px;
+	margin-left:-24px;
+}
+.olControlNavToolbarScatterZoomItemInactive {
+	float:left;
+  	background-image: url("../img/giovanni_icons.png");
+  	background-repeat: no-repeat;
+  	height:22px;
+  	width: 24px;
+	background-position: -26px -116px;
+	margin-top:26px;
+	margin-left:-24px;
+}
+#interactivePlotTitle {
+	font-size: 1.5em;
+	font-weight: bold;
+	text-align: center;
+	letter-spacing: 3px;
+}
+.graphHdr {
+	margin-top: 5px;
+}
+
+.markerPanel {
+	position:absolute;
+	top:0px;
+	left:0px;
+	border: 2px solid #666;
+	border-radius: 4px;
+	box-shadow: 2px 2px 2px #666;
+	background:white;
+	padding:5px;
+	z-index: 9999999999;
+	opacity: 0.85;
+}
+.mapCoords {
+	background: white;
+	padding: 5px;
+	opacity: 0.9;
+	border: 1px solid lightgrey;
+	float:left;
+	width:350px;
+	margin-bottom:2em;
+}
+#coordsReadout {
+	background-color:white;
+}
+#readoutTitle {
+	font-weight:bold;
+	float:left;
+}
+#readoutLat {
+	font-weight:bold;
+	float:right;
+	min-width:110px;
+}
+#readoutLon {
+	font-weight:bold;
+	float:right;
+	min-width:110px;
+}

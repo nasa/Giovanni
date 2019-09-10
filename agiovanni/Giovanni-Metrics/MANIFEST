@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/Giovanni-Metrics.t
+lib/Giovanni/Metrics.pm

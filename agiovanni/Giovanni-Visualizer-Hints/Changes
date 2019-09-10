@@ -1,0 +1,6 @@
+Revision history for Perl extension Giovanni::Visualizer::Hints.
+
+0.01  Tue May 22 16:36:27 2012
+	- original version; created by h2xs 1.23 with options
+		-AXc Giovanni::Visualizer::Hints
+

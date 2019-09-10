@@ -1,0 +1,16 @@
+# $Id: CRTN_TIME.svc,v 1.2 2015/06/30 17:56:04 mpetrenk Exp $
+# Maksym Petrenko, NASA/GSFC
+SERVICE_NAME = CrTm 
+SERVICE_DESCRIPTION = "Cross Section, Time-Pressure"
+SERVICE_LABEL = "Cross Section, Time-Pressure"
+PLOT_TYPE = TIME_SERIES_CURTAIN
+ALGORITHM_CMD = g4_curtain_time.pl
+OUTPUT_FILE_ROOT = curtainTime
+MAX_POINTS =
+MAX_FRAMES_GUEST = 4
+SLICE_LIMIT = 
+DATELINE_METHOD = stitch
+CONVERT_UNITS_STEP = POST
+SERVICE_HELP = ./doc/UsersManualworkingdocument.docx.html#h.eielqwu9wgco
+
+

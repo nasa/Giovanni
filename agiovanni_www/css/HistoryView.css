@@ -1,0 +1,58 @@
+.historyViewTitle {
+    font-size: 1.2em;
+    display:inline-block;
+    margin-bottom:0.5em;
+}
+
+.historyViewList {
+    list-style-type: none; /* Remove list bullets */
+    margin-left:-3em;
+    white-space:normal;
+    margin-top:0.5em;
+}
+
+.historyItem {
+    font-size:1.0em;
+    font-weight:normal;
+    color:#555; 
+}
+.historyItem a {
+    color:blue;
+}
+.historyItem a:visited {
+    color:purple;
+}
+
+.historyItem li:before {
+}
+
+.historyItemSelected {
+    font-weight: bold;
+    font-size:1.2em;
+    color:black;
+}
+
+.historyItemLabel {
+    display:inline-block;
+    white-space:normal;
+}
+.historyItemLabel:hover {
+    cursor:pointer;
+}
+
+.ygtvlabel {
+    background-color:transparent !important;
+    white-space:normal !important;
+    color:#555;
+}
+
+.historyItemDel {
+  padding:0em 0.2em;
+  border-radius:3px;
+  cursor:pointer;
+  margin-right:0.2em;
+  vertical-align:top;
+}
+.historyItemDel:hover {
+  background-color:white;
+}

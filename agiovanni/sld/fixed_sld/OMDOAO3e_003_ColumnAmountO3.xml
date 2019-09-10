@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:se="http://www.opengis.net/se" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1.0" xsi:schemaLocation="http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd">
+  <NamedLayer>
+    <se:Name>Time-Averaged.OMDOAO3e_003_ColumnAmountO3</se:Name>
+    <UserStyle>
+      <se:Name>Spectral, Inverted (Div), 10</se:Name>
+      <se:FeatureTypeStyle>
+        <se:Rule>
+          <se:RasterSymbolizer>
+            <se:Opacity>1.0</se:Opacity>
+            <se:ColorMap>
+              <se:Categorize fallbackValue="#ff00ff">
+                <se:LookupValue>Rasterdata</se:LookupValue>
+                <se:Value>#5e4fa2</se:Value>
+                <se:Threshold>100</se:Threshold>
+                <se:Value>#3288bd</se:Value>
+                <se:Threshold>150</se:Threshold>
+                <se:Value>#66c2a5</se:Value>
+                <se:Threshold>200</se:Threshold>
+                <se:Value>#abdda4</se:Value>
+                <se:Threshold>250</se:Threshold>
+                <se:Value>#e6f598</se:Value>
+                <se:Threshold>300</se:Threshold>
+                <se:Value>#fee08b</se:Value>
+                <se:Threshold>350</se:Threshold>
+                <se:Value>#fdae61</se:Value>
+                <se:Threshold>400</se:Threshold>
+                <se:Value>#f46d43</se:Value>
+                <se:Threshold>450</se:Threshold>
+                <se:Value>#d53e4f</se:Value>
+                <se:Threshold>500</se:Threshold>
+                <se:Value>#9e0142</se:Value>
+              </se:Categorize>
+            </se:ColorMap>
+          </se:RasterSymbolizer>
+        </se:Rule>
+      </se:FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>

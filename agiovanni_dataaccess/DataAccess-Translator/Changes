@@ -1,0 +1,6 @@
+Revision history for Perl extension DataAccess::Translator.
+
+0.01  Wed Nov 12 15:08:32 2014
+	- original version; created by h2xs 1.23 with options
+		-AXc DataAccess::Translator
+

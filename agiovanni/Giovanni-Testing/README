@@ -1,0 +1,13 @@
+Giovanni-Testing version 0.01
+=============================
+
+This provides some routines oft-used in Giovanni to generate unit tests.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install

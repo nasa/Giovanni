@@ -1,0 +1,428 @@
+#sessionWorkspace {
+  visibility:hidden;
+  display:none;
+  /* background:rgb(245,245,245); */
+  margin-top:0px;
+  padding-left:10px;
+  white-space:nowrap;
+}
+
+#sessionWorkspaceClear {
+  position: absolute;
+  top: 9.3em;
+  left: 13em;
+  cursor: pointer;
+  background-color: white;
+  border: none;
+  box-shadow: 2px 2px 5px #ccc;
+  height: 1.5em;
+  padding: 0em 0.5em;
+}
+
+#sessionWorkspaceClear:hover {
+  box-shadow: 2px 2px 5px #aaa;
+}
+
+#resultInfoIcon {
+  height:22px;
+  width:22px; 
+  vertical-align:top;
+}
+#resultDesc {
+  display:block;
+  font-size:0.7em;
+  font-weight:normal;
+  white-space:normal;
+}
+#overallTitle {
+  font-weight: bold;
+  font-size: 1.25em;
+}
+
+#overallSubTitle {
+  font-size: 1.1em;
+}
+
+#overallCaption {
+  text-align:center;
+  font-size:1.0em;
+}
+
+#statusContainer {
+  display:block;
+  margin:5px 0px 15px 5px;
+  width:95%;
+  /* background:linear-gradient(to right,#eee,#ddd); */
+  padding:10px;
+}
+
+.resultView {
+  display:inline-block;
+  vertical-align:top;
+  margin-top:0px;
+  width:600px;
+  height: auto !important;
+  min-width:300px;
+}
+#resultViewContainer {
+  white-space:normal;
+  [if Webkit] overflow:scroll;
+  min-height:600px;
+  border-left:1px solid #bbb;
+  padding-left:10px;
+  margin-right:10px;
+}
+.overlayMapContainer {
+  margin-top:-5em !important;
+}
+#progressBar {
+  display:inline-block;
+  vertical-align:middle;
+}
+#progressSpinner {
+  margin-left:5px;
+  vertical-align:middle;
+}
+#statusText {
+  margin-top:5px;
+}
+.imageFrame {
+  display:block;
+  text-align:center;
+  padding:5px;
+  margin:5px;
+  background:white;
+  border: solid 1px;
+  width: 50%;
+  min-width: 900px;
+  position:relative;
+}
+.overlayImageFrame {
+  display:inline-block;
+  text-align:center;
+  background:transparent;
+  border:none;
+  width:98%;
+  position:relative;
+  margin-top:-0.4em;
+  margin-bottom:1em;
+}
+
+.animationImageFrame {
+  display:inline-block;
+  text-align:center;
+  padding:5px;
+  margin:5px;
+  background:white;
+  border:none;
+  width:98%;
+  position:relative;
+}
+
+.plotImagePdfButton {
+  padding:0px;
+  margin:0px;
+  background-image: url("../img/giovanni_icons.png");
+  background-repeat: no-repeat;
+  background-color:transparent; 
+  float:right;
+  cursor:pointer;
+}
+
+.imageDownloadButton,
+.plotOptionsContainer {
+  position: absolute;
+  width: 100px;
+  right: -9em;
+  background-color: #424242;  
+  font-weight: 500;
+  z-index: 2;
+  border: 3px solid rgba(255,255,255,0.8);
+  border-radius: 4px;
+}
+
+.plotOptionsContainer {
+  top: 4em;
+}
+
+.imageDownloadButton {
+  padding: 10px 0px 10px 0px;
+}
+
+
+.plotOptionsContainer button
+{
+  background: transparent;
+  font-size: 14px;
+  padding: 10px 10px;
+  border: none;
+  text-align: left;
+  color: #ccc;
+}
+
+.plotOptionsContainer button:hover {
+  color:#ffeb80 !important;
+  cursor:pointer;
+}
+
+.plotOptionsContainer > .static-options {
+  display: none;
+  border: none !important;
+}
+
+.plotOptionsContainer.plot-options-active {
+  width: 140px;
+  right: -12.1em;
+  text-align: left;
+}
+
+.plotOptionsContainer.plot-options-active > .static-options {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #ddd;
+  border: none !important;
+}
+
+.plotOptionsContainer ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.plotOptionsContainer ul li {
+  margin-left: 10px;
+}
+
+.options-modal-button {
+  padding: 0 !important;
+  margin-bottom: 10px;
+}
+
+
+.imageDownloadButton a {
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  color: #ccc !important;
+}
+
+.imageDownloadButton a:hover {
+  color:#ffeb80 !important;
+}
+
+
+.imageDownloadButton h3,
+.plotOptionsContainer h3 {
+  margin: 0;
+}
+
+.plotImagePdfButton {
+  height:20px;
+  width: 65px;
+  background-position: -77px -403px;
+}
+
+.plotImagePdfButton:hover {
+  background-image: url("../img/giovanni_icons.png");
+  background-position: -142px -403px;
+}
+
+.plotImagePdfButtonDisabled {
+  background-image: url("../img/giovanni_icons.png");
+  background-position: -206px -403px;
+  cursor:default;
+}
+
+.plotImage {
+  margin-top:0px;
+  background:white;
+  padding: 5px 5px 5px 0px;
+  width: 100%;
+}
+.downloadIcon {
+  margin-right:2px;
+  /*width: 86px;*/
+}
+.plotCaption {
+  text-align:left;
+  white-space: normal;
+}
+
+.plotTitle {
+  text-align:center;
+  padding: 0 20px;
+  font-size: 1.5em;
+  white-space: normal;
+}
+
+.lineageIFrame {
+  padding:10px;
+}
+.historyView {
+  display:inline-block;
+  vertical-align:top;
+  overflow-y:auto;
+  [if Webkit] overflow-y:scroll;
+  overflow-x:hidden;
+  width:180px;
+  min-width:30px;
+  padding: 5px;
+  padding-top:0px;
+  margin-right:10px;
+  margin-top:0.6em;
+}
+.workspaceToolbar {
+  position:fixed;
+  bottom:0px;
+  left:0px;
+  right:0px;
+  padding: 14px 20px 10px 0px;
+  text-align: right;
+  z-index:3;
+  background-color:#0b1a2d;
+  border-top-left-radius:20px;
+  border-top-right-radius:20px;
+  border-top:1px solid #777;
+  box-shadow: 0px -5px 5px rgba(30,30,30,0.5);
+}
+.yui-skin-sam .yui-button.toolbarButton button {
+}
+.yui-skin-sam .yui-button.selectDataButton button {
+}
+.plotOptionsLabel {
+  font-weight:bold;
+  margin-top:5px;
+  margin-left:5px;
+}
+.plotOptionsRow {
+  margin-left:10px;
+}
+#downloadCaption {
+	font-style: italic;
+	margin-top: 5px;
+}
+#downloadHeader {
+	font-weight: bold;
+	margin-top: 10px;
+}
+#downloadContainer {
+	margin-left: 10px;
+	margin-top: 2px;
+}
+.imageDownloadHeader {
+	font-weight: bold;
+	margin-top: 10px;
+}
+.imageDownloadContainer {
+	margin-left: 10px;
+	margin-top: 2px;
+}
+.imageDownloadFakeLink {
+	color:blue;
+	text-decoration:underline;
+	cursor:pointer;
+}
+.downloadMsg {
+	font-weight:bold;
+        margin-top:1em;
+        color:#993300;
+}
+#ackPolicy {
+	font-weight: bold;
+	font-size: 1.3em;
+	margin-right: 30px;
+        color:rgb(210,210,0);
+        vertical-align:super;
+}
+#verticalSash {
+    width:25px;
+    height:100%;
+    background:red;
+    display:inline-block;
+}
+.yui-resize-handle {
+    border-left: 2px solid #ddd;
+    background-color: #dde;
+}
+#cancelButton {
+    background-image:url("../img/delete.png"); /* fallback */
+    background-image:url("../img/delete.png"), -webkit-linear-gradient(top,white,#ddd); /* old Chrome and Safari */
+    background-image:url("../img/delete.png"), -moz-linear-gradient(top,white,#ddd); /* FF3.6 */
+    background-image:url("../img/delete.png"), -ms-linear-gradient(top,white,#ddd); /* IE10 */
+    background-image:url("../img/delete.png"), -o-linear-gradient(top,white,#ddd); /* Opera 11.10 */
+    background-image:url("../img/delete.png"), linear-gradient(to bottom,white,#ddd); /* W3C */
+    background-repeat:no-repeat;
+    background-position: left center;
+    height:22px;
+    padding-left:20px;
+    border:1px solid #999;
+    border-radius:3px;
+    vertical-align:bottom;
+    text-align:left;
+    margin-left:15px;
+}
+#cancelButton:hover {
+    cursor:pointer;
+}
+
+.closeErrorButton {
+    background-image:url("../img/delete.png"); /* fallback */
+    background-image:url("../img/delete.png"), -webkit-linear-gradient(top,white,#ddd); /* old Chrome and Safari */
+    background-image:url("../img/delete.png"), -moz-linear-gradient(top,white,#ddd); /* FF3.6 */
+    background-image:url("../img/delete.png"), -ms-linear-gradient(top,white,#ddd); /* IE10 */
+    background-image:url("../img/delete.png"), -o-linear-gradient(top,white,#ddd); /* Opera 11.10 */
+    background-image:url("../img/delete.png"), linear-gradient(to bottom,white,#ddd); /* W3C */
+    background-repeat:no-repeat;
+    background-position: left center;
+    height:22px;
+    padding-left:17px;
+    border-radius:3px;
+    vertical-align:bottom;
+    text-align:left;
+    margin-left:15px;
+    cursor: pointer;
+}
+
+.ui-widget-overlay {
+  background: black !important;
+  opacity: .5 !important;
+}
+
+.errorMessagePlot {
+  width: 50%;
+  background: #ed7a61;
+  border: 1px solid black;
+  font-weight: bold;
+  margin-left: 5px;
+  margin-bottom: 5px;
+  text-align: left;
+  padding: 5px 0px 5px 10px;
+}
+
+.disabledLink { 
+  pointer-events: none; 
+  opacity: 0.4;
+  cursor: default; 
+}
+
+.disabledElement {
+  pointer-events: none;
+  opacity: 0.4;
+}
+.dataAccessWarning {
+    color:#777;
+    background-color:white;
+    font-weight:bold;
+    font-style:italic;
+    font-size:1.5em;
+    text-align:center;
+    border:1px solid #993300;
+    box-shadow: 10px 10px 5px #888888;
+    margin: auto;
+    width: 50%;
+    padding: 40px;
+    position:absolute;
+    top:7em;
+    left:18em;
+};

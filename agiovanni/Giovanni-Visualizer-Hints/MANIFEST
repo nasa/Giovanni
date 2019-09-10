@@ -1,0 +1,6 @@
+Changes
+Makefile.PL
+MANIFEST
+t/Giovanni-Visualizer-Hints_areaAverager.t
+t/Giovanni-Visualizer-Hints_timeAverager.t
+lib/Giovanni/Visualizer/Hints.pm
