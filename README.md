@@ -26,7 +26,7 @@ Each subdirectory has either a Makefile or Perl Makefile.PL
 <br/>Direct comments and questions to: <b>gsfc-help-disc@lists.nasa.gov</b>
 
 Giovanni is powered by:
-<a>NCO href="http://nco.sourceforge.net/"</a>
+<a href="http://nco.sourceforge.net/">NCO netCDF Operators</a>
 
 
 
