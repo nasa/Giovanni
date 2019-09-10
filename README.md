@@ -26,7 +26,7 @@ Each subdirectory has either a Makefile or Perl Makefile.PL
 <br/>Direct comments and questions to: <b>gsfc-help-disc@lists.nasa.gov</b>
 
 <br/>To give more indication of Giovanni's dependencies:
-Giovanni is powered by:<br/>
+<br/>Giovanni is powered by:
 <br/><a href="http://nco.sourceforge.net/">NCO netCDF Operator</a>
 <br/><a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR Common Metadata Repository</a>
 <br/><a href="http://developer.yahoo.com/yui/">YUI</a>
