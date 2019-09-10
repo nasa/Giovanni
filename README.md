@@ -19,14 +19,21 @@ Each subdirectory has either a Makefile or Perl Makefile.PL
 
 <br/><b>agiovanni/Dev-Tools/other/rpmbuild</b><br/> Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
 
-<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database.
+<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database. Giovanni's File database is <a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR</a>
 
 <b>Disclaimer:We will update the software but not maintain the pull requests.</b>
 
 <br/>Direct comments and questions to: <b>gsfc-help-disc@lists.nasa.gov</b>
 
-Giovanni is powered by:
-<a href="http://nco.sourceforge.net/">NCO netCDF Operators</a>
+<br/>To give more indication of Giovanni's dependencies:
+Giovanni is powered by:<br/>
+<a href="http://nco.sourceforge.net/">NCO netCDF Operator</a>
+<a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR Common Metadata Repository</a>
+<a href="http://developer.yahoo.com/yui/">YUI</a>
+<a href="http://openlayers.org/">OpenLayers</a>
+<a href="http://www.mapserver.org/ogc/">MapServer</a>
+<a href="http://opendap.org/">OPeNDAP</a>
+
 
 
 
