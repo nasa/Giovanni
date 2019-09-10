@@ -12,5 +12,9 @@ In agiovanni_algorithms and agiovanni_data_access subdirectories there is also a
 agiovanni_www, agiovanni_shapes, and agiovanni_giovanni all have  top level Makefiles. ( make install PREFIX=/opt/giovanni4)
 
 
+Disclaimer:We will update the software but not maintain the pull requests.
+
+
+
 
 
