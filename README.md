@@ -15,7 +15,7 @@ Each subdirectory has either a Makefile or Perl Makefile.PL
 <br/><b>agiovanni_www</b> 
 <br/><b>agiovanni_shapes</b>
 <br/><b> agiovanni_giovanni</b><br/>
-<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database. Giovanni's File database is <a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR</a>
+<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata database in SOLR. Giovanni's earth science data file database is <a href="https://earthdata.nasa.gov/about/science-system-description/eosdis-components/common-metadata-repository">CMR</a>
 
 <br/><b>agiovanni/Dev-Tools/other/rpmbuild</b><br/> Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
 
