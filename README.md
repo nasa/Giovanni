@@ -8,9 +8,14 @@ GES DISC is making our Giovanni (currently at version 4.31)  code base available
 <h4> Getting Started with the code </h4>
 Giovanni locally is split into several repositories:
 
-<br/><b>agiovanni:</b><br>There is a top level perl Makefile.PL (perl Makefile.PL PREFIX=/opt/giovanni4; make; make install)
-<br/><b>agiovanni_algorithms</b> and <b>agiovanni_data_access</b> subdirectories there is also a perl Makefile.PL
-<br/><b>agiovanni_www</b>, <b>agiovanni_shapes</b>, and <b> agiovanni_giovanni</b> all have  top level Makefiles. ( make install PREFIX=/opt/giovanni4)
+Each subdirectory has either a Makefile or Perl Makefile.PL
+
+<br/><b>agiovanni:</b><br>e install)
+<br/><b>agiovanni_algorithms</b>
+<br/><b>agiovanni_data_access</b>
+<br/><b>agiovanni_www</b>, 
+<br/><b>agiovanni_shapes</b>
+<br/><b> agiovanni_giovanni</b> 
 
 <br/><b>agiovanni/Dev-Tools/other/rpmbuild</b><br/> Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
 
