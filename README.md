@@ -12,7 +12,7 @@ Giovanni locally is split into several repositories:
 <br/><b>agiovanni_algorithms</b> and <b>agiovanni_data_access</b> subdirectories there is also a perl Makefile.PL
 <br/><b>agiovanni_www</b>, <b>agiovanni_shapes</b>, and <b> agiovanni_giovanni</b> all have  top level Makefiles. ( make install PREFIX=/opt/giovanni4)
 
-<br/><b>agiovanni/Dev-Tools/other/rpmbuild</b>Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
+<br/><b>agiovanni/Dev-Tools/other/rpmbuild</b><br/> Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
 
 <br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database.
 
