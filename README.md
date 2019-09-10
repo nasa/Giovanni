@@ -10,7 +10,7 @@ Giovanni locally is split into several repositories:
 
 Each subdirectory has either a Makefile or Perl Makefile.PL
 
-<br/><b>agiovanni:</b><br>e install)
+<br/><b>agiovanni:</b><br>
 <br/><b>agiovanni_algorithms</b>
 <br/><b>agiovanni_data_access</b>
 <br/><b>agiovanni_www</b>, 
@@ -24,6 +24,9 @@ Each subdirectory has either a Makefile or Perl Makefile.PL
 <b>Disclaimer:We will update the software but not maintain the pull requests.</b>
 
 <br/>Direct comments and questions to: <b>gsfc-help-disc@lists.nasa.gov</b>
+
+Giovanni is powered by:
+<a>NCO href="http://nco.sourceforge.net/"</a>
 
 
 
