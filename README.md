@@ -22,7 +22,7 @@ Each subdirectory has either a Makefile or Perl Makefile.PL
 
 <b>Disclaimer:We will update the software but not maintain the pull requests.</b>
 
-<br/>Direct comments and questions to: <b>gsfc-help-disc@lists.nasa.gov</b>
+<br/>Direct comments and questions to the Giovanni Development Team at: <b>gsfc-help-disc@lists.nasa.gov</b>
 
 <br/>To give more indication of Giovanni's dependencies:
 <br/>Giovanni is powered by:
