@@ -15,6 +15,7 @@ Giovanni's software dependencies.
 
 <b>Disclaimer:We will update the software but not maintain the pull requests.</b>
 
+<br/>Direct comments and questions to: <b>gsfc-help-disc@lists.nasa.gov</b>
 
 
 
