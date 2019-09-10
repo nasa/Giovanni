@@ -1,7 +1,7 @@
 # Giovanni
 https://giovanni.gsfc.nasa.gov/giovanni/
 
-Giovanni is an online (Web) environment for the display and analysis of geophysical parameters in which the provenance (data lineage) can easily be accessed. This user guide provides assistance on how to use Giovanni and information on Giovanni's data products and services.
+Giovanni is an online (Web) environment for the display and analysis of geophysical parameters in which the provenance (data lineage) can easily be accessed. 
 
 GES DISC is making our Giovanni (currently at version 4.31)  code base available on github
 
