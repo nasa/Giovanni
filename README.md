@@ -14,6 +14,7 @@ Giovanni locally is split into several repositories:
 
 <br/><b>agiovanni/Dev-Tools/other/rpmbuild</b>Contains  a build script and RPM spec file that gives an indication as to Giovanni's software dependencies.
 
+<br/><b>AESIR</b><br/>refers to Giovanni's variable metadata SOLR database.
 
 <b>Disclaimer:We will update the software but not maintain the pull requests.</b>
 
