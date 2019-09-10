@@ -1,5 +1,5 @@
 # Giovanni
-GES DISC is making our giovanni code base available on github
+GES DISC is making our Giovanni version 4.31  code base available on github
 
 Giovanni locally is split into several repositories.
 
