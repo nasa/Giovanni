@@ -1,0 +1,278 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getDataFieldsStatus,v 1.5 2015/07/23 01:33:26 eseiler Exp $
+# -@@@ AESIR EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+getDataFieldsStatus - Display publication status of all variables in all baselines
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getDataFieldsStatus
+
+=head1 DESCRIPTION
+
+A CGI script to display publication status of all data fields in all baselines
+
+=head1 RESPONSE
+
+The response consists of an HTML document containing a table with a row for
+each data field and a column for each baseline. Each column cell is populated
+with the publication date (dataFieldLastPublished) in that baseline if it
+has a value. Publication dates are followed by an asterix if the data field
+is not active (dataFieldActive is false)
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+my ($rootPath);
+
+BEGIN {
+
+    #    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : '/tools/gdaac/TS2/' );
+}
+
+use strict;
+use XML::LibXML;
+use LWP::UserAgent;
+use URI;
+use DateTime;
+use Date::Parse;
+
+#use Tie::IxHash;
+use CGI qw/:standard *table *Tr/;
+use Safe;
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_STATUS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_STATUS_DIR;
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_STATUS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_STATUS_DIR;
+
+my @baselines = reverse @CFG::AESIR_BASELINES;
+
+# Solr query for selecting all documents in the Solr database
+my $query = $CFG::catalogQuery
+    || 'select/?q=*&version=2.2&indent=on&rows=500&omitHeader=true';
+
+my $ua = LWP::UserAgent->new( timeout => 120 );
+
+my $table;
+my %count;
+
+# For each baseline, obtain data field information for all data fields
+foreach my $baseline (@baselines) {
+
+    # Construct query URL
+#    my $url = $CFG::catalogDbBaseUrl{$baseline} . $query;
+    next unless exists $CFG::BASELINE_CONFIG->{$baseline}->{CATALOG_DB_BASE_URL};
+    my $url = $CFG::BASELINE_CONFIG->{$baseline}->{CATALOG_DB_BASE_URL} . $query;
+
+    # Submit query
+    my $response = $ua->get($url);
+
+    # Check for error in query
+    if ( $response->is_error ) {
+
+        # Error in request.
+        if ( $response->content =~ /timeout/ ) {
+
+            # If a timeout occurred, proceed
+            # as if success
+        }
+        else {
+            # Return response indicating
+            # an error in rescrubbing.
+            my $message
+                = "Error invoking $url: " . $response->status_line . "\n";
+            die $message;
+        }
+    }
+
+    # Process query response
+    my $xml = $response->content;
+    my $dom;
+    eval { $dom = $parser->parse_string($xml); };
+    if ($@) {
+        exit_with_error("Error parsing response as xml: $@");
+    }
+    my $doc      = $dom->documentElement();
+    my @docNodes = $doc->findnodes('/response/result/doc');
+#    unless (@docNodes) {
+#        exit_with_error("Did not find any doc elements in response for baseline $baseline\n");
+#    }
+
+    $count{$baseline} = 0;
+    foreach my $docNode (@docNodes) {
+        my @ids = $docNode->findnodes('./*[@name="dataFieldId"]');
+        my $dataFieldId = $ids[0]->textContent if @ids;
+        unless ($dataFieldId) {
+            exit_with_error("Found a doc without a dataFieldId: ")
+                . $docNode->toString(1) . "\n";
+        }
+        $count{$baseline}++;
+
+        my @dataProductIds
+            = $docNode->findnodes('./*[@name="dataProductId"]');
+        if (@dataProductIds) {
+            unless ( exists $table->{$dataFieldId}->{dataProductId} ) {
+                my $dataProductId = $dataProductIds[0]->textContent;
+                $table->{$dataFieldId}->{dataProductId} = $dataProductId;
+                if (-f "$CFG::AESIR_CATALOG_DATA_PRODUCTS_STATUS_DIR/$dataProductId"
+                    )
+                {
+                    local $/;
+                    if (open( STATUS,
+                            "< $CFG::AESIR_CATALOG_DATA_PRODUCTS_STATUS_DIR/$dataProductId"
+                        )
+                        )
+                    {
+                        my $status = <STATUS>;
+                        close(STATUS);
+                        $table->{$dataFieldId}->{dataProductIdStatus}
+                            = $status;
+                    }
+                }
+            }
+        }
+
+        my @dataFieldLongNames
+            = $docNode->findnodes('./*[@name="dataFieldLongName"]');
+        if (@dataFieldLongNames) {
+            $table->{$dataFieldId}->{$baseline}->{dataFieldLongName}
+                = $dataFieldLongNames[0]->textContent;
+        }
+
+        my @dataFieldActives
+            = $docNode->findnodes('./*[@name="dataFieldActive"]');
+        if (@dataFieldActives) {
+            $table->{$dataFieldId}->{$baseline}->{dataFieldActive}
+                = $dataFieldActives[0]->textContent;
+        }
+
+        my @dataFieldLastModifieds
+            = $docNode->findnodes('./*[@name="dataFieldLastModified"]');
+        if (@dataFieldLastModifieds) {
+            $table->{$dataFieldId}->{$baseline}->{dataFieldLastModified}
+                = $dataFieldLastModifieds[0]->textContent;
+        }
+
+        my @dataFieldLastPublisheds
+            = $docNode->findnodes('./*[@name="dataFieldLastPublished"]');
+        if (@dataFieldLastPublisheds) {
+            my $dt
+                = DateTime->from_epoch(
+                epoch => str2time( $dataFieldLastPublisheds[0]->textContent )
+                );
+            $table->{$dataFieldId}->{$baseline}->{dataFieldLastPublished}
+                = $dt->strftime('%F %TZ');
+        }
+    }
+}
+
+print header;
+print start_html(
+    -title => 'AESIR variable status',
+    -style => { 'src' => '/EDDA/css/dataFieldsStatus.css' }
+);
+print h1('AESIR variable status'), "\n";
+print h3('Date of latest promotion to each baseline (* = inactive)'), "\n";
+print start_table, "\n";
+my @baselinePlusCount;
+foreach my $baseline (@baselines) {
+    push @baselinePlusCount, $baseline . "&nbsp;($count{$baseline})";
+}
+print Tr( th( [ 'dataFieldId', @baselinePlusCount, 'Waiting For...' ] ) ), "\n";
+my $parity;
+my $rowCount = 0;
+
+foreach my $dataFieldId ( sort keys %{$table} ) {
+    $rowCount++;
+    $parity = ( $rowCount % 2 ) ? 'odd' : 'even';
+    print start_Tr( { -class => $parity } ), "\n";
+    print td(
+        {   -title =>
+                $table->{$dataFieldId}->{ $baselines[0] }->{dataFieldLongName}
+        },
+        $dataFieldId
+    );
+    foreach my $baseline (@baselines) {
+        if ( exists $table->{$dataFieldId}->{$baseline} ) {
+            my $entry = $table->{$dataFieldId}->{$baseline}
+                ->{dataFieldLastPublished};
+            $entry .= '*'
+                if ( $table->{$dataFieldId}->{$baseline}->{dataFieldActive} eq
+                'false' );
+            print td($entry);
+        }
+        else {
+            print td;
+        }
+    }
+    my $status;
+    if ( -f "$CFG::AESIR_CATALOG_DATA_FIELDS_STATUS_DIR/$dataFieldId" ) {
+        local $/;
+        if (open( STATUS,
+                "< $CFG::AESIR_CATALOG_DATA_FIELDS_STATUS_DIR/$dataFieldId"
+            )
+            )
+        {
+            $status = <STATUS>;
+            close(STATUS);
+        }
+    }
+    elsif ( exists $table->{$dataFieldId}->{dataProductIdStatus} ) {
+        $status = $table->{$dataFieldId}->{dataProductIdStatus};
+    }
+    if ($status) {
+        my @ticketMatches = $status =~ /(ticket \d+)/gi;
+        if (@ticketMatches) {
+            foreach my $match (@ticketMatches) {
+                my $ticketNumber = $1 if $match =~ /(\d+)/;
+                if ( $ticketNumber && $CFG::TICKET_LINK ) {
+                    my $link = $CFG::TICKET_LINK . $ticketNumber;
+                    my $anchor = a( { href => $link }, $match );
+                    $status =~ s/$match/$anchor/;
+                }
+            }
+        }
+        print td($status);
+    }
+    else {
+        print td;
+    }
+    print end_Tr, "\n";
+}
+print end_table, "\n";
+print end_html;
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+#    ERROR($message);
+    print header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+

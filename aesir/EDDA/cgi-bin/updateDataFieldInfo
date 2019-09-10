@@ -1,0 +1,1140 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: updateDataFieldInfo,v 1.38 2015/12/08 03:13:46 eseiler Exp $
+# -@@@ AESIR EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+updateDataFieldInfo - Update existing EDDA data field information using provided information
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+POST updateDataFieldInfo?action=<save|publish|unpublish|cancel>&comment=commentText[&pubBaseline=<TS2|TS1|Beta|OPS> <dataField json or xml>
+
+GET updateDataFieldInfo?action=<save|publish|unpublish|cancel>[&$updatedDataField=<dataField json or xml>][&updatedDataFieldFile=<dataFieldFileName>]&comment=commentText[&pubBaseline=<TS2|TS1|Beta|OPS>
+
+=head1 DESCRIPTION
+
+A CGI script to update existing EDDA data field information using provided
+information.
+
+=head1 PARAMETERS
+
+The request can be either a POST or a GET request with these CGI parameters:
+
+=over 4
+
+=item action: Either 'save', 'publish, 'unpublish', or 'cancel'.
+
+=over 4
+
+=item save
+
+Update the EDDA data field file with the provided information.
+
+=item publish
+
+Update the EDDA data field file with the provided information, and
+publish the updated information to AESIR.
+
+=item unpublish
+
+Update the EDDA data field file with the provided information, and
+set the active attribute to false, effectively marking the data field as "invisible"
+
+=item cancel
+
+Cancel a pending request to publish.
+
+=back
+
+=item comment
+
+Comment text provided by the user (when action is 'publish' or 'unpublish')
+that will be included in the notification and/or logs for publication.
+
+=item pubBaseline
+
+When action is 'publish' or 'unpublish', the baseline of the AESIR instance
+to be updated ('TS2', 'TS1', 'Beta', or 'OPS').
+
+=item updatedDataField
+
+Only used when the request method is GET. Contains the updated data field
+information in json or xml format. The content_type in the HTTP request header
+will determine whether it is parsed as json or xml.
+
+=item updatedDataFieldFile
+
+Only used when the request method is GET. Contains the local filesystem path to
+the updated data field information in json or xml format. The content_type in
+the HTTP request header will determine whether it is parsed as json or xml.
+
+=item POSTDATA
+
+The body of the POST request. Contains the updated data field information
+in json or xml format. The content_type in the HTTP request header will
+determine whether it is parsed as json or xml.
+
+=back
+
+=head1 RESPONSE
+
+The response has a type of application/json or application/xml, corresponding
+to the content_type in the HTTP request header. It consists of an
+'updateResponse' object, which consists of a 'status' and a 'result',
+and possibly an 'errorCode' and 'errorMessage'.
+
+'status' has an integer value of 1 for success and a value greater
+than 1 on error. A value of 6 or greater indicates an error where a publication
+was not successful. If an error was detected, 'errorCode' will have a string
+value describing the status and 'errorMessage' will have a string value that
+describes the error.
+
+'result' is an object consisting of a 'dataField', whose value is a list of
+data field attribute/value pairs, where the value for each attribute is an
+object that describes the type, label, multiplicity, constraints, and value
+for the attribute.
+
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+#        unshift( @INC, $rootPath . 'lib/perl5' );
+        unshift( @INC, $rootPath . 'share/perl5' );
+
+        # Keep taint mode happy
+        $ENV{PATH} = undef;
+
+        # This set the type and path for the mailer used to send
+        # notification messages. Hard-code to the one executable
+        # known to be available.
+        $ENV{PERL_MAILERS} = 'sendmail:/usr/sbin/sendmail.postfix'
+            if -x '/usr/sbin/sendmail.postfix';
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::LibXSLT;
+use XML::XML2JSON;
+use CGI;
+use Safe;
+use Time::HiRes qw (gettimeofday);
+use DateTime;
+use Date::Parse;
+#use lib '/usr/local/pkg/bugzilla-4.2.1.orig/lib'; # For Mail::Mailer
+use Mail::Mailer;
+use URI;
+use LWP::UserAgent;
+use EDDA;
+use EDDA::Compare;
+use Log::Log4perl qw(:easy);
+use File::Basename;
+
+# Status codes for 'status' in response
+my $SUCCESS_STATUS               = 1;
+my $OUT_OF_SEQUENCE_STATUS       = 2;
+my $CANCELED_UNPUBLISHED_REQUEST = 3;
+my $MODIFIED_PENDING_REQUEST     = 4;
+my $UNKNOWN_STATE                = 5;
+my $PUBLISH_ERROR                = 6;
+my $SOLR_PUBLISH_ERROR           = 7;
+my $RESCRUB_ERROR                = 8;
+my $UNITS_VALIDATION_ERROR       = 9;
+my $UNITS_VALIDATION_PARSE_ERROR = 10;
+my $INVALID_DESTINATION_UNITS_ERROR = 11;
+
+# States of a data field
+my $privateState          = 'Private';
+my $updatedState          = 'Updated';
+my $submittedPrivateState = 'SubmittedPrivate';
+my $submittedUpdatedState = 'SubmittedUpdated';
+my $publishedState        = 'Published';
+my $unpublishedState      = 'Unpublished';
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+startLogging();
+
+# Check for required configuration variables and exit if any are not found
+# and valid
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_DIR;
+exit_with_error("AESIR_CATALOG_UPDATED_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_UPDATED_DATA_FIELDS_DIR;
+exit_with_error("PUBLISH_REQUEST_RECIPIENTS not defined in configuration")
+    unless defined @CFG::PUBLISH_REQUEST_RECIPIENTS;
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_XSL not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_XSL;
+
+my $dataFieldsDir = "$CFG::AESIR_CATALOG_DATA_FIELDS_DIR";
+exit_with_error("Directory '$dataFieldsDir' not found")
+    unless -d $dataFieldsDir;
+
+my $updatedDataFieldsDir = "$CFG::AESIR_CATALOG_UPDATED_DATA_FIELDS_DIR";
+exit_with_error("Directory '$updatedDataFieldsDir' not found")
+    unless -d $updatedDataFieldsDir;
+
+my $updateAddDocExe = $rootPath . '/bin/AESIR/EDDA/updateSolrCatalogAddDocFromEdda.pl';
+exit_with_error("Executable '$updateAddDocExe' not found")
+    unless -x $updateAddDocExe;
+
+my $postSolrExe = $rootPath . '/bin/AESIR/post_aesir_solr.pl';
+exit_with_error("Executable '$postSolrExe' not found")
+    unless -x $postSolrExe;
+
+my $updatedDataField;
+my $updatedDataFieldFile;
+my $actionParam;
+my $commentParam;
+my $pubBaselineParam;
+my $ignoreTimestamp;
+
+# Obtain type and content of updated data field
+my $request_method = $cgi->request_method;
+my $content_type   = $cgi->content_type();
+
+# Obtain input parameter values.
+if ($request_method eq 'POST') {
+    # Perl CGI will give the posted data parameter a different name if
+    # the content type is application/xml. Otherwise it will be
+    # named POSTDATA.
+    if ($content_type =~ /application\/xml/) {
+        $updatedDataField = $cgi->param('XForms:Model');
+    } else {
+        $updatedDataField = $cgi->param('POSTDATA');
+    }
+    $actionParam      = $cgi->url_param('action');
+    $commentParam     = $cgi->url_param('comment');
+    $pubBaselineParam = $cgi->url_param('pubBaseline');
+    $ignoreTimestamp  = $cgi->url_param('ignoreTimestamp');
+} elsif ($request_method eq 'GET') {
+    $updatedDataField     = $cgi->param('updatedDataField');
+    $updatedDataFieldFile = $cgi->param('updatedDataFieldFile');
+    $actionParam          = $cgi->param('action');
+    $commentParam         = $cgi->param('comment');
+    $pubBaselineParam     = $cgi->param('pubBaseline');
+    $ignoreTimestamp      = $cgi->param('ignoreTimestamp');
+}
+
+if ( (defined $updatedDataFieldFile) && (-r $updatedDataFieldFile) ) {
+    # Need to untaint $updatedDataFieldFile here before open
+    unless (open(UPDATED, "< $updatedDataFieldFile")) {
+        exit_with_error("Could not open $updatedDataFieldFile for reading: $!")
+    }
+    {
+        local $/;
+        $updatedDataField = <UPDATED>;
+    }
+    close(UPDATED);
+    INFO("Read $updatedDataFieldFile");
+}
+
+# Get action (save, publish, unpublish, or cancel)
+my $action = 'save';  # action is 'save' by default
+$action = lc($1) if $actionParam =~ /^(save|publish|unpublish|cancel)$/i;
+
+my $comment = $commentParam;
+
+my $pubBaseline;
+if ($CFG::EDDA_BASELINE eq 'TS2') {
+    $pubBaseline = $CFG::EDDA_BASELINE;
+} else {
+    # Do not provide capability to publish to a higher mode for now
+#    $pubBaseline = $1 if $pubBaselineParam =~ /^(TS1|Beta|OPS)$/;
+    $pubBaseline = $CFG::EDDA_BASELINE;
+}
+
+# Directory that a copy of the updated file will be written to when the
+# update is published
+my $publishedDataFieldsDir = "$CFG::AESIR_CATALOG_PUBLISHED_DATA_FIELDS_DIR->{$pubBaseline}";
+exit_with_error("Directory $publishedDataFieldsDir not found")
+    unless -d $publishedDataFieldsDir;
+
+# Directory that a copy of the original file will be written to when the
+# update is published
+my $rollbackDataFieldsDir = "$CFG::AESIR_CATALOG_ROLLBACK_DATA_FIELDS_DIR->{$pubBaseline}";
+exit_with_error("Directory '$rollbackDataFieldsDir' not found")
+    unless -d $rollbackDataFieldsDir;
+
+my $xml2jsonObj;
+
+# Obtain updated data field information in xml representation
+my $updated_xml;
+if ($content_type =~ /json/) {
+
+    # Create object for converting xml to json and back
+    my $noJsonAttrPrefix = 1;
+    my $JsonContentKeyIsValue = 1;
+    my $forceJSONarray = 1;
+    my $prettyJSON = 1;
+    my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+    my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+    $xml2jsonObj = XML::XML2JSON->new( module => 'JSON::XS',
+                                       pretty => $prettyJSON,
+                                       attribute_prefix => $prefix,
+                                       content_key => $content_key,
+                                       force_array => $forceJSONarray,
+                                       private_attributes => ['encoding', 'version']);
+
+    # Convert updated data field from json to xml
+    $updated_xml = $xml2jsonObj->json2xml($updatedDataField);
+
+    # Remove newlines that surround element text
+    $updated_xml =~ s/^(\s+?)<(.+?)>\n^(.+?)\n\1<\/\2>/$1<$2>$3<\/$2>/gm;
+} elsif ($content_type =~ /xml/) {
+    # Do some taint-checking here
+    $updated_xml = $updatedDataField;
+} else {
+    exit_with_error("Unrecognized content type $content_type");
+}
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+my $xslt = XML::LibXSLT->new();
+my $styleSheet;
+eval { $styleSheet = $xslt->parse_stylesheet_file($CFG::AESIR_CATALOG_DATA_FIELDS_XSL); };
+if ($@) {
+    exit_with_error("Error parsing stylesheet $CFG::AESIR_CATALOG_DATA_FIELDS_XSL: $@");
+}
+
+# Parse updated data field info
+my $updatedDataFieldDom;
+eval { $updatedDataFieldDom = $parser->parse_string($updated_xml); };
+if ($@) {
+    exit_with_error("Error parsing updated input as xml: $@");
+}
+my $updatedDataFieldDoc = $updatedDataFieldDom->documentElement();
+
+# Obtain dataFieldLastModified value from updated data field info
+# and convert it to floating point epoch seconds
+my ($updatedLastModifiedNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldLastModified/value');
+my $updatedLastModifiedStr;
+my $updatedLastModified;
+my $updatedLastModifiedEpoch;
+my $updatedLastModifiedEpochHiRes;
+if ($updatedLastModifiedNode) {
+    $updatedLastModifiedEpochHiRes = 0.0;
+    $updatedLastModifiedStr = $updatedLastModifiedNode->textContent();
+    if ((defined $updatedLastModifiedStr) && $updatedLastModifiedStr) {
+        $updatedLastModified = Date::Parse::str2time($updatedLastModifiedStr);
+        $updatedLastModifiedEpoch = DateTime->from_epoch( epoch => $updatedLastModified );
+        $updatedLastModifiedEpochHiRes = $updatedLastModifiedEpoch->hires_epoch;
+    }
+} else {
+    $updatedLastModifiedEpochHiRes = 0.0;
+}
+
+# Obtain dataFieldId value from updated data field info
+my ($dataFieldIdNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldId/value');
+my $dataFieldId = $dataFieldIdNode->textContent if $dataFieldIdNode;
+$dataFieldId = $1 if $dataFieldId =~ /^([a-zA-Z0-9_-]+)/;
+
+# Read the unmodified data field information from the file that is to be
+# modified and parse it. Assume that the base name of that file is the
+# dataFieldId value.
+
+my $updated_file = "$updatedDataFieldsDir/$dataFieldId";
+
+my $oldDataFieldDom;
+eval { $oldDataFieldDom = $parser->parse_file($updated_file); };
+if ($@) {
+    exit_with_error("Error parsing $updated_file: $@");
+}
+my $oldDataFieldDoc = $oldDataFieldDom->documentElement();
+
+my $rollbackDataFieldDom;
+eval { $rollbackDataFieldDom = $parser->parse_file($updated_file); };
+if ($@) {
+    exit_with_error("Error parsing $updated_file: $@");
+}
+
+# Obtain dataFieldLastModified value from the file being updated
+# and convert it to floating point epoch seconds
+my ($oldLastModifiedNode) = $oldDataFieldDoc->findnodes('/dataField/dataFieldLastModified/value');
+my $oldLastModifiedStr;
+my $oldLastModified;
+my $oldLastModifiedEpoch;
+my $oldLastModifiedEpochHiRes;
+if ($oldLastModifiedNode) {
+    $oldLastModifiedEpochHiRes = 0.0;
+    $oldLastModifiedStr = $oldLastModifiedNode->textContent();
+    if ((defined $oldLastModifiedStr) && $oldLastModifiedStr) {
+        $oldLastModified = Date::Parse::str2time($oldLastModifiedStr);
+        $oldLastModifiedEpoch = DateTime->from_epoch( epoch => $oldLastModified );
+        $oldLastModifiedEpochHiRes = $oldLastModifiedEpoch->hires_epoch;
+    }
+} else {
+    $oldLastModifiedEpochHiRes = 0.0;
+}
+
+unless (open(UPDATED, "+< $updated_file")) {
+    exit_with_error("Could not open $updated_file for updating: $!")
+}
+print STDERR "Waiting for exclusive lock of $updated_file\n";
+flock(UPDATED, 2);
+print STDERR "Obtained exclusive lock of $updated_file\n";
+
+# Compare dataFieldLastModified timestamp in the updated info with the
+# dataFieldLastModified timestamp of the file being updated.
+$updatedLastModifiedEpochHiRes = $oldLastModifiedEpochHiRes
+    if $ignoreTimestamp;
+if ( (not defined $updatedLastModifiedEpochHiRes) ||
+     ($updatedLastModifiedEpochHiRes != $oldLastModifiedEpochHiRes) ) {
+
+    # Timestamps are different, indicating that the file has been updated
+    # since the client that is requesting a new update obtained its
+    # information. Return an error response.
+    my $errorCode = 'OUT_OF_SEQUENCE';
+    my $message = "dataFieldLastModified value of $updatedLastModifiedStr is not equal to the current dataFieldLastModified value of $oldLastModifiedStr";
+    ERROR($message);
+    outputResponse($parser, $xml2jsonObj, $oldDataFieldDom,
+                   $OUT_OF_SEQUENCE_STATUS, $content_type,
+                   $errorCode, $message);
+    exit 0;
+}
+
+# Timestamps are the same, so the information in the file being updated
+# has not yet been updated, and is the same as it was before the
+# user made any changes.
+
+# Check for an invalid action by comparing the dataFieldState of
+# the old document to the dataFieldState of the updated document
+my $newDataFieldState;
+my ($oldDataFieldStateNode) = $oldDataFieldDoc->findnodes('/dataField/dataFieldState/value');
+my $oldDataFieldState = $oldDataFieldStateNode->textContent()
+    if $oldDataFieldStateNode;
+if  ( ( ($oldDataFieldState eq $privateState) ||
+        ($oldDataFieldState eq $updatedState) ) &&
+      ($action eq 'cancel') ) {
+    # Cannot cancel a publication request that has not been submitted
+    my $errorCode = 'CANCELED_UNPUBLISHED_REQUEST';
+    my $message = "Internal error: Tried to cancel a publication request for a field where the request had not been made";
+    ERROR($message);
+    outputResponse($parser, $xml2jsonObj, $oldDataFieldDom,
+                   $CANCELED_UNPUBLISHED_REQUEST, $content_type,
+                   $errorCode, $message);
+    exit 0;
+} elsif ( ( ($oldDataFieldState eq $submittedPrivateState) ||
+            ($oldDataFieldState eq $submittedUpdatedState) ) &&
+          ( ($action eq 'save') || ($action eq 'publish') ||
+            ($action eq 'unpublish') ) ) {
+    # Cannot save or publish a field with a pending publication request
+    my $errorCode = 'MODIFIED_PENDING_REQUEST';
+    my $message = "Internal error: Tried to save or publish a field where a request to publish is pending";
+    ERROR($message);
+    outputResponse($parser, $xml2jsonObj, $oldDataFieldDom,
+                   $MODIFIED_PENDING_REQUEST, $content_type,
+                   $errorCode, $message);
+    exit 0;
+}
+
+#my $measurementValidsDom;
+#my $measurementValidsDoc;
+#if (defined $CFG::AESIR_CATALOG_DATA_FIELDS_MEASUREMENT_VALIDS_DOC &&
+#    -r ($CFG::AESIR_CATALOG_DATA_FIELDS_MEASUREMENT_VALIDS_DOC)) {
+#    eval { $measurementValidsDom = $parser->parse_file( $CFG::AESIR_CATALOG_DATA_FIELDS_MEASUREMENT_VALIDS_DOC ); };
+#    if ($@) {
+#        exit_with_error("Error parsing $CFG::AESIR_CATALOG_DATA_FIELDS_MEASUREMENT_VALIDS_DOC : $@");
+#    }
+#    $measurementValidsDoc = $measurementValidsDom->documentElement();
+#}
+
+my $optionalDataFieldDom;
+eval { $optionalDataFieldDom = $parser->parse_string( $CFG::DATA_FIELD_OPTIONAL_XML ); };
+if ($@) {
+    exit_with_error("Error parsing \$DATA_FIELD_OPTIONAL_XML in configuration: $@");
+}
+
+# Get current date/time in iso8601 format.
+my $now;
+my $nowEpoch = DateTime->from_epoch(epoch => scalar(gettimeofday));
+$now = $nowEpoch->iso8601 . '.' . $nowEpoch->millisecond . 'Z';
+
+# Modify dataFieldLastModified value in the updated info to be the current
+# date/time.
+if ($updatedLastModifiedNode) {
+    $updatedLastModifiedNode->removeChildNodes();
+    $updatedLastModifiedNode->appendText($now);
+}
+
+# If data field is not internal, change the flag to mark it as internal
+my ($dataFieldInternalNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldInternal/value');
+if ($dataFieldInternalNode) {
+    my $dataFieldInternal = $dataFieldInternalNode->textContent;
+    if ($dataFieldInternal !~ /^t(?:rue)?$/i) {
+        $dataFieldInternalNode->removeChildNodes();
+        $dataFieldInternalNode->appendText('true');
+    }
+}
+
+# Update state.
+# (No state change occurs now if action is 'publish', instead
+# the state will only be changed after successful publication)
+$newDataFieldState = $oldDataFieldState;
+if ($oldDataFieldState eq $privateState) {
+    # Private remains Private if changes are saved
+    # Private becomes SubmittedPrivate if changes are published
+#    $newDataFieldState = $submittedPrivateState if ($action eq 'publish');
+    # Error if attempt to cancel
+} elsif ($oldDataFieldState eq $updatedState) {
+    # Updated remains Updated if changes are saved
+    # Updated becomes SubmittedUpdated if changes are published
+#    $newDataFieldState = $submittedUpdatedState if ($action eq 'publish');
+    # Error if attempt to cancel
+} elsif ($oldDataFieldState eq $submittedPrivateState) {
+    # Error if attempt to save once submitted
+    # Error if attempt to publish again once submitted
+    # SubmittedPrivate becomes Private if publication is cancelled
+    $newDataFieldState = $privateState if ($action eq 'cancel');
+} elsif ($oldDataFieldState eq $submittedUpdatedState) {
+    # Error if attempt to save once submitted
+    # Error if attempt to publish again once submitted
+    # SubmittedUpdated becomes Updated if publication is cancelled
+    $newDataFieldState = $updatedState if ($action eq 'cancel');
+} elsif ( ($oldDataFieldState eq $publishedState) ||
+          ($oldDataFieldState eq $unpublishedState) ) {
+    # Published becomes Updated if changes are saved
+    $newDataFieldState = $updatedState if ($action eq 'save');
+
+    # Published becomes SubmittedUpdated if changes are published
+#    $newDataFieldState = $submittedUpdatedState if ($action eq 'publish');
+
+    # Use $updatedState for attempt to save, and change it if publication
+    # is successful.
+    $newDataFieldState = $updatedState if ($action eq 'publish');
+
+    # Published becomes Updated if publication is cancelled
+    $newDataFieldState = $updatedState if ($action eq 'cancel');
+} else {
+    # Unknown data field state encountered
+    my $errorCode = 'UNKNOWN_STATE';
+    my $message = "Internal error: Unknown data field state: '$oldDataFieldState'";
+    ERROR($message);
+    outputResponse($parser, $xml2jsonObj, $oldDataFieldDom,
+                   $UNKNOWN_STATE, $content_type,
+                   $errorCode, $message);
+    exit 0;
+}
+my ($dataFieldStateNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldState/value');
+if ($dataFieldStateNode) {
+    $dataFieldStateNode->removeChildNodes();
+    $dataFieldStateNode->appendText($newDataFieldState);
+}
+
+if ($action =~ /publish$/) {
+    my ($dataFieldActiveNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldActive/value');
+    if ($dataFieldActiveNode) {
+        $dataFieldActiveNode->removeChildNodes();
+        if ($action eq 'unpublish') {
+            $dataFieldActiveNode->appendText('false');
+        } else {
+            $dataFieldActiveNode->appendText('true');
+        }
+    }
+}
+
+my $eraseValidsNode = XML::LibXML::Element->new('eraseValids');
+$updatedDataFieldDoc->addChild($eraseValidsNode);
+my $transform = $styleSheet->transform($updatedDataFieldDom);
+my $transform_string = $styleSheet->output_string($transform);
+$updatedDataFieldDoc->removeChild($eraseValidsNode);
+my ($baselineInfoNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldPublishedBaselineInfo');
+$updatedDataFieldDoc->removeChild($baselineInfoNode) if $baselineInfoNode;
+
+# Replace the old data field file contents with the updated information
+seek(UPDATED, 0, 0);
+print UPDATED $transform_string;
+truncate(UPDATED, tell(UPDATED));
+INFO("Updated $updated_file");
+
+# Update the Solr add document if publishing
+if ( ($action eq 'publish') | ($action eq 'unpublish') ) {
+    unless (defined $pubBaseline) {
+        my $errorCode = 'PUBLICATION_BASELINE_UNKNOWN';
+        my $message = "Internal error: Unknown or missing publication baseline";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+
+    unless (exists $CFG::AESIR_SOLR_ADD_DOC->{$pubBaseline}) {
+        my $errorCode = 'PUBLISH_ERROR';
+        my $message = "Internal error: Could not find AESIR_SOLR_ADD_DOC->{$pubBaseline} defined in $cfgFile\n";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+    my $aesir_solr_add_doc = $CFG::AESIR_SOLR_ADD_DOC->{$pubBaseline};
+    unless (-w $aesir_solr_add_doc) {
+        my $errorCode = 'PUBLISH_ERROR';
+        my $message = "Internal error: Could not find writeable $aesir_solr_add_doc\n";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+
+    my $publishedFile = "$publishedDataFieldsDir/$dataFieldId";
+    my $comparer;
+    if (-f $publishedFile) {
+        # Data field has been published before, so we can compare updated
+        # information with the information that was published
+        $comparer = EDDA::Compare->new(ORIGINAL_XML_FILE => $publishedFile,
+                                       UPDATED_XML       => $updated_xml)
+    }
+
+    # Check if a validator for dataFieldDestinationUnits is defined.
+    my $validateDestUnits;
+    my $unitsXpath;
+    my $destUnitsXpath;
+    my @destUnitsValueNodes;
+    my $validateDestUnitsUrl = $CFG::VALIDATE_DESTINATION_UNITS_URL;
+    if (defined $validateDestUnitsUrl) {
+        # A validator for dataFieldDestinationUnits is defined.
+        # Check if dataFieldDestinationUnits has any values.
+        $unitsXpath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataFieldUnits};
+        $destUnitsXpath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataFieldDestinationUnits};
+        my $destUnitsValuesXPath = $destUnitsXpath . '/value';
+        @destUnitsValueNodes = $updatedDataFieldDoc->findnodes($destUnitsValuesXPath);
+        if (@destUnitsValueNodes) {
+            #  dataFieldDestinationUnits has at least one value
+
+            # Store all selected destination units into an
+            # array
+            my @destinationUnits;
+            foreach my $valueNode (@destUnitsValueNodes) {
+                my $destinationUnit = $valueNode->textContent;
+                push @destinationUnits, $destinationUnit
+                    if $destinationUnit ne '';
+            }
+            if (@destinationUnits) {
+                # Validate destination units if one or more value is
+                # defined and either the values have changed or
+                # the value is being published for the first time.
+                # If the values are changed to having no values,
+                # there is no need to verify the new (empty) value.
+                if ($comparer &&
+                    !$comparer->onError &&
+                    ( (exists $comparer->compareAll->{$unitsXpath} &&
+                    $comparer->compareAll->{$unitsXpath}) ||
+                    (exists $comparer->compareAll->{$destUnitsXpath} &&
+                    $comparer->compareAll->{$destUnitsXpath}) )) {
+                    # dataFieldUnits value or dataFieldDestinationUnits
+                    # value has been changed, so validate
+                    # dataFieldDestinationUnits value
+                    $validateDestUnits = 1;
+                } elsif (! -f $publishedFile) {
+                    # Data field is being published for the first time,
+                    # so validate dataFieldDestinationUnits value
+                    $validateDestUnits = 1;
+                }
+            }
+            if ($validateDestUnits) {
+                my $unitsValueXpath = $unitsXpath . '/value';
+                my ($dataFieldUnitsNode) = $updatedDataFieldDoc->findnodes($unitsValueXpath);
+                if ($dataFieldUnitsNode) {
+                    my $dataFieldUnits = $dataFieldUnitsNode->textContent;
+
+                    # Obtain data product id
+                    my $productIdXpath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataProductId} . '/value';
+                    my ($dataProductIdNode) = $updatedDataFieldDoc->findnodes($productIdXpath);
+                    my $dataProductId = $dataProductIdNode->textContent
+                        if $dataProductIdNode;
+
+                    # Get data product temporal resolution from
+                    # data product info
+                    my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+                    my $productDom;
+                    my $productFilePath = "$dataProductsDir/$dataProductId";
+                    eval { $productDom = $parser->parse_file($productFilePath); };
+                    if ($@) {
+                        exit_with_error("Error parsing $productFilePath: $@");
+                    }
+                    my $productDoc = $productDom->documentElement();
+                    my $timeIntervalXpath = $CFG::ADD_DOC_PRODUCT_MAPPING->{dataProductTimeInterval} . '/value';
+                    my ($timeIntervalNode) =  $productDoc->findnodes($timeIntervalXpath);
+                    my $dataProductTimeInterval = 'unknown';
+                    $dataProductTimeInterval = $timeIntervalNode->textContent
+                        if $timeIntervalNode;
+
+                    # Validate whether the selected destination
+                    # units are all allowed for the given
+                    # combination of data product temporal
+                    # resolution and source units
+                    my $ua = LWP::UserAgent->new(timeout => $CFG::VALIDATE_DESTINATION_UNITS_TIMEOUT);
+                    my $uri = URI->new( $validateDestUnitsUrl );
+                    my $validationParams = {
+                        temporalResolution => $dataProductTimeInterval,
+                        sourceUnits        => $dataFieldUnits,
+#                         destinationUnits   => \@destinationUnits,
+                        destinationUnits   => join(',', @destinationUnits),
+                    };
+                    $uri->query_form($validationParams);
+                    my $requestString = $uri->as_string;
+                    my $response = $ua->get($requestString);
+                    if ( $response->is_error ) {
+                        # Error attempting the validation
+                        my $message = "Error invoking $requestString: " . $response->status_line . "\n";
+                        ERROR($message);
+                        print STDERR $message;
+                        my $errorCode = 'UNITS_VALIDATION_ERROR';
+                        $message = "Internal error: Destination units validation failure from $requestString: " . $response->status_line . "\n";
+                        ERROR($message);
+                        outputResponse($parser, $xml2jsonObj,
+                                       $updatedDataFieldDom,
+                                       $UNITS_VALIDATION_ERROR,
+                                       $content_type,
+                                       $errorCode, $message,
+                                       $styleSheet);
+                        exit 0;
+                    } else {
+                        # Try to parse xml response
+                        my $responseXml = $response->content;
+                        my $responseDom;
+                        eval { $responseDom = $parser->parse_string($responseXml); };
+                        if ($@) {
+                            # Error parsing xml response from validation.
+                            # Output message and exit.
+                            my $message = "Error parsing response from $requestString: $@\n";
+                            ERROR($message);
+                            print STDERR $message;
+                            my $errorCode = 'UNITS_VALIDATION_PARSE_ERROR';
+                            outputResponse($parser, $xml2jsonObj,
+                                           $updatedDataFieldDom,
+                                           $UNITS_VALIDATION_PARSE_ERROR,
+                                           $content_type,
+                                           $errorCode, $message,
+                                           $styleSheet);
+                            exit 0;
+                        }
+                        my $responseDoc = $responseDom->documentElement();
+                        my ($messageNode) = $responseDoc->findnodes('/response/message');
+                        if ($messageNode) {
+                            # Validation test failed.
+                            # Output message about invalid
+                            # destination units.
+                            my $message = $messageNode->textContent;
+                            ERROR($message);
+                            my $errorCode = 'INVALID_DESTINATION_UNITS_ERROR';
+                            outputResponse($parser, $xml2jsonObj,
+                                           $updatedDataFieldDom,
+                                           $INVALID_DESTINATION_UNITS_ERROR,
+                                           $content_type,
+                                           $errorCode, $message,
+                                           $styleSheet);
+                            exit 0;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        my $message = "Could not find VALIDATE_DESTINATION_UNITS_URL for baseline $pubBaseline in configuration\n";
+        ERROR($message);
+        print STDERR "Could not find VALIDATE_DESTINATION_UNITS_URL for baseline $pubBaseline in configuration\n";
+    }
+
+    if (-f $publishedFile) {
+        if ($comparer && !$comparer->onError) {
+
+            # Comparison can be done.
+            # Check to see if rescrubbing is needed.
+            if (@CFG::RESCRUB_DATA_ATTRIBUTES) {
+
+                # Compare each rescrubbing attribute.
+                # [Note that the rescrubbing request parameters are different
+                # depending on whether $CFG::RESCRUB_ALL_ATTRIBUTES_AT_ONCE is
+                # true, in order to provide compatibility with old rescrubber
+                # ($CFG::RESCRUB_ALL_ATTRIBUTES_AT_ONCE is false) and new
+                # rescrubber ($CFG::RESCRUB_ALL_ATTRIBUTES_AT_ONCE is true).
+                # Once new rescrubber is in place, code for when
+                # $CFG::RESCRUB_ALL_ATTRIBUTES_AT_ONCE is false can be
+                # jettisoned.]
+                my $rescrubParams = {};
+                foreach my $rescrubAttribute (@CFG::RESCRUB_DATA_ATTRIBUTES) {
+
+                    # Compare values before and after update to see if
+                    # rescrubbing is needed because a data field attribute
+                    # changed value.
+                    if (exists $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$rescrubAttribute}) {
+                        # Map attribute name to xpath
+                        my $xpath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$rescrubAttribute};
+
+                        # Compare original and updated values at $xpath
+                        my @differences = $comparer->compareSingleValues($xpath);
+                        if (@differences) {
+                            # A value changed, so rescrubbing should
+                            # be performed
+                            my ($oldValue, $newValue) = @differences;
+                            if ($CFG::RESCRUB_ALL_ATTRIBUTES_AT_ONCE) {
+                                # Don't rescrub yet, instead save the value
+                                # of the rescrubbing attribute
+                                $rescrubParams->{$rescrubAttribute} = $newValue;
+                            } else {
+                                # Rescrub this attribute.
+                                my $rescrubUrl = $CFG::RESCRUB_URL;
+                                if (defined $rescrubUrl) {
+                                    # Construct request URL and issue a GET
+                                    # request.
+                                    my $ua = LWP::UserAgent->new(timeout => $CFG::RESCRUB_TIMEOUT);
+                                    my $uri = URI->new( $rescrubUrl );
+                                    $rescrubParams->{data_field} = $dataFieldId;
+                                    $rescrubParams->{attr_name} = $rescrubAttribute;
+                                    $rescrubParams->{attr_value} = $newValue;
+                                    $uri->query_form($rescrubParams);
+                                    my $requestString = $uri->as_string;
+                                    my $response = $ua->get($requestString);
+
+                                    if ( $response->is_error ) {
+                                        # Error in rescrubbing request.
+                                        if ( $response->content =~ /timeout/ ) {
+                                            # If a timeout occurred, proceed
+                                            # as if success
+                                        } else {
+                                            # Return response indicating
+                                            # an error in rescrubbing.
+                                            my $message = "Error invoking $requestString: " . $response->status_line . "\n";
+                                            ERROR($message);
+                                            print STDERR $message;
+                                            my $errorCode = 'RESCRUB_ERROR';
+                                            $message = "Internal error: Rescrub failure from $requestString: " . $response->status_line . "\n";
+                                            ERROR($message);
+                                            outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                                                           $RESCRUB_ERROR, $content_type,
+                                                           $errorCode, $message, $styleSheet);
+                                            exit 0;
+                                        }
+                                    }
+                                } else {
+                                    my $message = "Could not find RESCRUB_URL for baseline $pubBaseline in configuration\n";
+                                    ERROR($message);
+                                    print STDERR "Could not find RESCRUB_URL for baseline $pubBaseline in configuration\n";
+                                }
+                            }
+                        }
+                    }
+                }
+                if ($CFG::RESCRUB_ALL_ATTRIBUTES_AT_ONCE) {
+                    if (%$rescrubParams) {
+                        my $rescrubUrl = $CFG::RESCRUB_URL;
+                        if (defined $rescrubUrl) {
+                            # Construct request URL and issue a GET
+                            # request.
+                            my $ua = LWP::UserAgent->new(timeout => $CFG::RESCRUB_TIMEOUT);
+                            my $uri = URI->new( $rescrubUrl );
+                            $rescrubParams->{data_field} = $dataFieldId;
+                            $uri->query_form($rescrubParams);
+                            my $requestString = $uri->as_string;
+                            my $response = $ua->get($requestString);
+                            if ( $response->is_error ) {
+                                # Error in rescrubbing request.
+                                if ( $response->content =~ /timeout/ ) {
+                                    # If a timeout occurred, proceed
+                                    # as if success
+                                } else {
+                                    my $message = "Error invoking $requestString: " . $response->status_line . "\n";
+                                    ERROR($message);
+                                    print STDERR $message;
+                                    my $errorCode = 'RESCRUB_ERROR';
+                                    $message = "Internal error: Rescrub failure from $requestString: " . $response->status_line . "\n";
+                                    ERROR($message);
+                                    outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                                                   $RESCRUB_ERROR, $content_type,
+                                                   $errorCode, $message, $styleSheet);
+                                    exit 0;
+                                }
+                            }
+                        } else {
+                            my $message = "Could not find RESCRUB_URL for baseline $pubBaseline in configuration\n";
+                            ERROR($message);
+                            print STDERR "Could not find RESCRUB_URL for baseline $pubBaseline in configuration\n";
+                        }
+                    }
+                }
+            }
+
+            # Add differences to comment
+            my $allDifferences = $comparer->compareAll;
+            foreach my $key (sort keys %$allDifferences) {
+                next if $key =~ /dataFieldState/;  # Do not report state
+                $comment .= "\n$key: " . join("\n", @{$allDifferences->{$key}}) . "\n";
+            }
+        }
+    } else {
+        # Published file does not exist, so data field is being published
+        # for the first time
+        $comment .= "\nFirst publication for $dataFieldId at $now\n";
+    }
+
+    # Update entry for the data field in the Solr Catalog Add document
+    my $output = `$updateAddDocExe $dataFieldId $pubBaseline 2<&1`;
+    my $status = $?;
+    if ($status) {
+        my $errorCode = 'PUBLISH_ERROR';
+        my $message = "Internal error: Error executing `$updateAddDocExe`\n$output\n";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+
+    # Update Solr with the contents of the Solr Catalog Add document
+    $output = `$postSolrExe --baseline $pubBaseline $aesir_solr_add_doc 2<&1`;
+    $status = $?;
+    if ($status) {
+        my $errorCode = 'SOLR_PUBLISH_ERROR';
+        my $message = "Internal error: Error executing `$postSolrExe`\n$output\n";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $SOLR_PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+
+    # Update state again if publication was successful
+    $newDataFieldState = ($action eq 'unpublish') ? $unpublishedState : $publishedState;
+    my ($dataFieldStateNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldState/value');
+    if ($dataFieldStateNode) {
+        $dataFieldStateNode->removeChildNodes();
+        $dataFieldStateNode->appendText($newDataFieldState);
+    }
+
+    # Update publication date if publication was successful
+    my ($dataFieldLastPublishedNode) = $updatedDataFieldDoc->findnodes('/dataField/dataFieldLastPublished/value');
+    if ($dataFieldLastPublishedNode) {
+        my $nowEpoch = DateTime->from_epoch(epoch => scalar(gettimeofday));
+        my $now = $nowEpoch->iso8601 . '.' . $nowEpoch->millisecond . 'Z';
+        $dataFieldLastPublishedNode->removeChildNodes();
+        $dataFieldLastPublishedNode->appendText($now);
+    }
+
+    # Replace the file contents, using the updated state and date information
+    unless (open(UPDATED, "> $updated_file")) {
+        my $errorCode = 'PUBLISH_ERROR';
+        my $message = "Could not open $updated_file for updating: $!";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+#    flock(UPDATED, 2);
+    $updatedDataFieldDoc->addChild($eraseValidsNode);
+    my $transform = $styleSheet->transform($updatedDataFieldDom);
+    my $transform_string = $styleSheet->output_string($transform);
+    $updatedDataFieldDoc->removeChild($eraseValidsNode);
+    print UPDATED $transform_string;
+    if (close(UPDATED)) {
+        INFO("Updated $updated_file");
+
+        # Write the unmodified file to a rollback directory
+        my $backup_file = "$rollbackDataFieldsDir/$dataFieldId";
+        if (open(BACKUP, "> $backup_file")) {
+            print BACKUP $rollbackDataFieldDom->toString(1);
+            close(BACKUP);
+            chmod 0666, $backup_file;
+            INFO("Wrote $backup_file");
+        } else {
+            print STDERR "Error opening $backup_file for writing\n";
+        }
+    } else {
+        my $errorCode = 'PUBLISH_ERROR';
+        my $message = "Could not close $updated_file for updating: $!";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+
+    # Write the updated information corresponding to the most recent
+    # publication to a separate file
+    unless (open(PUBLISHED, "> $publishedFile")) {
+        my $errorCode = 'PUBLISH_ERROR';
+        my $message = "Could not open $publishedFile for updating: $!";
+        ERROR($message);
+        outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+                       $PUBLISH_ERROR, $content_type,
+                       $errorCode, $message, $styleSheet);
+        exit 0;
+    }
+    $updatedDataFieldDoc->addChild($eraseValidsNode);
+    $transform = $styleSheet->transform($updatedDataFieldDom);
+    $transform_string = $styleSheet->output_string($transform);
+    $updatedDataFieldDoc->removeChild($eraseValidsNode);
+    print STDERR "Waiting for exclusive lock of $publishedFile\n";
+    flock(PUBLISHED, 2);
+    print STDERR "Obtained exclusive lock of $publishedFile\n";
+    print PUBLISHED $transform_string;
+    close(PUBLISHED);
+    chmod 0666, $publishedFile;
+}  # END if ($action eq 'publish')
+
+if ( ( $action eq 'publish' ) ||  ( $action eq 'unpublish' ) ||
+     ( $action eq 'cancel' ) ) {
+
+    # Log the host of the requester plus any comments
+    my $message = "$dataFieldId $action from " . $cgi->remote_host();
+    $message .= "\nComment: $comment\n" if $comment;
+    INFO($message);
+
+    # If submitted or cancelled for publication, send out the notice
+    my $recipients = join(',', @CFG::PUBLISH_REQUEST_RECIPIENTS);
+    if ($recipients) {
+        my $from = $CFG::PUBLISH_REQUEST_SENDER || 'updateDataFieldInfo@nasa.gov';
+        my $subject;
+        if ( $action eq 'publish' ) {
+            $subject = "$dataFieldId published from $rootPath to $pubBaseline";
+        } elsif ( $action eq 'unpublish' ) {
+            $subject = "$dataFieldId unpublished from $rootPath to $pubBaseline";
+        } elsif ( $action eq 'cancel' ) {
+            $subject = "$dataFieldId to $pubBaseline cancelled from $rootPath";
+        }
+        my $header = {
+                      To      => $recipients,
+                      From    => $from,
+                      Subject => $subject
+                     };
+
+        sendmail($header, $message, $updatedDataFieldDom) if $recipients;
+    }
+}
+
+# Add baseline information to the end of the response document
+# (note that this is not added to any saved documents)
+if ($CFG::INCLUDE_DATA_FIELD_PUBLISHED_BASELINE) {
+    my $publishedBaselines = EDDA::getPublishedBaselines($dataFieldId,
+                                                         $CFG::EDDA_BASELINE,
+                                                         \@CFG::AESIR_BASELINES,
+                                                         $CFG::AESIR_CATALOG_PUBLISHED_DATA_FIELDS_DIR,
+                                                         $parser);
+    if ($publishedBaselines) {
+        foreach my $baseline (@CFG::AESIR_BASELINES) {
+            if (exists $publishedBaselines->{$baseline}) {
+                my $baselineInfoNode = EDDA::createPublishedBaselineInfoNode($baseline, $publishedBaselines);
+                $updatedDataFieldDoc->addChild($baselineInfoNode) if $baselineInfoNode;
+            }
+        }
+    }
+}
+
+#outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+#               $SUCCESS_STATUS, $content_type);
+outputResponse($parser, $xml2jsonObj, $updatedDataFieldDom,
+               $SUCCESS_STATUS, $content_type, '', '', $styleSheet);
+
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    ERROR($message);
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub outputResponse {
+    my ($parser, $xml2jsonObj, $dom, $status, $content_type,
+        $errorCode, $errorMessage, $styleSheet) = @_;
+
+    my $responseDom = $parser->parse_string('<updateResponse></updateResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ($status > $SUCCESS_STATUS) {
+        # Error
+        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    if ($styleSheet) {
+        my $transform = $styleSheet->transform($dom);
+        my $transform_string = $styleSheet->output_string($transform);
+        my $tdom = $parser->parse_string($transform_string);
+        $resultNode->addChild($tdom->documentElement());
+    } else {
+        $resultNode->addChild($dom->documentElement());
+    }
+    $responseDoc->addChild($resultNode);
+
+
+    if ($content_type =~ /xml/) {
+        print $cgi->header( -type   => 'application/xml' );
+        print $responseDom->toString(1);
+    } else {
+        my $responseJson = $xml2jsonObj->convert($responseDom->toString());
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}
+
+sub sendmail {
+    my ( $params, $message, $updatedDataFieldDom ) = @_;
+
+    # Mail $message to recipients specified in $params
+
+    my $mailer = new Mail::Mailer();
+    $params->{'Reply-To'} = $params->{From};
+    $mailer->open($params);
+    my @lines = ref($message) ? @$message : ($message);
+    print $mailer "$_\n" for @lines;
+    $mailer->close();
+}
+
+sub startLogging {
+
+    # Determine directory used to hold log
+    my $logDir =
+        defined $CFG::EDDA_UPDATE_DATA_FIELD_LOG_DIR ? $CFG::EDDA_UPDATE_DATA_FIELD_LOG_DIR :
+        (-d '/var/tmp' && -w '/var/tmp') ? '/var/tmp' :
+        undef;
+
+    my $scriptName = basename((caller(0))[1]);
+    my $scriptMode = ( dirname((caller(0))[1]) =~ /(DEV|TS2|TS1|OPS)/ ) ? ".$1" : "";
+    my ($userSuffix) = ( (defined $ENV{USER}) && $ENV{USER} =~ /^(\w+)$/ ) ? ".$1" : "";
+    my $logFile = (defined $logDir) ?
+        ">>$logDir/" . $scriptName . $scriptMode . $userSuffix . ".log" : '>>STDERR';
+
+    # Determine logging level
+    my $logLevel = $CFG::EDDA_UPDATE_DATA_FIELD_LOG_LEVEL ? $CFG::EDDA_UPDATE_DATA_FIELD_LOG_LEVEL : $INFO;
+
+    # Define logger for this script
+    my $logInit = { level  => $logLevel,
+                    file   => $logFile,
+                    layout => '%d %P %p %m%n'};
+    my @inits = ($logInit);
+    Log::Log4perl->easy_init( @inits );
+    INFO("Starting $0 at " . scalar(gmtime));
+}

@@ -1,0 +1,7 @@
+    <valids>
+      <valid>binary</valid>
+      <valid>hdf</valid>
+      <valid>native</valid>
+      <valid>netCDF</valid>
+      <valid>text</valid>
+    </valids>

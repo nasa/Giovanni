@@ -1,0 +1,176 @@
+#!/usr/bin/perl -T
+
+
+################################################################################
+# $Id: DIFEntryIdList,v 1.8 2015/06/19 22:09:27 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+DIFEntryIdList - Output a list of all GCMD DIF Entry IDs, for use in autocomplete
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+DIFEntryIdList
+
+=head1 DESCRIPTION
+
+Output a list of all GCMD DIF Entry IDs, for use in autocomplete
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use LWP::UserAgent;
+use CGI;
+use Safe;
+
+my $SUCCESS_STATUS = 1;
+my $ERROR_STATUS = 2;
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+my $cgi = new CGI;
+my $pretty = 1 if $cgi->param('pretty');
+my $format = $cgi->param('format');
+$format ||= 'json';
+
+my $ua = LWP::UserAgent->new;
+#my $gcmdDifEntryId = 'GES_DISC_*';
+my $gcmdDifEntryId = '*';
+my $url = "http://gcmdservices.gsfc.nasa.gov/mws/entryids/dif?query=[Entry_ID='$gcmdDifEntryId']&format=xml";
+my $req = HTTP::Request->new(GET => $url);
+#$req->authorization_basic( 'URS_USERNAME_GOES_HERE', 'URS_PASSWORD_GOES_HERE' );
+# Assume that IP-based access to GCMD MWS has been allowed
+my $response = $ua->request($req);
+my $entryIdDom;
+my $entryIdDoc;
+if ($response->is_success) {
+    eval { $entryIdDom = $parser->parse_string( $response->content ); };
+    if ($@) {
+        my $errorCode = 'DIF_ERROR';
+        my $message = "Could not parse response from query for GCMD DIF Entry_ID $gcmdDifEntryId";
+        my $dom = $parser->parse_string('<error></error>');
+        my $doc = $dom->documentElement();
+        outputResponse($parser, $doc, $ERROR_STATUS, $format,
+                       $errorCode, $message);
+        exit 1;
+    }
+    $entryIdDoc = $entryIdDom->documentElement();
+    my ($node) = $entryIdDoc->findnodes('/Error_Message');
+    if ($node) {
+        my $errorCode = 'DIF_NOT_FOUND';
+        my $message = "Could not find a DIF with Entry_ID $gcmdDifEntryId";
+        my $dom = $parser->parse_string('<error></error>');
+        my $doc = $dom->documentElement();
+        outputResponse($parser, $doc, $ERROR_STATUS, $format,
+                       $errorCode, $message);
+        exit 1;
+    }
+} else {
+        my $errorCode = 'DIF_REQUEST_ERROR';
+        my $message = "Error requesting a DIF with Entry_ID $gcmdDifEntryId";
+        my $dom = $parser->parse_string('<error></error>');
+        my $doc = $dom->documentElement();
+        outputResponse($parser, $doc, $ERROR_STATUS, $format,
+                       $errorCode, $message);
+        exit 1;
+}
+
+my @entryIds;
+my (@entryIdNodes) = $entryIdDoc->findnodes('/Results/Entry_ID');
+foreach my $entryIdNode (@entryIdNodes) {
+    my $entryId = $entryIdNode->textContent();
+    $entryId =~ s/\[[\w\-]+\]//;
+#    if ($entryId !~ /^\w[\w.\-]+$/) {
+#        print STDERR "$entryId\n"
+#    }
+    # Filter out GES DISC AIRS and MLS level 2 for now
+    next if $entryId =~ /^GES_DISC_AIR.2/;
+    next if $entryId =~ /^GES_DISC_ML2/;
+    push @entryIds, $entryId;
+}
+
+if ($format =~ /xml/) {
+    print $cgi->header(-type=>"application/x-suggestions+xml");
+    print $pretty ? qq(<Entry_IDs>\n) : qq(<Entry_IDs>);
+    foreach my $entryId (sort @entryIds) {
+        print $pretty ? qq(  <Entry_ID>$entryId</Entry_ID>\n) : qq(<Entry_ID>$entryId</Entry_ID>);
+    }
+    print $pretty ? qq(</Entry_IDs>) : qq(</Entry_IDs>);
+} else {
+    print $cgi->header(-type=>"application/x-suggestions+json");
+    print $pretty ? qq ({\n  "Entry_IDs" : [\n    ) : qq({ "Entry_IDs" : [);
+    my $sep = ($pretty) ? ",\n    " : ",";
+    print join($sep, map {"\"$_\""} sort @entryIds);
+    print $pretty ? qq(\n  ]\n}\n) : qq(] });
+}
+
+exit 0;
+
+
+sub outputResponse {
+#    my ($parser, $xml2jsonObj, $doc, $status, $content_type,
+#        $errorCode, $errorMessage) = @_;
+    my ($parser, $doc, $status, $content_type,
+        $errorCode, $errorMessage) = @_;
+
+#    my $responseDom = $parser->parse_string('<DIFEntryIdListResponse></DIFEntryIdListResponse>');
+#    my $responseDoc = $responseDom->documentElement();
+#    $responseDoc->appendTextChild( 'status', "$status" );
+#
+    if ($status > $SUCCESS_STATUS) {
+#        # Error
+#        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+#        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+        print STDERR $errorMessage, "\n";
+        return;
+    }
+#    my $resultNode = XML::LibXML::Element->new('result');
+#    $resultNode->addChild($doc);
+#    $responseDoc->addChild($resultNode);
+#
+    if ($content_type =~ /xml/) {
+#        print $cgi->header( -type   => 'application/xml' );
+#        print $responseDom->toString(1);
+        print $cgi->header(-type=>"application/x-suggestions+xml");
+        print qq(<Entry_IDs></Entry_IDs>);
+    } else {
+#        my $responseJson = $xml2jsonObj->convert($responseDom->toString());
+#        print $cgi->header( -type => 'application/json' );
+#        print $responseJson;
+        print $cgi->header(-type=>"application/x-suggestions+json");
+        print qq({ "Entry_IDs" : [] });
+    }
+}

@@ -1,0 +1,102 @@
+    <valids>
+      <valid>Aerosol Index</valid>
+      <valid>Aerosol Optical Depth</valid>
+      <valid>Air Pressure</valid>
+      <valid>Air Pressure Anomaly</valid>
+      <valid>Air Temperature</valid>
+      <valid>Air Temperature Anomaly</valid>
+      <valid>Albedo</valid>
+      <valid>Altitude</valid>
+      <valid>Angstrom Exponent</valid>
+      <valid>Atmospheric Moisture</valid>
+      <valid>Atmospheric Moisture Anomaly</valid>
+      <valid>Black Carbon</valid>
+      <valid>Buoyancy</valid>
+      <valid>Canopy Water Storage</valid>
+      <valid>Chlorophyll</valid>
+      <valid>Cloud Fraction</valid>
+      <valid>Cloud Properties</valid>
+      <valid>ClO</valid>
+      <valid>CO</valid>
+      <valid>CO2</valid>
+      <valid>CH4</valid>
+      <valid>Component Aerosol Optical Depth</valid>
+      <valid>Deuterium</valid>
+      <valid>Diffusivity</valid>
+      <valid>Dust</valid>
+      <valid>Emissivity</valid>
+      <valid>Energy</valid>
+      <valid>Erythemal UV</valid>
+      <valid>Evaporation</valid>
+      <valid>Evaporation Anomaly</valid>
+      <valid>Evapotranspiration</valid>
+      <valid>Evapotranspiration Anomaly</valid>
+      <valid>Flooding</valid>
+      <valid>Geopotential</valid>
+      <valid>Grid Std Dev</valid>
+      <valid>Ground Heat</valid>
+      <valid>HCl</valid>
+      <valid>HCN</valid>
+      <valid>Heat Flux</valid>
+      <valid>Heat Flux Anomaly</valid>
+      <valid>Height, Level</valid>
+      <valid>HNO3</valid>
+      <valid>Incident Radiation</valid>
+      <valid>Incident Radiation Anomaly</valid>
+      <valid>Iron</valid>
+      <valid>Irradiance</valid>
+      <valid>Latent Heat</valid>
+      <valid>Latent Heat Flux</valid>
+      <valid>Mass Flux</valid>
+      <valid>Mixed Layer Depth</valid>
+      <valid>N2O</valid>
+      <valid>Nitrate</valid>
+      <valid>NO2</valid>
+      <valid>Obs Time</valid>
+      <valid>Ocean Optics</valid>
+      <valid>OH</valid>
+      <valid>OLR</valid>
+      <valid>Organic Carbon</valid>
+      <valid>Oxygen, Odd</valid>
+      <valid>Ozone</valid>
+      <valid>Particulate Matter</valid>
+      <valid>Phytoplankton</valid>
+      <valid>Pixel Counts</valid>
+      <valid>Precipitation</valid>
+      <valid>Precipitation Anomaly</valid>
+      <valid>Quality Info</valid>
+      <valid>Radiation, Net</valid>
+      <valid>Reflectivity</valid>
+      <valid>Runoff</valid>
+      <valid>Runoff Anomaly</valid>
+      <valid>Scattering Angle</valid>
+      <valid>Sea Salt</valid>
+      <valid>Sea Surface Temperature</valid>
+      <valid>Sensible Heat</valid>
+      <valid>Sensible Heat Flux</valid>
+      <valid>Snow/Ice</valid>
+      <valid>Snow/Ice Anomaly</valid>
+      <valid>SO2</valid>
+      <valid>SO4</valid>
+      <valid>Soil Moisture</valid>
+      <valid>Soil Moisture Anomaly</valid>
+      <valid>Soil Temperature</valid>
+      <valid>Soil Temperature Anomaly</valid>
+      <valid>Statistics</valid>
+      <valid>Streamflow</valid>
+      <valid>Surface Runoff</valid>
+      <valid>Surface Temperature</valid>
+      <valid>Surface Temperature Anomaly</valid>
+      <valid>Total Aerosol Optical Depth</valid>
+      <valid>Total AOD Climatology Anomaly</valid>
+      <valid>UV Exposure</valid>
+      <valid>Vegetation</valid>
+      <valid>Viewing Geometry</valid>
+      <valid>Vorticity</valid>
+      <valid>Water Storage</valid>
+      <valid>Wind</valid>
+      <valid>Wind Anomaly</valid>
+      <valid>Wind Stress Direction</valid>
+      <valid>Wind Stress Magnitude</valid>
+      <valid>Wind Velocity</valid>
+    </valids>

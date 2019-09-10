@@ -1,0 +1,167 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getDataProductInfo,v 1.10 2015/06/24 18:28:34 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+getDataProductInfo - Output AESIR information for one or more data products
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getDataProductInfo?dataProductId=<dataProductId>[&dataProductId=<dataProductId>][&format=xml]
+
+=head1 DESCRIPTION
+
+Output AESIR information for one or more data products
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use CGI;
+use Safe;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+# Check for required configuration variables
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+
+# Assume that the names of the files in the data products catalog directory
+# are the dataProductId values for each data product.
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory $dataProductsDir not found")
+    unless -d $dataProductsDir;
+
+# Check that at least one valid dataProductId parameter was provided
+my @dataProductIds;
+my @pids = $cgi->param('dataProductId');
+foreach my $pid (@pids) {
+    push @dataProductIds, $pid if $pid =~ /^(\w[\w.]+)/;
+}
+exit_with_error("Need one or more valid dataProductId parameters\n")
+    unless @dataProductIds;
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+# Start new dataProducts xml document
+my $dataProductsDom = $parser->parse_string('<dataProducts></dataProducts>');
+my $dataProductsDoc = $dataProductsDom->documentElement();
+
+# For each requested data product, parse the data product xml and add it to
+# the dataProducts document
+foreach my $dataProductId (sort @dataProductIds) {
+    my $productFile = "$dataProductsDir/$dataProductId";
+    exit_with_error("Could not find catalog information for dataProductId $dataProductId\n")
+        unless -f "$dataProductsDir/$dataProductId";
+    my $dataProductDom;
+    eval { $dataProductDom = $parser->parse_file( $productFile ); };
+    if ($@) {
+        exit_with_error("Could not read and parse $productFile\n");
+    }
+    my $dataProductDoc = $dataProductDom->documentElement();
+
+    # Replace valids with values from configuration files
+    # that are updated whenever a new valid is added.
+    my $validsDom;
+    my $validsDoc;
+    if (defined $CFG::AESIR_CATALOG_DATA_PRODUCT_VALIDS_DOCS) {
+        while (my($attr, $file) = each %$CFG::AESIR_CATALOG_DATA_PRODUCT_VALIDS_DOCS) {
+            my $validsPath = $CFG::ADD_DOC_PRODUCT_MAPPING->{$attr} . '/valids';
+            my ($validsNode) = $dataProductDoc->findnodes($validsPath);
+            if ($validsNode) {
+                if (defined $file && -r ($file)) {
+                    eval { $validsDom = $parser->parse_file( $file ); };
+                    if ($@) {
+                        exit_with_error("Error parsing $file");
+                    }
+                    $validsDoc = $validsDom->documentElement();
+                    if ($validsDoc->findnodes('/valids')) {
+                        $validsNode->replaceNode($validsDoc);
+                    }
+                }
+            }
+        }
+    }
+
+    $dataProductsDoc->addChild($dataProductDoc) if $dataProductDoc;
+}
+
+# If xml format is desired, output the xml version of the dataProducts document
+my $format = $cgi->param('format');
+if (uc($format) eq 'XML') {
+    print $cgi->header( -type => 'application/xml' );
+    my $xml = $dataProductsDoc->toString(1);
+    print $xml;
+    exit 0;
+}
+
+# By default, output the dataProducts document in json
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+
+my $obj = XML::XML2JSON->new( module => 'JSON::XS',
+                              pretty => $prettyJSON,
+                              attribute_prefix => $prefix,
+                              content_key => $content_key,
+                              force_array => $forceJSONarray,
+                              private_attributes => ['encoding', 'version']);
+my $xml = $dataProductsDoc->toString();
+my $json = $obj->convert($xml);
+
+print $cgi->header( -type => 'application/json' );
+print $json;
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}

@@ -1,0 +1,313 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: downloadDataFieldInfo,v 1.8 2015/04/11 01:38:49 eseiler Exp $
+# -@@@ AESIR EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+downloadDataFieldInfo - Download AESIR information for one or more data fields
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+downloadDataFieldInfo?dataFieldId=<dataFieldId>[&dataFieldId=<dataFieldId>]
+
+=head1 DESCRIPTION
+
+Download AESIR information for one or more data fields
+
+=head1 OPTIONS
+
+=over 4
+
+=item
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+}
+
+use strict;
+use XML::LibXML;
+use XML::LibXSLT;
+use File::Copy;
+use Time::HiRes qw (gettimeofday);
+use CGI;
+use Safe;
+
+my $DEBUG;
+delete $ENV{PATH};
+delete $ENV{ENV};
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_DIR;
+my $dataFieldsDir = "$CFG::AESIR_CATALOG_DATA_FIELDS_DIR";
+exit_with_error("Directory $dataFieldsDir not found")
+    unless -d $dataFieldsDir;
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_XSL not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_XSL;
+
+# Check that at least one valid dataFieldId parameter was provided
+my @dataFieldIds;
+my @idParams;
+foreach my $dfid ($cgi->param('dataFieldId')) {
+    if ($dfid =~ /^(\w+)$/) {
+        push @idParams, $1;
+    } elsif ( $dfid =~ /^([\w\*]+)$/ ) {
+        $dfid = $1;
+        $dfid =~ s/\*/\.\*/g;
+        push @idParams, $dfid;
+    }
+}
+exit_with_error("Need one or more valid dataFieldId parameters\n")
+    unless @idParams;
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+my $xslt = XML::LibXSLT->new();
+my $styleSheet = $xslt->parse_stylesheet_file($CFG::AESIR_CATALOG_DATA_FIELDS_XSL);
+
+# # Start new dataFields xml document
+# my $dataFieldsDom = $parser->parse_string('<dataFields></dataFields>');
+# my $dataFieldsDoc = $dataFieldsDom->documentElement();
+
+# my $dataFieldDom = $parser->parse_string($CFG::DATA_FIELD_XML);
+# my $dataFieldDoc = $dataFieldDom->documentElement();
+#my $optionalDataFieldDom = $parser->parse_string($CFG::DATA_FIELD_OPTIONAL_XML);
+#my $optionalDataFieldDoc = $optionalDataFieldDom->documentElement();
+
+exit_with_error("Could not open $dataFieldsDir: $!\n")
+    unless opendir(DIR, $dataFieldsDir);
+my @dfFileNames = grep { !/^\./ && -f "$dataFieldsDir/$_" } readdir(DIR);
+closedir(DIR);
+
+my @ids;
+foreach my $idParam (@idParams) {
+    push @ids, grep {/^$idParam$/} @dfFileNames;
+}
+exit_with_error("No dataFieldId match found\n")
+    unless @ids;
+foreach my $id (@ids) {
+    push @dataFieldIds, $1 if $id =~ /^(\w+)$/;
+}
+
+my $tmpDir = $CFG::tmpdir || '/tmp';
+exit_with_error("Directory $tmpDir not found\n")
+    unless -d $tmpDir;
+my $timeStamp = scalar(gettimeofday);
+$timeStamp =~ s/\./_/;
+my $dirName = 'downloadDataFieldInfo_' . $timeStamp;
+my $outputDir = File::Spec->catfile($tmpDir, $dirName);
+exit_with_error("Could not create directory '$outputDir'\n")
+    unless mkdir $outputDir;
+
+my @filesWritten;
+foreach my $dataFieldId (@dataFieldIds) {
+    my $fieldFile = File::Spec->catfile($dataFieldsDir, $dataFieldId);
+    exit_with_error("Could not find catalog information for dataFieldId $dataFieldId\n")
+        unless -e "$fieldFile";
+    my $dataFieldDom;
+    eval { $dataFieldDom = $parser->parse_file( $fieldFile ); };
+    if ($@) {
+        exit_with_error("Could not read and parse $fieldFile\n");
+    }
+    my $dataFieldDoc = $dataFieldDom->documentElement();
+
+    # Change values of some fields to force them to be changed before
+    # uploading
+    foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_FIELDS_FINAL) {
+        if (exists $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$fieldKey}) {
+            my $path = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$fieldKey};
+            my ($node) = $dataFieldDoc->findnodes($path);
+            unless (defined $node) {
+                print STDERR "Could not find path $path in $fieldFile\n";
+            }
+            if ( ($fieldKey eq 'dataFieldId') ||
+                 ($fieldKey eq 'dataFieldG3Id') ){
+                my ($valueNode) = $node->findnodes('./value');
+                if ($valueNode) {
+                    my $value = $valueNode->textContent;
+                    $value = 'CLONE_OF_' . $value;
+                    $valueNode->removeChildNodes();
+                    $valueNode->appendText($value);
+                }
+            }
+        }
+    }
+
+#     # Add any optional fields that are not already there
+#     foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_OPTIONAL_FIELDS_FINAL) {
+#         if (exists $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING->{$fieldKey}) {
+#             my $path = $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING->{$fieldKey};
+#             my ($node) = $dataFieldDoc->findnodes($path);
+#             if (defined $node) {
+#                 my $newNode = $node->cloneNode(1);
+#                 $dataFieldDoc->removeChild($node);
+#                 $dataFieldDoc->appendChild($newNode);
+#             }
+#             else {
+#                 my ($optionalNode) = $optionalDataFieldDoc->findnodes($path);
+#                 if ($optionalNode) {
+#                     my $newNode = $optionalNode->cloneNode(1);
+#                     my ($valueNode) = $newNode->findnodes('./value');
+#                     unless ($valueNode) {
+#                         my $newValueNode = XML::LibXML::Element->new('value');
+#                         $newNode->appendChild($newValueNode);
+#                     }
+#                     $dataFieldDoc->appendChild($newNode);
+#                 }
+#             }
+#         }
+#     }
+
+    # Replace dataFieldSld valids with values from a configuration file
+    # that is updated whenever a new SLD is added.
+    if (defined $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC &&
+        -r $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC) {
+        my $sldValidsDom;
+        my $sldValidsDoc;
+        eval { $sldValidsDom = $parser->parse_file( $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC ); };
+        if ($@) {
+            exit_with_error("Error parsing $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC");
+        }
+        $sldValidsDoc = $sldValidsDom->documentElement();
+        if ($sldValidsDoc->findnodes('/valids')) {
+            my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{'dataFieldSld'}
+                . '/valids';
+            my $validsPath2 = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{'dataFieldSld'}
+                . '/valids/dataFieldSldName';
+            my ($validsNode2) = $dataFieldDoc->findnodes($validsPath2);
+            if ($validsNode2) {
+                $sldValidsDoc->setNodeName('dataFieldSldName');
+                $validsNode2->replaceNode($sldValidsDoc);
+            } else {
+                my ($validsNode) = $dataFieldDoc->findnodes($validsPath);
+                if ($validsNode) {
+                    $validsNode->replaceNode($sldValidsDoc);
+                }
+            }
+        }
+    }
+
+    # Replace valids with values from a configuration file
+    # that is updated whenever a new valid is added.
+    my $validsDom;
+    my $validsDoc;
+    if (defined $CFG::AESIR_CATALOG_DATA_FIELD_VALIDS_DOCS) {
+        while (my($attr, $file) = each %$CFG::AESIR_CATALOG_DATA_FIELD_VALIDS_DOCS) {
+            my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$attr} . '/valids';
+            my ($validsNode) = $dataFieldDoc->findnodes($validsPath);
+            if ($validsNode) {
+                if (defined $file && -r ($file)) {
+                    eval { $validsDom = $parser->parse_file( $file ); };
+                    if ($@) {
+                        exit_with_error("Error parsing $file");
+                    }
+                    $validsDoc = $validsDom->documentElement();
+                    if ($validsDoc->findnodes('/valids')) {
+                        $validsNode->replaceNode($validsDoc);
+                    }
+                }
+            }
+        }
+    }
+
+    my $outFile = File::Spec->catfile($outputDir, $dataFieldId);
+    unless (open(OUT, "> $outFile")) {
+        exit_with_error("Could not open $outFile: $!\n")
+    }
+
+    # Transform via stylesheet to ensure that the order of the fields
+    # is the same as that produced by updateDateFieldInfo
+    my $transform = $styleSheet->transform($dataFieldDom);
+    my $transform_string = $styleSheet->output_string($transform);
+
+#    print OUT $dataFieldDom->toString(1);
+    print OUT $transform_string;
+    close(OUT);
+    push @filesWritten, $outFile;
+}
+
+my $downloadName = $dirName . '.tar.gz';
+my $output = safe_exec('/bin/gtar', '--create', '-z', '-O', '-C',
+                        $outputDir, '.');
+if ($output) {
+    print $cgi->header(-type => 'application/x-tar',
+                       -Content_Encoding => 'x-gzip',
+                       -Content_disposition => "attachment; filename=\"$downloadName\"",
+                       -Content_length => length($output),
+                       -Cache_control => 'no-cache');
+    print $output;
+}
+foreach my $fileWritten (@filesWritten) {
+    unlink $fileWritten if -f $fileWritten;
+}
+rmdir $outputDir if -d $outputDir;
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    $message =~ s/\n//g;
+    print $cgi->header(-status => '404 ' . $message,
+                       -type => 'text/plain',
+                       -cache_control => 'no-cache');
+    print $message, "\n";
+    exit;
+}
+
+
+sub safe_exec {
+    my $cmd_str = join( ' ', map { qq('$_') } @_ );
+
+    my $output;
+    my $pid;
+    die "$0 Cannot fork: $!" unless defined( $pid = open( CHILD, "-|" ) );
+    if ( $pid == 0 ) {
+        exec(@_) or die "Failed executing $cmd_str: $!";
+    }
+    else {
+        local $/;
+        $output = <CHILD>;
+        close(CHILD);
+    }
+
+    my $status = $? ? ( $? >> 8 ) : $?;
+    if ($status) {
+        if ($output) {
+            print STDERR "Executed $cmd_str with status $status\n" if ($DEBUG);
+            print $output;
+            exit $status;
+        }
+        else {
+            die "Failed executing $cmd_str: $!, status=$status";
+        }
+    }
+    print STDERR "Successfully executed $cmd_str\n" if ($DEBUG);
+
+    return $output;
+}

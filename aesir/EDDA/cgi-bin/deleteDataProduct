@@ -1,0 +1,374 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: deleteDataProduct,v 1.17 2015/06/24 18:26:42 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+deleteDataProduct - Delete a data product and all of its variables from EDDA and the AESIR catalog
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+GET deleteDataProduct
+
+=head1 DESCRIPTION
+
+Delete a data product and all of its variables from EDDA and the AESIR catalog
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+
+        # Keep taint mode happy
+        $ENV{PATH} = undef;
+
+        # This set the type and path for the mailer used to send
+        # notification messages. Hard-code to the one executable
+        # known to be available.
+        $ENV{PERL_MAILERS} = 'sendmail:/usr/sbin/sendmail.postfix'
+            if -x '/usr/sbin/sendmail.postfix';
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use CGI;
+use Safe;
+use Time::HiRes qw (gettimeofday);
+use Mail::Mailer;
+use Log::Log4perl qw(:easy);
+use File::Basename;
+use File::Copy;
+
+my $SUCCESS_STATUS = 1;
+my $ERROR_STATUS = 2;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+my $pubBaseline;
+if ($CFG::EDDA_BASELINE eq 'TS2') {
+    $pubBaseline = $CFG::EDDA_BASELINE;
+} else {
+    # Do not provide capability to publish to a higher mode for now
+#    $pubBaseline = $1 if $pubBaselineParam =~ /^(TS1|Beta|OPS)$/;
+    $pubBaseline = $CFG::EDDA_BASELINE;
+}
+
+startLogging();
+
+# Check for required configuration variables
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+exit_with_error("AESIR_CATALOG_DELETED_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DELETED_DATA_PRODUCTS_DIR;
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_DIR;
+exit_with_error("AESIR_CATALOG_DELETED_DATA_FIELDS_DIR for baseline $pubBaseline not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DELETED_DATA_FIELDS_DIR->{$pubBaseline};
+exit_with_error("AESIR_SOLR_ADD_DOC for baseline $pubBaseline not defined in configuration")
+    unless defined $CFG::AESIR_SOLR_ADD_DOC->{$pubBaseline};
+
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory '$dataProductsDir' not found")
+    unless -d $dataProductsDir;
+
+my $deletedDataProductsDir = "$CFG::AESIR_CATALOG_DELETED_DATA_PRODUCTS_DIR";
+exit_with_error("Directory '$deletedDataProductsDir' not found")
+    unless -d $deletedDataProductsDir;
+
+my $dataFieldsDir = "$CFG::AESIR_CATALOG_DATA_FIELDS_DIR";
+exit_with_error("Directory '$dataFieldsDir' not found")
+    unless -d $dataFieldsDir;
+
+my $deletedDataFieldsDir = "$CFG::AESIR_CATALOG_DELETED_DATA_FIELDS_DIR->{$pubBaseline}";
+exit_with_error("Directory '$deletedDataFieldsDir' not found")
+    unless -d $deletedDataFieldsDir;
+
+my $deleteFromAddDocExe = $rootPath . '/bin/AESIR/EDDA/deleteEddaDataFieldFromSolrCatalogAddDoc.pl';
+exit_with_error("Executable '$deleteFromAddDocExe' not found")
+    unless -x $deleteFromAddDocExe;
+
+my $postSolrExe = $rootPath . '/bin/AESIR/post_aesir_solr.pl';
+exit_with_error("Executable '$postSolrExe' not found")
+    unless -x $postSolrExe;
+
+my $aesir_solr_add_doc = $CFG::AESIR_SOLR_ADD_DOC->{$pubBaseline};
+exit_with_error("Writeable '$aesir_solr_add_doc' not found")
+    unless (-w $aesir_solr_add_doc);
+
+my $newDataProductInfo;
+my $newDataProductInfoFile;
+
+# Obtain dataProductId and comment from input parameters
+my $dataProductIdParam = $cgi->param('dataProductId');
+my $dataProductId = $1 if $dataProductIdParam =~ /^(\w[\w.-]+)/;
+my $comment = $cgi->param('comment');
+my $content_type = $cgi->param('contentType');
+
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+my $xml2jsonObj = XML::XML2JSON->new( module => 'JSON::XS',
+                                      pretty => $prettyJSON,
+                                      attribute_prefix => $prefix,
+                                      content_key => $content_key,
+                                      force_array => $forceJSONarray,
+                                      private_attributes => ['encoding', 'version']);
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+my $dataProductFile = "$dataProductsDir/$dataProductId";
+my $deletedDataProductFile = "$deletedDataProductsDir/$dataProductId";
+
+my $dataProductDom;
+my $dataProductDoc;
+
+# Read and parse data product file
+unless (-f $dataProductFile) {
+    my $errorCode = 'DATA_PRODUCT_FILE_NOT_FOUND';
+    my $message = "Readable file for '$dataProductId' not found";
+    outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    ERROR($message);
+    exit 1;
+}
+eval { $dataProductDom = $parser->parse_file($dataProductFile); };
+if ($@) {
+    exit_with_error("Error parsing $dataProductFile: $@");
+}
+$dataProductDoc = $dataProductDom->documentElement();
+#my ($dataProductProductIdNode) = $dataProductDoc->findnodes('/dataProduct/dataProductProductId/value');
+#if ($dataProductProductIdNode) {
+#    $dataProductId = $dataProductProductIdNode->textContent;
+#} else {
+#    my $errorCode = 'DATA_PRODUCT_ID_NOT_FOUND';
+#    my $message = "dataProductProductId value not found for $dataProductId";
+#    outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+#                   $content_type, $errorCode, $message);
+#    ERROR($message);
+#    exit 1;
+#}
+
+my @dataFieldIdNodes = $dataProductDoc->findnodes('/dataProduct/dataProductDataFieldIds/value');
+foreach my $dataFieldIdNode (@dataFieldIdNodes) {
+    my $dataFieldId = $dataFieldIdNode->textContent;
+    my $dataFieldLongId = $dataFieldIdNode->getAttribute('longId');
+    my $dataFieldFile = "$dataFieldsDir/$dataFieldId";
+    my $deletedDataFieldFile = "$deletedDataFieldsDir/$dataFieldId";
+
+    unless (-f $dataFieldFile) {
+        my $errorCode = 'DATA_FIELD_FILE_NOT_FOUND';
+        my $message = "Readable file for '$dataFieldId' not found";
+#        outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+#                       $content_type, $errorCode, $message);
+        ERROR($message);
+#        exit 1;
+        next;
+    }
+    my $dataFieldDom;
+    my $dataFieldDoc;
+    eval { $dataFieldDom = $parser->parse_file($dataFieldFile); };
+    if ($@) {
+#        exit_with_error("Error parsing $dataFieldFile: $@");
+        ERROR"Error parsing $dataFieldFile: $@";
+        next;
+    }
+    $dataFieldDoc = $dataFieldDom->documentElement();
+
+    my $dataFieldState;
+    my ($dataFieldStateNode) = $dataFieldDoc->findnodes('/dataField/dataFieldState/value');
+    if ($dataFieldStateNode) {
+        $dataFieldState = $dataFieldStateNode->textContent;
+    }
+
+    # Delete variables from Solr Add Document unless the state is 'Private'
+    # (has never been published)
+    if ($dataFieldState && ($dataFieldState ne 'Private')) {
+        my $output = `$deleteFromAddDocExe $dataFieldId $pubBaseline 2<&1`;
+        my $status = $?;
+        if ($status) {
+            my $errorCode = 'DELETE_FROM_ADD_DOC_ERROR';
+            $status = $status >>8;
+            my $message = "Internal error: Error executing `$deleteFromAddDocExe`, status=$status\n";
+#            outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+#                           $content_type, $errorCode, $message);
+            ERROR($message);
+#            exit 0;
+            next;
+        } else {
+            INFO("$deleteFromAddDocExe deleted $dataFieldId from $pubBaseline catalog");
+        }
+    }
+
+    # Move data field file to deleted data fields directory
+    my $moveStatus = move($dataFieldFile, $deletedDataFieldFile);
+    if ($moveStatus) {
+        INFO("Moved $dataFieldFile to $deletedDataFieldFile");
+    } else {
+        my $errorCode = 'DATA_FIELD_NOT_MOVED';
+        my $message = "Could not move data field file to deleted data fields directory";
+#        outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+#                       $content_type, $errorCode, $message);
+        ERROR($message);
+#        exit 1;
+        next;
+    }
+}
+
+# Update Solr with the contents of the updated Solr Catalog Add document
+my $output = `$postSolrExe --baseline $pubBaseline $aesir_solr_add_doc 2<&1`;
+my $status = $?;
+if ($status) {
+    my $errorCode = 'SOLR_PUBLISH_ERROR';
+    my $message = "Internal error: Error executing `$postSolrExe`\n$output\n";
+    ERROR($message);
+    outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 0;
+}
+
+# Move data product file to deleted data products directory
+my $moveStatus = move($dataProductFile, $deletedDataProductFile);
+if ($moveStatus) {
+    INFO("Moved $dataProductFile to $deletedDataProductFile");
+} else {
+    my $errorCode = 'DATA_PRODUCT_NOT_MOVED';
+    my $message = "Could not move data set file to deleted data sets directory";
+    outputResponse($parser, $xml2jsonObj, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    ERROR($message);
+    exit 1;
+}
+
+my $recipients = join(',', @CFG::PUBLISH_REQUEST_RECIPIENTS);
+if ($recipients) {
+    my $from = $CFG::PUBLISH_REQUEST_SENDER || 'deleteDataProduct@nasa.gov';
+    my $subject = "$dataProductId deleted from $pubBaseline via $rootPath";
+    my $header = {
+                  To      => $recipients,
+                  From    => $from,
+                  Subject => $subject
+    };
+    my $message = "$dataProductId deletion from " . $cgi->remote_host();
+    $message .= "\nComment: $comment\n" if $comment;
+    INFO($message);
+
+    sendmail($header, $message) if $recipients;
+}
+
+# Product successfully deleted
+outputResponse($parser, $xml2jsonObj, $SUCCESS_STATUS,
+               $content_type);
+
+exit 0;
+
+sub sendmail {
+    my ( $params, $message ) = @_;
+
+    # Mail $message to recipients specified in $params
+
+    my $mailer = new Mail::Mailer();
+    $params->{'Reply-To'} = $params->{From};
+    $mailer->open($params);
+    my @lines = ref($message) ? @$message : ($message);
+    print $mailer "$_\n" for @lines;
+    $mailer->close();
+}
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub outputResponse {
+    my ($parser, $xml2jsonObj, $status, $content_type,
+        $errorCode, $errorMessage) = @_;
+
+    my $responseDom = $parser->parse_string('<deleteDataProductResponse></deleteDataProductResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ($status > $SUCCESS_STATUS) {
+        # Error
+        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    $responseDoc->addChild($resultNode);
+
+    if ($content_type =~ /xml/) {
+        print $cgi->header( -type   => 'application/xml' );
+        print $responseDom->toString(1);
+    } else {
+        my $responseJson = $xml2jsonObj->convert($responseDom->toString());
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}
+
+sub startLogging {
+
+    # Determine directory used to hold log
+    my $logDir =
+        defined $CFG::EDDA_UPDATE_DATA_FIELD_LOG_DIR ? $CFG::EDDA_UPDATE_DATA_FIELD_LOG_DIR :
+        (-d '/var/tmp' && -w '/var/tmp') ? '/var/tmp' :
+        undef;
+
+    my $scriptName = basename((caller(0))[1]);
+    my $scriptMode = ( dirname((caller(0))[1]) =~ /(DEV|TS2|TS1|OPS)/ ) ? ".$1" : "";
+    my ($userSuffix) = ( (defined $ENV{USER}) && $ENV{USER} =~ /^(\w+)$/ ) ? ".$1" : "";
+    my $logFile = (defined $logDir) ?
+        ">>$logDir/" . $scriptName . $scriptMode . $userSuffix . ".log" : '>>STDERR';
+
+    # Determine logging level
+    my $logLevel = $CFG::EDDA_UPDATE_DATA_FIELD_LOG_LEVEL ? $CFG::EDDA_UPDATE_DATA_FIELD_LOG_LEVEL : $INFO;
+
+    # Define logger for this script
+    my $logInit = { level  => $logLevel,
+                    file   => $logFile,
+                    layout => '%d %P %p %m%n'};
+    my @inits = ($logInit);
+    Log::Log4perl->easy_init( @inits );
+    INFO("Starting $0 at " . scalar(gmtime));
+}

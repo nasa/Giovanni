@@ -1,0 +1,425 @@
+<html>
+<head>
+  <title>EDDA Data Set Attributes</title>
+        <style type="text/css">
+        .helpTable {
+                border: 1px solid black;
+                }
+        .helpTable th, td {
+                border: 1px solid black;
+                        padding: 20px;
+                        vertical-align: top;
+                }
+        </style>
+</head>
+<body style='font-family: sans-serif; font-size: 100%;'>
+
+<div style='font-weight: bold; font-size: 1.25em; text-align: left; padding-bottom: 5px;'>EDDA Data Set Attributes</div>
+<table class="helpTable">
+  <tr>
+    <th>Title</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><a id="dataProductIdentifiers">Identifiers</a></td>
+    <td>
+      <table class="plainTable">
+        </tr>
+        <tr>
+          <td><a id="dataProductGcmdEntryId">GCMD Entry ID or Unique Id</a></td>
+          <td>The GCMD collection meatadata identifier, or if the data set meatdata is not available from GCMD, then an identifier that is unique for the data set.<br><br><b>Example:</b> GES_DISC_AIRX3STM_V006</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductShortName">Short Name</a></td>
+          <td>The short name of the data set.<br><br><b>Example:</b> AIRX3STM</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductVersion">Version</a></td>
+          <td>The version identifier for the data set.<br><br><b>Example:</b> 006</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductLongName">Long Name</a></td>
+          <td>The long name of the data set.<br><br><b>Example:</b> Aqua AIRS Level 3 Monthly Standard Physical Retrieval (AIRS+AMSU)</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataProductDescriptionUrl">Description URL</a></td>
+    <td>The URL for a web page that describes that data set.<br><br><b>Example:</b> http://disc.gsfc.nasa.gov/datacollection/AIRX3STD_006.html</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductProcessingLevel">Processing Level</a></td>
+    <td>The processing level of the data set. If the data set was not processed, there is no value.<br><br><b>Example:</b> 3</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductDataCenter">Data Center</a></td>
+    <td>The data center at which data set files are archived, specified in a hierarchical fashion.<br><br><b>Example:</b> NASA/GSFC/SED/ESD/GCDC/GESDISC</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductPlatform">Platform</a></td>
+    <td>
+      <table class="plainTable">
+        <tr>
+          <td><a id="dataProductPlatformShortName">Short Name</a></td>
+          <td>The short name of the platform for the data set.<br><br><b>Example:</b> Aqua</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductPlatformLongName">Long Name</a></td>
+          <td>The long name of the platform for the data set.<br><br><b>Example:</b> Earth Observing System, AQUA</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataProductInstrument">Instrument</a></td>
+    <td>
+      <table class="plainTable">
+        <tr>
+          <td><a id="dataProductInstrumentShortName">Short Name</a></td>
+          <td>The short name of the instrument for the data set.<br><br><b>Example:</b> MODIS</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductInstrumentLongName">Long Name</a></td>
+          <td>The long name of the instrument for the data set.<br><br><b>Example:</b> Moderate-Resolution Imaging Spectroradiometer</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataProductPlatformInstrument">Source</a></td>
+    <td>A concise representation of the combination of Instrument and Platform that is used as a facet for Select Variables instead of separate facets for Instrument and Platform. Usually it is just the value of the Instrument, unless the instrument is on more than one platform.<br><br><b>Examples:</b><br> 
+AATSR-Aqua<br>
+AIRS<br>
+AMSR-2<br>
+AMSR-E<br>
+Aquarius<br>
+ENVISAT/MERIS<br>
+EPA AIRNow<br>
+FLDAS Model<br>
+GEOS-CHEM<br>
+GLDAS Model<br>
+GMS/PR<br>
+GOCART Model<br>
+GOES AVHRR<br>
+GPM<br>
+GRACE<br>
+MERRA Model<br>
+MERRA-2 Model<br>
+MISR<br>
+MODIS-Aqua<br>
+MODIS-Terra<br>
+MOPITT<br>
+NCA-LDAS Model<br>
+NCDC Model<br>
+NLDAS Model<br>
+NOAA-18/AVHRR-3<br>
+NOBM Model<br>
+OCTS<br>
+OMI<br>
+OMPS-NM SNPP<br>
+SSMI<br>
+SeaWiFS<br>
+SeaWinds<br>
+TOMS EP<br>
+TOMS Meteor-3<br>
+TOMS Nimbus-7<br>
+TRMM<br>
+VIIRS
+</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductObservation">Observation/Model</a></td>
+    <td>A designation to indicate whether the variable data was obtained via an observation (e.g. from a satellite sensor) or whether it was computed from a model.<br><br><b>Examples:</b><br> 
+model<br>
+observation<br>
+</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductSpatialResolutionLongitude"></a><a id="dataProductSpatialResolutionLatitude"></a><a id="dataProductSpatialResolutionUnits"></a><a id="dataProductSpatialResolution">Spatial Resolution</a></td>
+    <td>The spatial resolution of the data set along lines of latitude and longitude, and the units of resolution.<br><br><b>Example:</b> Longitude: 1, Latitude: 0.5, Units: deg.</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductSpatialCoverage">Spatial Coverage</a></td>
+    <td>
+      <table class="plainTable">
+        <tr>
+        <td colspan="2">The spatial extent of the data set coverage, represented by the longitudes and latitudes of the bounding rectangle, measured in degrees.</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductWest">West</a></td><td>The westernmost longitude of the bounding box.<br><br><b>Example:</b> -180.0</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductNorth">North</a></td><td>The northernmost latitude of the bounding box.<br><br><b>Example:</b> 90.0</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductEast">East</a></td><td>The easternmost longitude of the bounding box.<br><br><b>Example:</b> 180.0</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductSouth">South</a></td><td>The southernmost latitude of the bounding box.<br><br><b>Example:</b> -90.0</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataProductTemporalCoverage">Temporal Coverage</a></td>
+    <td>
+      <table class="plainTable">
+        <tr>
+          <td colspan="2">The temporal coverage of the data set.</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductBeginDateTime">Start Date/Time</a></td>
+          <td>The starting date/time of the temporal coverage of the data set, in ISO format.<br><br><b>Example:</b> 2002-08-30T00:00:00Z</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductEndDateTime">End Date/Time</a></td>
+          <td>The ending date/time of the temporal coverage of the data set, in ISO format. If new data files are still being processed and/or archived, this value should be empty.<br><br><b>Example:</b> 2011-06-29T22:29:59.000Z</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductTimeFrequency">Frequency</a></td>
+          <td>The frequency of data files in terms of the temporal coverage interval. <b>(Deprecated; set the value to 1.)</b></td>
+        </tr>
+        <tr>
+          <td><a id="dataProductTimeInterval">Interval</a></td>
+          <td>The interval between the start and end times of a data set's files, e.g. "hourly" for data sets with a duration of 1 hour.<br><br><b>Example:</b> hourly</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductStartTimeOffset">Start time offset (seconds)</a></td>
+          <td>The offset (in seconds) between the starting date/time of temporal coverage for each of a daily data set's data files and 00:00:00 UTC. This value should be 0 if the temporal coverage interval is anything other than "daily", or when the temporal coverage of a daily data file starts on a day boundary, and should be a value between -86,399 and 86,399 for daily files that start at other times.<br><br><b>Example:</b> TRMM 3B42 Daily files start at 22:30:00 the day before the nominal "day of coverage", and thus have an offset of -5400 (seconds).</td>
+        </tr>
+        <tr>
+          <td><a id="dataProductEndTimeOffset">End time offset (seconds)</a></td>
+          <td>The offset (in seconds) between the ending date/time of temporal coverage for each of a daily data set's data files and 00:00:00 UTC. This value should be 0 if the temporal coverage interval is anything other than "daily", or when the temporal coverage of a daily data file ends before the day boundary, and should be a value between -86,399 and 86,399 for daily files that end at other times.<br><br><b>Example:</b> TRMM 3B42 Daily files end at 22:29:59 on the nominal "day of coverage", and thus have an offset of -5401 (seconds).</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataProductSearchIntervalDays">Duration of search intervals (in days)</a></td>
+    <td>An optional value that determines the Giovanni "chunking" duration. Normally this value can be left empty.<br><br><b>Example:</b> For the 'MISR Level 3 Component Global Aerosol Product covering a day' data set data variables, the value is 90.0 (days).</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductOsddUrl">OpenSearch Descriptor Document for granules URL</a></td>
+    <td>The URL for the OpenSearch Descriptor Document used to perform a granule search. The URL for the OpenSearch at CMR and MODAPS can be constructed from a template:
+      <ul>
+        <li><b>CMR:</b> https://cmr.earthdata.nasa.gov/opensearch/granules/descriptor_document.xml?dataCenter=&lt;dataCenter&gt;&shortName=&lt;ShortName&gt;&versionId=&lt;VersionId&gt;&clientId=Giovanni</li>
+        <li><b>MODAPS:</b> https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getOSDD?product=&lt;productId&gt;</li>
+      </ul>
+      <br><br><b>Examples:</b>
+      <ul>
+        <li><b>CMR:</b> https://cmr.earthdata.nasa.gov/opensearch/granules/descriptor_document.xml?dataCenter=LAADS&shortName=MOD08_D3&versionId=5.1&clientId=Giovanni</li>
+        <li><b>MODAPS:</b> https://modwebsrv.modaps.eosdis.nasa.gov/axis2/services/MODAPSservices/getOSDD?product=MOD08_D3</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataProductSampleGranuleUrl">Sample OpenSearch data granule URL</a></td>
+    <td>A sample URL for any of the data set's granules that would be found via the OpenSearch described by the URL for the OpenSearch Descriptor Document.<br><br><b>Example:</b> https://acdisc.gsfc.nasa.gov/data/Aqua_AIRS_Level3/AIRX3STM.006/2002/AIRS.2002.09.01.L3.RetStd030.v6.0.9.0.G13208054216.hdf</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductOpendapUrl">(corresponding) Sample OPeNDAP granule URL</a></td>
+    <td>The OPeNDAP URL that corresponds to the same granule provided in the Sample OpenSearch data granule URL. If possible, provide a URL with extension '.html'.<br><br><b>Example:</b> https://acdisc.gsfc.nasa.gov/opendap/Aqua_AIRS_Level3/AIRX3STM.006/2002/AIRS.2002.09.01.L3.RetStd030.v6.0.9.0.G13208054216.hdf.html</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductResponseFormat">Access Format</a></td>
+    <td>The format of the data granules used to obtain one data variable. Usually this should be "netCDF", but it should be "DAP" in the case where the data are accessed through an OPeNDAP server that does not provide netCDF downloading. Choose one value.<br><br><b>Example:</b> netCDF</td>
+  </tr>
+  <tr>
+    <td><a id="dataProductLastModified">Last modification date</a></td>
+    <td>This displays the most recent data that the Data Set Attributes have been modified.</td>
+  </tr>
+<!--
+  <tr>
+    <td><a id=""></a></td>
+    <td></td>
+  </tr>
+-->
+</table>
+
+<br/>
+<br/>
+<br/>
+<br/>
+<div style='font-weight: bold; font-size: 1.25em; text-align: left; padding-bottom: 5px;'>EDDA Data Variable Attributes</div>
+<table class="helpTable">
+  <tr>
+    <th>Title</th>
+    <th>Description</th>
+  </tr>
+<!--
+  <tr>
+    <td><a id="dataFieldSdsName">G3 SDS Name</a></td>
+    <td>An identifier string (without spaces) for the data variable that is unique for each data variable in a data set. Normally this will be identical to Variable Name, but there may be exceptions, for example, when the Variable Name for the variable in OPeNDAP differs from the original SDS name. For a completely new data variable, any sensible value can be used. Choose one value.<br><br><b>Example:</b> For MOD08_D3, the SDS name of the ocean-only Angstrom Exponent variable in OPeNDAP is Angstrom_Exponent_1_Ocean_QA_Mean</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldShortName">Short Name</a></td>
+    <td>The short name for the data variable. Provide one value.<br><br><b>Example:</b> For MOD08_D3, the short name of the ocean-only Angstrom Exponent variable whose SDS name is Angstrom_Exponent_1_Ocean_QA_Mean is "Angstrom 550/865nm - Ocean (QA-w)"</td>
+  </tr>
+-->
+  <tr>
+    <td><a id="dataFieldLongName">Long Name</a></td>
+    <td>The long name for the data variable. This is the name that will be displayed in the data picker, so systematic naming will help insure that similar data variables appear together in the data picker.<br><br><b>Example:</b> For MOD08_D3 and MYD08_D3, example values are: <ul>
+<li>Aerosol Optical Depth 550 nm (Dark Target)</li>
+<li>Angstrom Exponent 470/660 nm (Dark Target), Land-only</li>
+</ul> An example ordering of the long name constituents is: <ol><li>measurement</li><li>wavelengths (or other "third dimension", if any) with units</li><li>qualifiers</li></ol></td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldAccessName">Variable Name</a></td>
+    <td>The name of the variable(s) used for the chosen Access Method. If the Access Method is "OPeNDAP", then this is the name of the variable in OPeNDAP. If more than one variable is needed to represent the data variable, the names of the variables should be separated by commas [For example, the AIRX3STD Atmospheric Temperature profile needs both Temperature_A and TempPrsLvls_A, so the value in that case should be 'Temperature_A,TempPrsLvls_A']. If a variable has multiple dimensions, the name should also include the index of the extra dimensions.  Choose one value.<br><br><b>Example:</b> For MOD08_D3, the Access Method is "OPeNDAP", and the name of the ocean-only Angstrom Exponent variable in OPeNDAP is Angstrom_Exponent_1_Ocean_QA_Mean.<br>For MIL3DAE 004, there are also OpticalDepth, Band, and ParticleType dimensions, so to choose the first optical depth, the second band, and the first ParticleType, the name should be Optical_depth_average/OpticalDepth[0]/Band[1]/ParticleType[0]</td>
+  </tr>
+<!--
+  <tr>
+    <td><a id="dataFieldAccessFormat">Variable Format</a></td>
+    <td>The format of the values desired for the chosen Access Method. If the Access Method is "OPeNDAP", a number of different formats may be available, but usually the desired format is "netCDF". However, for GRIB data, the desired format is "native". Choose one value.<br><br><b>Example:</b> For MOD08_D3 data variables, the Access Method is "OPeNDAP", and the desired Variable Format is "netCDF".</td>
+  </tr>
+-->
+<!--
+  <tr>
+    <td><a id="dataFieldAccessFormatVersion">Variable Format Version</a></td>
+    <td>The version of the Variable Format. e.g.<br><ul><li>binary: 4</li><li>hdf: 4 or 5</li><li>netCDF: 3</li><li>text: 1</li></ul></td>
+  </tr>
+-->
+<!--
+  <tr>
+    <td><a id="dataFieldAccessMethod">Access Method</a></td>
+    <td>The method used by Giovanni to access the data granules and obtain one data variable. Usually this will be "OPeNDAP", but other methods may be needed if the data variable cannot be obtained via OPeNDAP.</td>
+  </tr>
+-->
+  <tr>
+    <td><a id="dataFieldSld">Color Palettes</a></td>
+    <td>The color palettes used to display plots of this data variable. (Often a palette related to the data variable's measurement already exists; if not, a new palette may need to be created.) Choose one or more.<br><br><b>Example:</b> For the MOD08_D3 data variable Angstrom_Exponent_1_Ocean_QA_Mean, the "Angstrom Exponent" palette is the best choice.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldMeasurement">Measurements</a></td>
+    <td>The main quantity being measured by the data variables. Choose one or more values.<br><br><b>Example:</b> Aerosol Index</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldDescriptionUrl">Description URL</a></td>
+    <td>The URL for a web page or a portion of a web page that describes the data variable. The data picker will use this URL to link the data variable to its description. Choose one value.<br><br><b>Example:</b> Angstrom Exponent data variables might use the URL <a href="https://disc.gsfc.nasa.gov/information/glossary?keywords=giovanni%20measurements&amp;title=Giovanni%20Measurement%20Definitions:%20Angstrom%20Exponent">https://disc.gsfc.nasa.gov/information/glossary?keywords=giovanni%20measurements&amp;title=Giovanni%20Measurement%20Definitions:%20Angstrom%20Exponent</a></td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldDiscipline">Disciplines</a></td>
+    <td>The science discipline associated with this data variable. Choose one or more values.<br><br><b>Example:</b> Aerosols</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldKeywords">Keywords</a></td>
+    <td>Keywords and keyword phrases that can be used to find the data variable via a keyword search in Giovanni. One of the keywords should always be the shortname of the data set. Use the "Add Keywords" button to add additional keywords, and use the "Remove" button to remove keywords.<br><br>Words and phrases from the values of the following fields will automatically be used in keyword searches even if they are not added as keywords :<br>
+      <ul>
+        <li>(Data Set) Short Name</li>
+        <li>(Data Set) Platform Short Name</li>
+        <li>(Data Set) Platform Long Name</li>
+        <li>(Data Set) Instrument Short Name</li>
+        <li>(Data Set) Instrument Long Name</li>
+        <li>Variable Name</li>
+        <li>Measurements</li>
+        <li>CF-1 Standard Name</li>
+        <li>Special Features</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldTags">Tags</a></td>
+    <td>One or more tags (text strings) that can be used to produce bookmarkable URLs that will only display data variables with that tag in Giovanni. These tags can be used to create virtual groups of related data variables, i.e. portals. Use the "Add Tags" button to add additional tags.<br><br><b>Example:</b> Basic</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldSearchFilter">Granule Search Results Filter (regex)</a></td>
+    <td>A filter (in the form of a regular expression) that is applied to the results of an OpenSearch for granules. It is used to exclude granules from the results returned to Giovanni. Only granules with a download link which matches the regular expression will be included.<br><br>No value is needed for this attribute when the OpenSearch result will only contain links for the data set whose attributes (such as spatial resolution and temporal coverage) were specified in the EDDA Data Set Attributes. However, there may be some cases when the OpenSearch result contains granules whose attributes do not match what was specified for the data set (e.g. there is more than one spatial resolution), but they can be distinguished via pattern matching, and in those cases a value should be specified for this attribute. The value should be specified as a regular expression. <br><br><b>Example:</b> opendap.+L3m_MO_SST4_sst4_4km can be used to select only granules with a download link that contains 'opendap' followed by one or more characters before the string 'L3m_MO_SST4_sst4_4km'.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldStandardName">CF-1 Standard Name</a></td>
+    <td>The CF-1 Metadata compliant "Standard Name" for the data variable. See <a href="http://cfconventions.org/Data/cf-standard-names/27/build/cf-standard-name-table.html">CF Standard Names</a>. Since not every data variable has a corresponding standard name, this is often left empty.<br><br><b>Example:</b> air_temperature</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldFillValueFieldName">Name of fill value attribute</a></td>
+    <td>The name of the fill value variable in the data file.<br><br><b>Example:</b> _FillValue</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldUnits">Units</a></td>
+    <td>The units associated with this data variable. If the data variable is unitless, this is often the value '1'. Choose zero or one value.<br><br><b>Example:</b> m/s</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldDestinationUnits">Allowed Units Conversions</a></td>
+    <td>The conversions that are allowed for the units associated with this data variable. Choose zero or more values.<br><br><b>Example:</b> mm/s and mm/hr</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldDeflationLevel">Deflation Level</a></td>
+    <td>The deflation level, needed only if the data files are compressed NetCDF. Otherwise it should be left empty.<br><br><b>Example:</b>1</td>
+  </tr>
+  <tr>
+    <td><a id="virtualDataFieldGenerator">Virtual data variable generator</a></td>
+    <td>Usually not used. In some cases, a "virtual" data variable can be generated by a formula for the ncap2 equation that produces a single value from one or more variables. The left side of the equation should be the data variable id.<br><br><b>Example:</b> The value of air pressure at sea level from the MAT1NXSLV data set can be rescaled via the formula MAT1NXSLV_5_2_0_SLP=SLP/100.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldVectorComponentNames">Vector Component Names</a></td>
+    <td>An optional field that only needs a value if the variable represents a vector, in which case it should be the comma-separated names of all of the vector component variables. Choose one value.<br><br><b>Example:</b> For the NLDAS_FORA0125_H.002 data set, the wind velocity vector has two components, which are zonal wind speed and meridional wind speed, so the value used is the comma-separated list of the names of those two variables, which is "N10-m_above_ground_Zonal_wind_speed,N10-m_above_ground_Meridional_wind_speed"</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldAccumulatable">Can be accumulated?</a></td>
+    <td>Set to "true" to indicate that values of this data variable can be accumulated over time, e.g. accumulated precipitation amounts. Only set this to "true" for data variables for which it makes sense to accumulate the measurement.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldMinValid">Minimum Valid Value</a></td>
+    <td>The minimum valid data value. This is an optional value that should be set when the data contains invalid values; setting the minimum value will cause values less than the minimum to be ignored.<br><br><b>Example:</b> The MOD08_D3 0051 Deep Blue AOD at 550 nm from LAADS has values less than 0, so setting this value to '0.' will cause those values to be ignored.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldMaxValid">Maximum Valid Value</a></td>
+    <td>The maximum valid data value. This is an optional value that should be set when the data contains invalid values; setting the maximum value will cause values greater than the maximum to be ignored.<br><br><b>Example:</b> The MOD08_D3 051 Deep Blue AOD at 550 nm from LAADS has values greater than 5, so setting this value to '5.' will cause those values to be ignored.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldNominalMinValue">Nominal minimum value</a></td>
+    <td>The nominal minimum data value. This is an optional value that specifies the smallest nominal value expected in the data. All values smaller than this will be rendered in a map plot as the same color.<br><br><b>Example:</b> </td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldNominalMaxValue">Nominal maximum value</a></td>
+    <td>The nominal maximum data value. This is an optional value that specifies the largest nominal value expected in the data. All values larger than this will be rendered in a map plot as the same color.<br><br><b>Example:</b> </td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldValuesDistribution">Data Values Distribution</a></td>
+    <td>The distribution of the data values, such as "linear" or "log(arithmic)". The value chosen will determine the distribution of palette colors and the scale displayed for the palette in map plots.<br><br><b>Example:</b> linear</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldTimeIntvRepPos">Time Interval Representative Position</a></td>
+    <td>The position in the interval between the start and end times of a data set's file that represents the "data time" for a variable, which is either the start, middle, or end of the interval.<br><br><b>Example:</b> start</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldWavelengths">Wavelengths</a></td>
+    <td>If there are wavelengths associated with the data variable, a (numerical) wavelength value should be provided for each wavelength. No values need to be provided if there are no wavelengths associated with the data variable. (Units will be specified in "Wavelength Units"). Provide zero or more values.<br><br><b>Example:</b> For MOD08_D3, the ocean-only Angstrom Exponent variable has two wavelength values associated with it, "550" and "865".</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldWavelengthUnits">Wavelength Units</a></td>
+    <td>If there are wavelengths associated with the data variable, the units for the wavelength values. Provide zero or more values.<br><br><b>Example:</b> For MOD08_D3, the ocean-only Angstrom Exponent variable has "nm" as the wavelength units.</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldDepth">Depths</a></td>
+    <td>The range of depths below the surface for the data measurement. Provide zero or one value.<br><br><b>Example:</b> 0-10</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldDepthUnits">Depth Units</a></td>
+    <td>Units for the range of depths below the surface for the data measurement. Provide zero or one value.<br><br><b>Example:</b> cm</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldZDimensionName">Z-Dimension name (if any)</a></td>
+    <td>If this data variable has a Z-dimension, the name used for the Z-dimension values. Choose one value if the data variable has a Z-dimension, otherwise leave it empty.<br><br><b>Example:</b> TempPrsLvls_A</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldZDimensionType">Z-Dimension type (if any)</a></td>
+    <td>If this data variable has a Z-dimension, the type ('pressure', 'altitude', 'depth') of the Z-dimension values. Choose one value if the data variable has a Z-dimension, otherwise leave it empty.<br><br><b>Example:</b> pressure</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldZDimensionUnits">Z-Dimension units (if any)</a></td>
+    <td>If this data variable has a Z-dimension, the units used for the Z-dimension values. Choose one value if the data variable has a Z-dimension, otherwise leave it empty.<br><br><b>Example:</b> hPa</td>
+  </tr>
+  <tr>
+    <td><a id="dataFieldZDimensionValues">Z-Dimension values (space-separated, if any)</a></td>
+    <td>If this data variable has a Z-dimension, the order, space-separated list of Z-dimension values. Provide a list of values if the data variable has a Z-dimension, otherwise leave it empty.<br><br><b>Example:</b> For the case where the Z-dimension is "pressure", the list of values (in hPa) might be "1000 500 100 50 30 10 5 1".</td>
+  </tr>
+<!--
+  <tr>
+    <td><a id=""></a></td>
+    <td></td>
+  </tr>
+-->
+</table>
+</body>
+</html>

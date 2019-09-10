@@ -1,0 +1,376 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getNewDataFieldInfo,v 1.20 2016/01/05 20:51:35 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+getNewDataFieldInfo - Output AESIR information for one new data field
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getNewDataFieldInfo?dataProductId=<dataProductId>&dataFieldId=<dataFieldId>[&format=xml]
+
+=head1 DESCRIPTION
+
+Output AESIR information for one new data field
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+#        unshift( @INC, $rootPath . 'lib/perl5' );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use LWP::UserAgent;
+use EDDA::DataProbe;
+use CGI;
+use Safe;
+
+my $SUCCESS_STATUS = 1;
+my $ERROR_STATUS = 2;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+# If xml format is desired, output the xml version of the dataProducts document
+my $format = $cgi->param('format');
+$format ||= 'json';
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+my $newDataFieldDom = $parser->parse_string($CFG::NEW_DATA_FIELD_XML);
+my $newDataFieldDoc = $newDataFieldDom->documentElement();
+my %newDataFieldHash;
+
+my $pid = $cgi->param('dataProductId');
+my $dataProductId = $1 if $pid =~ /^([a-zA-Z0-9_.-]+)/;
+my $dataFieldId = $cgi->param('dataFieldId');
+if ($dataProductId && $dataFieldId) {
+    # Try to obtain data product information
+
+    my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+    my $dataProductFile = "$dataProductsDir/$dataProductId";
+    unless (-r $dataProductFile) {
+        exit_with_error("Could not find readable product file for product id $dataProductId\n");
+    }
+    unless (open(DATAPRODUCT, "< $dataProductFile")) {
+        exit_with_error("Could not open product file for product id $dataProductId for reading: $!")
+    }
+    my $dataProductInfoXml;
+    {
+        local $/;
+        $dataProductInfoXml = <DATAPRODUCT>;
+    }
+    close(DATAPRODUCT);
+    my $dataProductDom = $parser->parse_string($dataProductInfoXml);
+    my $dataProductDoc = $dataProductDom->documentElement();
+    my ($dataProductShortNameNode) = $dataProductDoc->findnodes('/dataProduct/dataProductIdentifiers/value/dataProductShortName/value');
+    my $dataProductShortName = $dataProductShortNameNode->textContent
+        if $dataProductShortNameNode;
+    my ($dataProductVersionNode) = $dataProductDoc->findnodes('/dataProduct/dataProductIdentifiers/value/dataProductVersion/value');
+    my $dataProductVersion = $dataProductVersionNode->textContent
+        if $dataProductVersionNode;
+    my ($dataProductOpendapUrlNode) = $dataProductDoc->findnodes('/dataProduct/dataProductOpendapUrl/value');
+    my $dataProductOpendapUrl = $dataProductOpendapUrlNode->textContent
+        if $dataProductOpendapUrlNode;
+
+    my %args = (SHORTNAME  => $dataProductShortName,
+                VERSION    => $dataProductVersion);
+    if ($dataProductOpendapUrl) {
+        $args{OPENDAPURL} = $dataProductOpendapUrl;
+    } else {
+        my ($dataProductBeginDateTimeNode) = $dataProductDoc->findnodes('/dataProduct/dataProductTemporalCoverage/value/dataProductBeginDateTime/value');
+        my $dataProductBeginDateTime = $dataProductBeginDateTimeNode->textContent
+            if $dataProductBeginDateTimeNode;
+        $args{BEGINDATE} = $dataProductBeginDateTime if $dataProductBeginDateTime;
+        my ($dataProductTimeIntervalNode) = $dataProductDoc->findnodes('/dataProduct/dataProductTemporalCoverage/value/dataProductTimeInterval/value');
+        my $dataProductTimeInterval = $dataProductTimeIntervalNode->textContent
+            if $dataProductTimeIntervalNode;
+        $args{TIMEINTERVAL} = $dataProductTimeInterval if $dataProductTimeInterval;
+
+        # Add path to Giovanni library modules to @INC so that DataProbe
+        # can find ESIP::OSDD
+        unshift( @INC, $CFG::GIOVANNI_LIB ) if defined $CFG::GIOVANNI_LIB;
+    }
+
+    my $dataFieldName = $dataFieldId;
+    my $prefix = $dataProductId;
+    $prefix =~ s/\./_/g;
+    $dataFieldName = $1 if $dataFieldName =~ /${prefix}_(.+)/;
+    addValue($newDataFieldDoc, 'dataFieldAccessName',
+             $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+             $dataFieldName);
+
+    # Use dataProbe to attempt to find additional information
+    my $dataProbe = new EDDA::DataProbe(%args);
+    if ($dataProbe->onError) {
+        exit_with_error("Data probe: " . $dataProbe->errorMessage);
+    }
+    my $attributes = $dataProbe->dataFieldAttributes($dataFieldName);
+    if ($attributes) {
+        unless (ref($attributes) eq 'HASH') {
+            exit_with_error("Unexpected data probe result for $dataFieldId");
+        }
+
+        # The data probe found some information.
+
+        # Add a value for each attribute the the data probe dataFieldAttributes
+        foreach my $attribute (keys %$attributes) {
+            next unless exists $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$attribute};
+            my $value = $dataProbe->dataFieldAttribute($dataFieldName, $attribute);
+            addValue($newDataFieldDoc, $attribute,
+                     $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                     $value);
+        }
+
+        # Set SDS name to dataFieldName and make it uneditable
+        addValue($newDataFieldDoc, 'dataFieldSdsName',
+                 $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                 $dataFieldName);
+
+        # Set dataFieldAccessMethod to 'OPeNDAP'
+        addValue($newDataFieldDoc, 'dataFieldAccessMethod',
+                 $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                 'OPeNDAP');
+    }
+
+    # Set dataFieldId and dataProductId to the values that were provided
+    # as arguments.
+    addValue($newDataFieldDoc, 'dataFieldId',
+             $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+             $dataFieldId);
+    addValue($newDataFieldDoc, 'dataProductId',
+             $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+             $dataProductId);
+}
+
+# Replace dataFieldSld valids with values from a configuration file
+# that is updated whenever a new SLD is added.
+if (defined $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC &&
+    -r $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC) {
+    my $sldValidsDom;
+    my $sldValidsDoc;
+    eval { $sldValidsDom = $parser->parse_file( $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC ); };
+    if ($@) {
+        exit_with_error("Error parsing $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC");
+    }
+    $sldValidsDoc = $sldValidsDom->documentElement();
+    if ($sldValidsDoc->findnodes('/valids')) {
+        my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{'dataFieldSld'}
+          . '/valids';
+        my $validsPath2 = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{'dataFieldSld'}
+            . '/valids/dataFieldSldName';
+        my ($validsNode2) = $newDataFieldDoc->findnodes($validsPath2);
+        if ($validsNode2) {
+            $sldValidsDoc->setNodeName('dataFieldSldName');
+            $validsNode2->replaceNode($sldValidsDoc);
+        } else {
+            my ($validsNode) = $newDataFieldDoc->findnodes($validsPath);
+            if ($validsNode) {
+                $validsNode->replaceNode($sldValidsDoc);
+            }
+        }
+    }
+}
+
+# Replace dataFieldDestinationUnits valids with values obtained
+# from Giovanni
+my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataFieldDestinationUnits} . '/valids';
+my ($validsNode) = $newDataFieldDoc->findnodes($validsPath);
+if ($validsNode) {
+    my $getDestUnitsUrl = $CFG::GET_DESTINATION_UNITS_URL;
+    if (defined $getDestUnitsUrl) {
+        my $ua = LWP::UserAgent->new(timeout => $CFG::GET_DESTINATION_UNITS_TIMEOUT);
+        my $response = $ua->get($getDestUnitsUrl);
+        unless ( $response->is_error ) {
+            my $xml = $response->content;
+            my $dom;
+            eval { $dom = $parser->parse_string($xml); };
+            if ($@) {
+                exit_with_error("Error parsing response from $getDestUnitsUrl");
+            }
+            my $validsDoc = $dom->documentElement();
+            $validsNode->replaceNode($validsDoc);
+        }
+    }
+}
+
+# Replace valids with values from a configuration file
+# that is updated whenever a new valid is added.
+my $validsDom;
+my $validsDoc;
+if (defined $CFG::AESIR_CATALOG_DATA_FIELD_VALIDS_DOCS) {
+    while (my($attr, $file) = each %$CFG::AESIR_CATALOG_DATA_FIELD_VALIDS_DOCS) {
+        my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$attr} . '/valids';
+        my ($validsNode) = $newDataFieldDoc->findnodes($validsPath);
+        if ($validsNode) {
+            if (defined $file && -r ($file)) {
+                eval { $validsDom = $parser->parse_file( $file ); };
+                if ($@) {
+                    exit_with_error("Error parsing $file");
+                }
+                $validsDoc = $validsDom->documentElement();
+                if ($validsDoc->findnodes('/valids')) {
+                    $validsNode->replaceNode($validsDoc);
+                }
+            }
+        }
+    }
+}
+
+outputResponse($parser, $newDataFieldDoc, $SUCCESS_STATUS, $format);
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub addValue {
+    my ($doc, $key, $mapping, $value) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    # Look for a 'value' child node. If one is found and it is empty,
+    # replace it with a new value
+    my ($valueNode1) = $node->findnodes('./value');
+    if (defined $valueNode1) {
+        my $content = $valueNode1->textContent;
+        if ($content eq '') {
+            $valueNode1->removeChildNodes();
+            $valueNode1->appendText($value);
+            return;
+        }
+    }
+
+    # Otherwise add a new 'value' child node.
+    # Construct a new 'value' node and add it to the node in $doc at
+    # that path.
+    $node->appendTextChild('value', $value);
+    return;
+}
+
+sub addOptionalValue {
+    my ($doc, $key, $mapping, $dataFieldOptionalDoc, $value) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+
+    if ($node) {
+        # Add the 'value' node to the node in $doc at that path
+        $node->appendTextChild('value', $value);
+        return;
+    } else {
+        # Find the node in $dataFieldOptionalDoc at that path, clone it,
+        # and add the 'value' node to the cloned node
+        ($node) = $dataFieldOptionalDoc->findnodes($path);
+        unless ($node) {
+            print STDERR "Could not find optional node for key $key path $path\n";
+            return;
+        }
+        my $newNode = $node->cloneNode(1);
+        $newNode->appendTextChild('value', $value);
+
+        # Add the cloned node to $doc
+        $doc->addChild($newNode);
+    }
+}
+
+sub outputResponse {
+    my ($parser, $doc, $status, $content_type,
+        $errorCode, $errorMessage) = @_;
+
+    my $responseDom = $parser->parse_string('<getNewDataFieldInfoResponse></getNewDataFieldInfoResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ($status > $SUCCESS_STATUS) {
+        # Error
+        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    $resultNode->addChild($doc);
+    $responseDoc->addChild($resultNode);
+
+    if ($content_type =~ /xml/) {
+        print $cgi->header( -type   => 'application/xml' );
+        print $responseDom->toString(1);
+    } else {
+        my $noJsonAttrPrefix = 1;
+        my $JsonContentKeyIsValue = 1;
+        my $forceJSONarray = 1;
+        my $prettyJSON = 1;
+        my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+        my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+        my $obj = XML::XML2JSON->new( module => 'JSON::XS',
+                                      pretty => $prettyJSON,
+                                      attribute_prefix => $prefix,
+                                      content_key => $content_key,
+                                      force_array => $forceJSONarray,
+                                      private_attributes => ['encoding', 'version']);
+        my $responseJson = $obj->convert($responseDom->toString());
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}

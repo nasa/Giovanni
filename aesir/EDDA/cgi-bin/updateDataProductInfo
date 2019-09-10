@@ -1,0 +1,592 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: updateDataProductInfo,v 1.8 2015/06/30 17:11:56 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+updateDataProductInfo - Update existing EDDA data product information using provided information
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+POST updateDataProductInfo?comment=commentText[&pubBaseline=<TS2|TS1|Beta|OPS> <dataProduct json or xml>
+
+=head1 DESCRIPTION
+
+A CGI script to update existing EDDA data product information using provided
+information.
+
+=head1 PARAMETERS
+
+The request can be either a POST or a GET request with these CGI parameters:
+
+=item comment
+
+Comment text provided by the user (when action is 'publish')
+that will be included in the notification and/or logs for publication.
+
+=item updatedDataProduct
+
+Only used when the request method is GET. Contains the updated data product
+information in json or xml format. The content_type in the HTTP request header
+will determine whether it is parsed as json or xml.
+
+=item updatedDataProductFile
+
+Only used when the request method is GET. Contains the local filesystem path to
+the updated product information in json or xml format. The content_type in
+the HTTP request header will determine whether it is parsed as json or xml.
+
+=item POSTDATA
+
+The body of the POST request. Contains the updated data product information
+in json or xml format. The content_type in the HTTP request header will
+determine whether it is parsed as json or xml.
+
+=head1 RESPONSE
+
+The response has a type of application/json or application/xml, corresponding
+to the content_type in the HTTP request header. It consists of an
+'updateResponse' object, which consists of a 'status' and a 'result',
+and possibly an 'errorCode' and 'errorMessage'.
+
+'status' has an integer value of 1 for success and a value greater
+than 1 on error. A value of 6 or greater indicates an error where a publication
+was not successful. If an error was detected, 'errorCode' will have a string
+value describing the status and 'errorMessage' will have a string value that
+describes the error.
+
+'result' is an object consisting of a 'dataProduct', whose value is a list of
+data product attribute/value pairs, where the value for each attribute is an
+object that describes the type, label, multiplicity, constraints, and value
+for the attribute.
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+#        unshift( @INC, $rootPath . 'lib/perl5' );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::LibXSLT;
+use XML::XML2JSON;
+use DateTime;
+use Date::Parse;
+use CGI;
+use Safe;
+use Time::HiRes qw (gettimeofday);
+use LWP::UserAgent;
+use LWP::Simple;
+use Log::Log4perl qw(:easy);
+use File::Basename;
+
+# Status codes for 'status' in response
+my $SUCCESS_STATUS          = 1;
+my $ERROR_STATUS            = 2;
+my $OUT_OF_SEQUENCE_STATUS  = 3;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+#my $entryIdsCfgFile = $rootPath . 'cfg/EDDA/AESIR_GCMD_DIF_Entry_IDs.cfg';
+#unless ( $cpt->rdo($entryIdsCfgFile) ) {
+#    exit_with_error("Could not read configuration file $entryIdsCfgFile\n");
+#}
+
+startLogging();
+
+# Check for required configuration variables and exit if any are not found
+# and valid
+#exit_with_error("AESIR_CATALOG_DIR not defined in configuration\n")
+#    unless defined $CFG::AESIR_CATALOG_DIR;
+#exit_with_error("Directory $CFG::AESIR_CATALOG_DIR not found\n")
+#    unless -d $CFG::AESIR_CATALOG_DIR;
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory $dataProductsDir not found")
+    unless -d $dataProductsDir;
+
+# my $updateAddDocExe = $rootPath . '/bin/AESIR/EDDA/updateSolrCatalogAddDocFromEdda.pl';
+# exit_with_error("Executable '$updateAddDocExe' not found")
+#     unless -x $updateAddDocExe;
+
+# my $postSolrExe = $rootPath . '/bin/AESIR/post_aesir_solr.pl';
+# exit_with_error("Executable '$postSolrExe' not found")
+#     unless -x $postSolrExe;
+
+my $updatedDataProductFile;
+my $updatedDataProductInfo;
+my $commentParam;
+my $pubBaselineParam;
+my $ignoreTimestamp;
+
+# Obtain type and content of POSTed updated data product info
+my $request_method = $cgi->request_method;
+my $content_type = $cgi->content_type();
+
+# Obtain input parameter values.
+if ($request_method eq 'POST') {
+    if ($content_type =~ /application\/xml/) {
+	$updatedDataProductInfo = $cgi->param('XForms:Model');
+    } else {
+	$updatedDataProductInfo = $cgi->param('POSTDATA');
+    }
+    $commentParam           = $cgi->url_param('comment');
+    $pubBaselineParam       = $cgi->url_param('pubBaseline');
+    $ignoreTimestamp        = $cgi->url_param('ignoreTimestamp');
+} elsif ($request_method eq 'GET') {
+    $updatedDataProductInfo = $cgi->param('updatedDataProduct');
+    $updatedDataProductFile = $cgi->param('updatedDataProductFile');
+    $commentParam           = $cgi->url_param('comment');
+    $pubBaselineParam       = $cgi->param('pubBaseline');
+    $ignoreTimestamp        = $cgi->param('ignoreTimestamp');
+}
+
+if ( (defined $updatedDataProductFile) && (-r $updatedDataProductFile) ) {
+    unless (open(UPDATED, "< $updatedDataProductFile")) {
+        exit_with_error("Could not open $updatedDataProductFile for reading: $!")
+    }
+    {
+        local $/;
+        $updatedDataProductInfo = <UPDATED>;
+    }
+    close(UPDATED);
+    INFO("Read $updatedDataProductFile");
+}
+
+my $comment = $commentParam;
+
+my $pubBaseline;
+if ($CFG::EDDA_BASELINE eq 'TS2') {
+    $pubBaseline = $CFG::EDDA_BASELINE;
+} else {
+    # Do not provide capability to publish to a higher baseline for now
+#    $pubBaseline = $1 if $pubBaselineParam =~ /^(TS1|Beta|OPS)$/;
+    $pubBaseline = $CFG::EDDA_BASELINE;
+}
+
+my $xml2jsonObj;
+
+# Obtain updated data product information in xml representation
+my $updatedDataProductInfoXml;
+if ($content_type =~ /json/) {
+    my $noJsonAttrPrefix = 1;
+    my $JsonContentKeyIsValue = 1;
+    my $forceJSONarray = 1;
+    my $prettyJSON = 1;
+    my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+    my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+    $xml2jsonObj = XML::XML2JSON->new( module => 'JSON::XS',
+                                      pretty => $prettyJSON,
+                                      attribute_prefix => $prefix,
+                                      content_key => $content_key,
+                                      force_array => $forceJSONarray,
+                                      private_attributes => ['encoding', 'version']);
+
+    # Convert input from json to xml
+    $updatedDataProductInfoXml = $xml2jsonObj->json2xml($updatedDataProductInfo);
+
+    # Remove newlines that surround element text
+    $updatedDataProductInfoXml =~ s/^(\s+?)<(.+?)>\n^(.+?)\n\1<\/\2>/$1<$2>$3<\/$2>/gm;
+} elsif ($content_type =~ /xml/) {
+    # Do some taint-checking here
+    $updatedDataProductInfoXml = $updatedDataProductInfo;
+} else {
+    exit_with_error("Unrecognized content type $content_type");
+}
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+my $xslt = XML::LibXSLT->new();
+my $styleSheet;
+eval { $styleSheet = $xslt->parse_stylesheet_file($CFG::AESIR_CATALOG_DATA_PRODUCTS_XSL); };
+if ($@) {
+    exit_with_error("Error parsing stylesheet $CFG::AESIR_CATALOG_DATA_PRODUCTS_XSL: $@");
+}
+
+# Parse updated data product info
+my $updatedDataProductInfoDom;
+eval { $updatedDataProductInfoDom = $parser->parse_string($updatedDataProductInfoXml); };
+if ($@) {
+    exit_with_error("Error parsing updated input as xml: $@");
+}
+my $updatedDataProductInfoDoc = $updatedDataProductInfoDom->documentElement();
+
+
+# Obtain dataProductLastModified value from updated data product info
+# and convert it to floating point epoch seconds
+my ($updatedLastModifiedNode) = $updatedDataProductInfoDoc->findnodes('/dataProduct/dataProductLastModified/value');
+my $updatedLastModifiedStr;
+my $updatedLastModified;
+my $updatedLastModifiedEpoch;
+my $updatedLastModifiedEpochHiRes;
+if ($updatedLastModifiedNode) {
+    $updatedLastModifiedEpochHiRes = 0.0;
+    $updatedLastModifiedStr = $updatedLastModifiedNode->textContent();
+    if ((defined $updatedLastModifiedStr) && $updatedLastModifiedStr) {
+        $updatedLastModified = Date::Parse::str2time($updatedLastModifiedStr);
+        $updatedLastModifiedEpoch = DateTime->from_epoch( epoch => $updatedLastModified );
+        $updatedLastModifiedEpochHiRes = $updatedLastModifiedEpoch->hires_epoch;
+    }
+} else {
+    $updatedLastModifiedEpochHiRes = 0.0;
+}
+
+# Obtain dataProductId value from updated data product info
+my ($dataProductIdNode) = $updatedDataProductInfoDoc->findnodes('/dataProduct/dataProductId/value');
+my $dataProductId = $dataProductIdNode->textContent if $dataProductIdNode;
+$dataProductId = $1 if $dataProductId =~ /^(\w[\w.-]+)/;
+
+# Read the unmodified data product information from the file that is to be
+# modified and parse it. Assume that the base name of that file is the
+# dataProductId value.
+
+my $updated_file = "$dataProductsDir/$dataProductId";
+
+my $oldDataProductInfoDom;
+eval { $oldDataProductInfoDom = $parser->parse_file($updated_file); };
+if ($@) {
+    exit_with_error("Error parsing $updated_file: $@");
+}
+my $oldDataProductInfoDoc = $oldDataProductInfoDom->documentElement();
+
+my $rollbackDataProductInfoDom;
+eval { $rollbackDataProductInfoDom = $parser->parse_file($updated_file); };
+if ($@) {
+    exit_with_error("Error parsing $updated_file: $@");
+}
+
+# Obtain dataProductLastModified value from the file being updated
+# and convert it to floating point epoch seconds
+my ($oldLastModifiedNode) = $oldDataProductInfoDoc->findnodes('/dataProduct/dataProductLastModified/value');
+my $oldLastModifiedStr;
+my $oldLastModified;
+my $oldLastModifiedEpoch;
+my $oldLastModifiedEpochHiRes;
+if ($oldLastModifiedNode) {
+    $oldLastModifiedEpochHiRes = 0.0;
+    $oldLastModifiedStr = $oldLastModifiedNode->textContent();
+    if ((defined $oldLastModifiedStr) && $oldLastModifiedStr) {
+        $oldLastModified = Date::Parse::str2time($oldLastModifiedStr);
+        $oldLastModifiedEpoch = DateTime->from_epoch( epoch => $oldLastModified );
+        $oldLastModifiedEpochHiRes = $oldLastModifiedEpoch->hires_epoch;
+    }
+} else {
+    $oldLastModifiedEpochHiRes = 0.0;
+}
+
+unless (open(UPDATED, "+< $updated_file")) {
+    exit_with_error("Could not open $updated_file for updating: $!")
+}
+flock(UPDATED, 2);
+
+# Compare dataProductLastModified timestamp in the updated info with the
+# dataProductLastModified timestamp of the file being updated.
+$updatedLastModifiedEpochHiRes = $oldLastModifiedEpochHiRes
+    if $ignoreTimestamp;
+if ( (not defined $updatedLastModifiedEpochHiRes) ||
+     ($updatedLastModifiedEpochHiRes != $oldLastModifiedEpochHiRes) ) {
+
+    # Timestamps are different, indicating that the file has been updated
+    # since the client that is requesting a new update obtained its
+    # information. Return an error response.
+    my $errorCode = 'OUT_OF_SEQUENCE';
+    my $message = "dataProductLastModified value of $updatedLastModifiedStr is not equal to the current dataProductLastModified value of $oldLastModifiedStr";
+    ERROR($message);
+    outputResponse($parser, $xml2jsonObj, $oldDataProductInfoDom,
+                   $OUT_OF_SEQUENCE_STATUS, $content_type,
+                   $errorCode, $message);
+    exit 0;
+}
+
+# Timestamps are the same, so the information in the file being updated
+# has not yet been updated, and is the same as it was before the
+# user made any changes.
+
+# Check that all constraints have been satisfied
+my @validationMessages;
+my %updatedDataProductHash;
+foreach my $productKey (@CFG::ADD_DOC_PRODUCT_FIELDS) {
+    unless (exists $CFG::ADD_DOC_PRODUCT_MAPPING->{$productKey}) {
+        # Every product in ADD_DOC_PRODUCT_FIELDS should be a key in
+        # $ADD_DOC_PRODUCT_MAPPING, otherwise there is a problem
+        # with the configuration file
+        print STDERR "Key $productKey not found in ADD_DOC_PRODUCT_MAPPING\n";
+        next;
+    }
+    my $value;
+    my $path = $CFG::ADD_DOC_PRODUCT_MAPPING->{$productKey};
+    my ($node) = $updatedDataProductInfoDoc->findnodes($path);
+    if ($node) {
+        my ($valueNode) = $node->findnodes('value');
+        if ($valueNode) {
+            $value = $valueNode->textContent;
+            if ($value && $productKey eq 'dataProductOpendapUrl') {
+                # Check for valid dataProductOpendapUrl
+                # First check if value is in the form of a URL
+                my ($regexNode) = $node->findnodes('./constraints/regex');
+                if ($regexNode) {
+                    my $regex = $regexNode->textContent;
+                    if ($regex) {
+                        if ($value =~ $regex) {
+			    $value .= '.html' if $value =~ /\.grb$/;
+                            my $opendapGranule = LWP::Simple::get($value);
+                            if (defined $opendapGranule) {
+                                $updatedDataProductHash{$productKey} = $value;
+                            } else {
+                                push @validationMessages, "Unable to retrieve $productKey $value";
+                            }
+                        } else {
+                            push @validationMessages, "Value '$value' is not a valid value for $productKey";
+                        }
+                    }
+                }
+            } else {
+                $updatedDataProductHash{$productKey} = $value;
+            }
+        }
+        my ($requiredNode) = $node->findnodes('./constraints/required');
+        if ($requiredNode) {
+            my $required = $requiredNode->textContent;
+            if ($required =~ /t(?:rue)?/i) {
+                unless ($value ne '') {
+                    push @validationMessages, "Required value for $productKey not found";
+                }
+            }
+        }
+    } else {
+        print STDERR "Element with xpath $path not found in new data product";
+    }
+}
+
+if (@validationMessages) {
+    my $errorCode = 'VALIDATION_ERRORS';
+    my $message = join("\n", @validationMessages);
+    outputResponse($parser, $xml2jsonObj, $updatedDataProductInfoDom,
+                   $ERROR_STATUS, $content_type, $errorCode, $message);
+    exit 1;
+}
+
+my $updatedDataProductId = $updatedDataProductHash{dataProductId}
+    if exists $updatedDataProductHash{dataProductId};
+unless ($updatedDataProductId) {
+    my $errorCode = 'NO_DATA_PRODUCT_ID';
+    my $message = "No value was provided for dataProductId";
+    outputResponse($parser, $xml2jsonObj, $updatedDataProductInfoDom,
+                   $ERROR_STATUS, $content_type, $errorCode, $message);
+    exit 1;
+}
+$updatedDataProductId =~ s/\s+//g;
+
+# Get current date/time in iso8601 format.
+my $now;
+my $nowEpoch = DateTime->from_epoch(epoch => scalar(gettimeofday));
+$now = $nowEpoch->iso8601 . '.' . $nowEpoch->millisecond . 'Z';
+
+# Modify dataProductLastModified value in the updated info to be the current
+# date/time.
+if ($updatedLastModifiedNode) {
+    $updatedLastModifiedNode->removeChildNodes();
+    $updatedLastModifiedNode->appendText($now);
+}
+
+# Preserve dataProductDataFieldIds found in the document being updated.
+# The updated info may not have this information because it is the one piece
+# of data product information that is modified by a script other than this one
+# (createNewDataField)
+my ($old_dataProductDataFieldIdsNode) = $oldDataProductInfoDoc->findnodes('/dataProduct/dataProductDataFieldIds');
+my ($updated_dataProductDataFieldIdsNode) = $updatedDataProductInfoDoc->findnodes('/dataProduct/dataProductDataFieldIds');
+if ($old_dataProductDataFieldIdsNode && $updated_dataProductDataFieldIdsNode) {
+    $updated_dataProductDataFieldIdsNode->replaceNode($old_dataProductDataFieldIdsNode);
+}
+
+# Update data product document
+
+#my $dataProductDom = $parser->parse_string($CFG::DATA_PRODUCT_XML);
+#my $dataProductDoc = $dataProductDom->documentElement();
+#foreach my $productKey (@CFG::ADD_DOC_PRODUCT_FIELDS) {
+#    if (exists $updatedDataProductHash{$productKey}) {
+#        if (ref $updatedDataProductHash{$productKey} eq 'ARRAY') {
+#            foreach my $val (@{$updatedDataProductHash{$productKey}}) {
+#                addValue($dataProductDoc, $productKey,
+#                         $CFG::ADD_DOC_PRODUCT_MAPPING,
+#                         $val);
+#            }
+#        } else {
+#            addValue($dataProductDoc, $productKey,
+#                     $CFG::ADD_DOC_PRODUCT_MAPPING,
+#                     $updatedDataProductHash{$productKey});
+#        }
+#    }
+#}
+
+# Set dataProductLastModified value to be the current date/time.
+#my ($lastModifiedNode) = $dataProductDoc->findnodes('/dataProduct/dataProductLastModified/value');
+#if ($lastModifiedNode) {
+#    $lastModifiedNode->removeChildNodes();
+#    $lastModifiedNode->appendText($now);
+#}
+
+my $eraseValidsNode = XML::LibXML::Element->new('eraseValids');
+$updatedDataProductInfoDoc->addChild($eraseValidsNode);
+my $transform = $styleSheet->transform($updatedDataProductInfoDom);
+my $transform_string = $styleSheet->output_string($transform);
+$updatedDataProductInfoDoc->removeChild($eraseValidsNode);
+
+# Replace the old data product file contents with the updated information
+seek(UPDATED, 0, 0);
+print UPDATED $transform_string;
+truncate(UPDATED, tell(UPDATED));
+#INFO("Updated $updated_file");
+
+# Update the Solr add document for all published data fields
+
+# Republish Solr add document if any published data fields were updated
+
+
+# New product successfully added
+#outputResponse($parser, $xml2jsonObj, $dataProductDoc, $SUCCESS_STATUS,
+#               $content_type);
+outputResponse($parser, $xml2jsonObj, $updatedDataProductInfoDom,
+               $SUCCESS_STATUS, $content_type, '', '', $styleSheet);
+
+exit 0;
+
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub addValue {
+    my ($doc, $key, $mapping, $value) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    # Look for a 'value' child node. If one is found and it is empty,
+    # replace it with a new value
+    my ($valueNode1) = $node->findnodes('./value');
+    if (defined $valueNode1) {
+        my $content = $valueNode1->textContent;
+        if ($content eq '') {
+            $valueNode1->removeChildNodes();
+            $valueNode1->appendText($value);
+            return;
+        }
+    }
+
+    # Otherwise add a new 'value' child node.
+    # Construct a new 'value' node and add it to the node in $doc at
+    # that path.
+    $node->appendTextChild('value', $value);
+    return;
+}
+
+sub outputResponse {
+    my ($parser, $xml2jsonObj, $dom, $status, $content_type,
+        $errorCode, $errorMessage) = @_;
+
+    my $responseDom = $parser->parse_string('<updateDataProductInfoResponse></updateDataProductInfoResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ($status > $SUCCESS_STATUS) {
+        # Error
+        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    if ($styleSheet) {
+        my $transform = $styleSheet->transform($dom);
+        my $transform_string = $styleSheet->output_string($transform);
+        my $tdom = $parser->parse_string($transform_string);
+        $resultNode->addChild($tdom->documentElement());
+    } else {
+        $resultNode->addChild($dom->documentElement());
+    }
+    $responseDoc->addChild($resultNode);
+
+    if ($content_type =~ /xml/) {
+        print $cgi->header( -type   => 'application/xml' );
+        print $responseDom->toString(1);
+    } else {
+        my $responseJson = $xml2jsonObj->convert($responseDom->toString());
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}
+
+sub startLogging {
+
+    # Determine directory used to hold log
+    my $logDir =
+        defined $CFG::EDDA_UPDATE_DATA_PRODUCT_LOG_DIR ? $CFG::EDDA_UPDATE_DATA_PRODUCT_LOG_DIR :
+        (-d '/var/tmp' && -w '/var/tmp') ? '/var/tmp' :
+        undef;
+
+    my $scriptName = basename((caller(0))[1]);
+    my $scriptMode = ( dirname((caller(0))[1]) =~ /(DEV|TS2|TS1|OPS)/ ) ? ".$1" : "";
+    my ($userSuffix) = ( (defined $ENV{USER}) && $ENV{USER} =~ /^(\w+)$/ ) ? ".$1" : "";
+    my $logFile = (defined $logDir) ?
+        ">>$logDir/" . $scriptName . $scriptMode . $userSuffix . ".log" : '>>STDERR';
+
+    # Determine logging level
+    my $logLevel = $CFG::EDDA_UPDATE_DATA_PRODUCT_LOG_LEVEL ? $CFG::EDDA_UPDATE_DATA_PRODUCT_LOG_LEVEL : $INFO;
+
+    # Define logger for this script
+    my $logInit = { level  => $logLevel,
+                    file   => $logFile,
+                    layout => '%d %P %p %m%n'};
+    my @inits = ($logInit);
+    Log::Log4perl->easy_init( @inits );
+    INFO("Starting $0 at " . scalar(gmtime));
+}

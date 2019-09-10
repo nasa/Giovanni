@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- $Id: index.html,v 1.37 2016/02/12 19:43:12 eseiler Exp $ -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>EDDA - Editor of Data Definitions for AESIR</title>
+<link rel="stylesheet" type="text/css" href="css/demo_page.css" />
+<link rel="stylesheet" type="text/css" href="css/demo_table.css" />
+<link rel="stylesheet" type="text/css" href="css/edda.css" />
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/themes/smoothness/jquery-ui.css" />
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.collapsible.min.js"></script>
+<script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script type="text/javascript" src="js/edda.js"></script>
+<script type="text/javascript">
+  var editor;
+
+  function init() {
+    editor = new edda();
+  };
+</script>
+</head>
+<body onload="init()">
+	<div class="header">
+		<div class="logo headerContent">EDDA</div>
+		<div class="headerContent">
+			<span class="title">Editor of Data Definitions for AESIR</span> <br />
+			<a class="headerLink1" href="#">Tutorial</a>
+			&nbsp;
+			<a class="headerLink1" href="EDDA_help.html">Glossary</a>
+		</div>
+		<div class="headerContent fltRt">
+			<a class="headerLink2" target="_blank" href="EDDA_help.html">Help</a>
+		</div>
+	</div>
+	<div class="navBar" id="navBar"></div>
+	<div class="body">
+		<div id="intro" class="mainContent">
+			<p>EDDA allows you to manage the G4 AESIR database records (inventory). To begin, please choose one of the
+				following actions:</p>
+			<ul>
+				<li><a href="js.html" id="brLnk">Browse and Edit</a> (includes adding data variables to existing data sets)</li>
+				<li><a href="js.html" id="addLnk">Add a new data set</a> (and it's data variables)</li>
+				<li><a href="js.html" id="statLnk">View status of data variables in AESIR</a></li>
+			</ul>
+		</div>
+		<div id="prodBrowse" class="mainContent hidden">
+			<p>
+				<b>Select a data set from the list below:</b>
+			</p>
+			<div id="tableLoadIcon" class="hidden">
+				<img src="images/loader.gif" alt="... loading ..."></img>
+			</div>
+			<table class="dataTable" id="dataProductTable"></table>
+		</div>
+		<div id="prodCreate" class="mainContent hidden">
+			<p>
+				<input type='radio' name='prodCreateChoice' id='inCMR' value='inCMR' checked='checked'>
+				<b>Data set already in CMR?</b>
+				</input>
+			</p>
+			<div>
+				<div class="userInputLine" id="newProdShortNameDiv">
+					<label for="newProdShortName">Enter Short Name: </label><input size="80" id="newProdShortName" />
+				</div>
+				<div class="userInputLine" id="newProdVerIdDiv">
+					<label for="newProdVerId">Enter Version ID: </label><input size="10" id="newProdVerId" />
+				</div>
+				<div class="userInputLine" id="newProdProvIdDiv">
+<!--
+					<label for="newProdProvId">Enter Provider ID (optional): </label><input size="10" id="newProdProvId" />
+					  <option value="AU_AADC">AU_AADC</option>
+					  <option value="CDDIS">CDDIS</option>
+					  <option value="ESA">ESA</option>
+					  <option value="EUMETSAT">EUMETSAT</option>
+					  <option value="ISRO">ISRO</option>
+					  <option value="JAXA">JAXA</option>
+					  <option value="LANCEAMSR2">LANCEAMSR2</option>
+					  <option value="LANCEMODIS">LANCEMODIS</option>
+					  <option value="LM_FIRMS">LM_FIRMS</option>
+					  <option value="OMINRT">OMINRT</option>
+					  <option value="SCIOPS">SCIOPS</option>
+					  <option value="USGS_LTA">USGS_LTA</option>
+					  <option value="USGS_EROS">USGS_EROS</option>
+-->
+					<label for="newProdProvId">Select Provider ID: </label><select id="newProdProvId">
+					  <option value="ASDC">ASDC</option>
+					  <option value="ASF">ASF</option>
+					  <option value="GSFCS4PA">GSFCS4PA</option>
+					  <option value="GES_DISC">GES_DISC</option>
+					  <option value="GHRC">GHRC</option>
+					  <option value="LAADS">LAADS</option>
+					  <option value="LARC">LARC</option>
+					  <option value="LPDAAC">LPDAAC</option>
+					  <option value="LPDAAC_ECS">LPDAAC_ECS</option>
+					  <option value="NOAA_NCEI">NOAA_NCEI</option>
+					  <option value="NSIDCV0">NSIDCV0</option>
+					  <option value="NSIDC_ECS">NSIDC_ECS</option>
+					  <option value="OB_DAAC">OB_DAAC</option>
+					  <option value="ORNL_DAAC">ORNL_DAAC</option>
+					  <option value="PODAAC">PODAAC</option>
+					  <option value="SEDAC">SEDAC</option>
+                                        </select>
+
+				</div>
+			</div>
+			<p>
+				<input type='radio' name='prodCreateChoice' id='inGCMD' value='inGCMD'>
+				<b>Data set already registered in the GCMD (i.e., has a DIF ID)?</b>
+				</input>
+			</p>
+			<div>
+				<div class="userInputLine">
+					<label id="newProdDIFIdLabel" for="newProdDifId">Enter DIF ID: </label>
+					<input size="50" id="newProdDifId" placeholder="e.g. GES_DISC_TRMM_3B43_V6"/>
+					<input class="spacedCtrl" id="gesDiscOnly" type="checkbox" />
+					<label for="gesDiscOnly">Show GES DISC products only</label>
+					<!--<span id="difIdInfo"></span>-->
+					<span id="difIdAutoComp"></span>
+				</div>
+				<div class="userInputLine">
+					<span id="difIdInfo"></span>
+				</div>
+<!--
+				<div class="userInputLine hidden" id="newProdShortNameDiv">
+					<label for="newProdShortName">Enter Short Name: </label><input id="newProdShortName" />
+				</div>
+				<div class="userInputLine hidden" id="newProdVerIdDiv">
+					<label for="newProdVerId">Enter Version ID: </label><input id="newProdVerId" />
+				</div>
+-->
+			</div>
+			<p>
+				<input type='radio' name='prodCreateChoice' id='inXMLFile' value='inXMLFile'>
+				<b>Data set described in web-accessible <a href="http://gcmd.nasa.gov/Aboutus/xml/dif/DIF_XML_Template.xml" target="_blank" title="An XML file that conforms to the GCMD DIF format">DIF XML</a> file?</b>
+				</input>
+			</p>
+			<div>
+				<div class="userInputLine">
+					<label id="newProdXMLUrlLabel" for="newProdXMLURL">Enter URL: </label>
+					<input size="100" id="newProdXMLURL" placeholder="e.g. https://s4ptu-ts2.ecs.nasa.gov/~okbryant/EDDA/xmldata/ESGF_AIRS_L3_RetStd-v5.xml"/>
+				</div>
+			</div>
+			<button class="userInputLine" id="difIdSubmit">GO</button>
+			<div id="createInfo" class="hidden">
+				<h3>
+					<b id="createTitle"></b>
+				</h3>
+				<h3>Data Set Attributes</h3>
+				<div class="editableContent" id="attributesEdit"></div>
+			</div>
+		</div>
+		<div id="prodView" class="mainContent hidden">
+			<h3>
+				<b id="viewerTitle"></b>
+			</h3>
+			<h3 class="viewerHeader">
+				<span class="collapse-icon"></span> Data Set Attributes
+			</h3>
+			<div class="editableContent" id="attributes"></div>
+			<p class="actionPanel" id="productActionPanel"></p>
+			<div class="editableContent" id="fieldsList"></div>
+			<div class="editableContent" id="newField"></div>
+			<h3 class="viewerHeader">
+				<span class="collapse-icon"></span> Data Variables <span id="dataFieldsCount"></span>
+			</h3>
+			<div>
+				<div class="editableContent" id="dataFields"></div>
+				<div class="viewerLineItem" id="dataFieldsFooter"></div>
+			</div>
+		</div>
+	</div>
+	<div id="mask"></div>
+	<div class="feedback">
+		<a href="js.html" id="feedback">
+			<img src="images/feedback.png" />
+		</a>
+	</div>
+	<div id="republishConfDlg" class="hidden">
+		<div>Do you want to republish all published data variables for this data set?</div>
+		<div>
+			<label for="republishComment">Comments [optional] : </label>
+		</div>
+		<textarea id="republishComment"></textarea>
+	</div>
+	<div id="publishConfDlg" class="hidden">
+		<div>Do you want to submit a request for publishing this data variable?</div>
+		<div>
+			<label for="publishComment">Comments [optional] : </label>
+		</div>
+		<textarea id="publishComment"></textarea>
+	</div>
+	<div id="deleteDatasetConfDlg" class="hidden">
+		<div>Are you sure you want to delete this data set and all of its variables?</div>
+		<div>
+			<label for="deleteDatasetComment">Comments [optional] : </label>
+		</div>
+		<textarea id="deleteDatasetComment"></textarea>
+	</div>
+	<div id="deleteVariableConfDlg" class="hidden">
+		<div>Are you sure you want to delete this variable?</div>
+		<div>
+			<label for="deleteVariableComment">Comments [optional] : </label>
+		</div>
+		<textarea id="deleteVariableComment"></textarea>
+	</div>
+	<div id="unpublishVariableConfDlg" class="hidden">
+		<div>Unpublish this variable?</div>
+		<div>
+			<label for="unpublishVariableComment">Comments [optional] : </label>
+		</div>
+		<textarea id="unpublishVariableComment"></textarea>
+	</div>
+	<div id="colorPaletteDlg" class="hidden">
+		<div style="max-width: 800px; max-height: 300px; overflow: auto;">
+			<select id="paletteList" size="10"></select>
+			<!-- <table id="paletteList" class="colorPaletteTable"></table> -->
+		</div>
+		<div style="margin-top: 10px" align="center">
+			<button id="palDlgOk">OK</button>
+			<button id="palDlgCancel">Cancel</button>
+		</div>
+	</div>
+</body>
+</html>

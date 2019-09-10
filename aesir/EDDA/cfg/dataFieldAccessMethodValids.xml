@@ -1,0 +1,8 @@
+    <valids>
+      <valid>AIRNOW</valid>
+      <valid>HTTP_Services_CLIMATOLOGY_ANOMALY</valid>
+      <valid>HTTP_Services_HDF_TO_NetCDF</valid>
+      <valid>OPeNDAP</valid>
+      <valid>OPeNDAP_TIMESPLIT</valid>
+      <valid>PODAAC_OPeNDAP</valid>
+    </valids>

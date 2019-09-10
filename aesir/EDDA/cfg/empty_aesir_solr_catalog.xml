@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<update>
+  <delete>
+    <query>*:*</query>
+  </delete>
+  <add overwrite="true">
+  </add>
+</update>

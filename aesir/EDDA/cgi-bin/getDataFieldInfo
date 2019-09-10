@@ -1,0 +1,266 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getDataFieldInfo,v 1.17 2015/06/30 22:03:35 eseiler Exp $
+# -@@@ AESIR EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+getDataFieldInfo - Output AESIR information for one or more data fields
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getDataFieldInfo?dataFieldId=<dataFieldId>[&dataFieldId=<dataFieldId>][&format=xml]
+
+=head1 DESCRIPTION
+
+Output AESIR information for one or more data fields
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use LWP::UserAgent;
+use EDDA;
+use CGI;
+use Safe;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_DIR;
+
+my $dataFieldsDir = "$CFG::AESIR_CATALOG_DATA_FIELDS_DIR";
+exit_with_error("Directory $dataFieldsDir not found")
+    unless -d $dataFieldsDir;
+
+# Check that at least one valid dataFieldId parameter was provided
+my @dataFieldIds;
+my @dfids = $cgi->param('dataFieldId');
+foreach my $dfid (@dfids) {
+    push @dataFieldIds, $dfid if $dfid =~ /^([a-zA-Z0-9_-]+)/;
+}
+exit_with_error("Need one or more valid dataFieldId parameters\n")
+    unless @dataFieldIds;
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+# Start new dataFields xml document
+my $dataFieldsDom = $parser->parse_string('<dataFields></dataFields>');
+my $dataFieldsDoc = $dataFieldsDom->documentElement();
+
+my $dataFieldDom = $parser->parse_string($CFG::DATA_FIELD_XML);
+my $dataFieldDoc = $dataFieldDom->documentElement();
+#my $optionalDataFieldDom = $parser->parse_string($CFG::DATA_FIELD_OPTIONAL_XML);
+#my $optionalDataFieldDoc = $optionalDataFieldDom->documentElement();
+
+# For each requested data field, parse the data field xml and add it to
+# the dataFields document
+foreach my $dataFieldId (sort @dataFieldIds) {
+    my $fieldFile = "$dataFieldsDir/$dataFieldId";
+    exit_with_error("Could not find catalog information for dataFieldId $dataFieldId\n")
+        unless -e "$dataFieldsDir/$dataFieldId";
+    my $dataFieldDom;
+    eval { $dataFieldDom = $parser->parse_file( $fieldFile ); };
+    if ($@) {
+        exit_with_error("Could not read and parse $fieldFile\n");
+    }
+    my $dataFieldDoc = $dataFieldDom->documentElement();
+    foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_FIELDS) {
+        if (exists $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$fieldKey}) {
+            my $path = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$fieldKey};
+            my ($node) = $dataFieldDoc->findnodes($path);
+            unless (defined $node) {
+                print STDERR "Could not find path $path in $fieldFile\n";
+            }
+        }
+    }
+#     foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_OPTIONAL_FIELDS) {
+#         if (exists $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING->{$fieldKey}) {
+#             my $path = $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING->{$fieldKey};
+#             my ($node) = $dataFieldDoc->findnodes($path);
+#             unless (defined $node) {
+#                 my ($optionalNode) = $optionalDataFieldDoc->findnodes($path);
+#                 if ($optionalNode) {
+#                     my $newNode = $optionalNode->cloneNode(1);
+#                     my $valueNode = $newNode->findnodes('./value');
+#                     unless ($valueNode) {
+#                         my $newValueNode = XML::LibXML::Element->new('value');
+#                         $newNode->appendChild($newValueNode);
+#                     }
+#                     $dataFieldDoc->appendChild($newNode);
+#                 }
+#             }
+#         }
+#     }
+
+    # Replace dataFieldSld valids with values from a configuration file
+    # that is updated whenever a new SLD is added.
+    if (defined $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC &&
+        -r $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC) {
+        my $sldValidsDom;
+        my $sldValidsDoc;
+        eval { $sldValidsDom = $parser->parse_file( $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC ); };
+        if ($@) {
+            exit_with_error("Error parsing $CFG::AESIR_CATALOG_DATA_FIELDS_SLD_VALIDS_DOC");
+        }
+        $sldValidsDoc = $sldValidsDom->documentElement();
+        if ($sldValidsDoc->findnodes('/valids')) {
+            my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{'dataFieldSld'}
+                . '/valids';
+            my $validsPath2 = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{'dataFieldSld'}
+                . '/valids/dataFieldSldName';
+            my ($validsNode2) = $dataFieldDoc->findnodes($validsPath2);
+            if ($validsNode2) {
+                $sldValidsDoc->setNodeName('dataFieldSldName');
+                $validsNode2->replaceNode($sldValidsDoc);
+            } else {
+                my ($validsNode) = $dataFieldDoc->findnodes($validsPath);
+                if ($validsNode) {
+                    $validsNode->replaceNode($sldValidsDoc);
+                }
+            }
+        }
+    }
+
+    # Replace dataFieldDestinationUnits valids with values obtained
+    # from Giovanni
+    my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataFieldDestinationUnits} . '/valids';
+    my ($validsNode) = $dataFieldDoc->findnodes($validsPath);
+    if ($validsNode) {
+        my $getDestUnitsUrl = $CFG::GET_DESTINATION_UNITS_URL;
+        if (defined $getDestUnitsUrl) {
+            my $ua = LWP::UserAgent->new(timeout => $CFG::GET_DESTINATION_UNITS_TIMEOUT);
+            my $response = $ua->get($getDestUnitsUrl);
+            unless ( $response->is_error ) {
+                my $xml = $response->content;
+                my $dom;
+                eval { $dom = $parser->parse_string($xml); };
+                if ($@) {
+                    exit_with_error("Error parsing response from $getDestUnitsUrl");
+                }
+                my $validsDoc = $dom->documentElement();
+                $validsNode->replaceNode($validsDoc);
+            }
+        }
+    }
+
+
+    # Replace valids with values from a configuration file
+    # that is updated whenever a new valid is added.
+    my $validsDom;
+    my $validsDoc;
+    if (defined $CFG::AESIR_CATALOG_DATA_FIELD_VALIDS_DOCS) {
+        while (my($attr, $file) = each %$CFG::AESIR_CATALOG_DATA_FIELD_VALIDS_DOCS) {
+            my $validsPath = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$attr} . '/valids';
+            my ($validsNode) = $dataFieldDoc->findnodes($validsPath);
+            if ($validsNode) {
+                if (defined $file && -r ($file)) {
+                    eval { $validsDom = $parser->parse_file( $file ); };
+                    if ($@) {
+                        exit_with_error("Error parsing $file");
+                    }
+                    $validsDoc = $validsDom->documentElement();
+                    if ($validsDoc->findnodes('/valids')) {
+                        $validsNode->replaceNode($validsDoc);
+                    }
+                }
+            }
+        }
+    }
+
+    if ($CFG::INCLUDE_DATA_FIELD_PUBLISHED_BASELINE) {
+        my $publishedBaselines = EDDA::getPublishedBaselines($dataFieldId,
+                                                             $CFG::MODE,
+                                                             \@CFG::AESIR_BASELINES,
+                                                             $CFG::AESIR_CATALOG_PUBLISHED_DATA_FIELDS_DIR,
+                                                             $parser);
+        if ($publishedBaselines) {
+            foreach my $baseline (@CFG::AESIR_BASELINES) {
+                if (exists $publishedBaselines->{$baseline}) {
+                    my $baselineInfoNode = EDDA::createPublishedBaselineInfoNode($baseline, $publishedBaselines);
+                    $dataFieldDoc->addChild($baselineInfoNode) if $baselineInfoNode;
+                }
+            }
+        }
+    }
+
+    $dataFieldsDoc->addChild($dataFieldDoc) if $dataFieldDoc;
+}
+
+# If xml format is desired, output the xml version of the document
+my $format = $cgi->param('format');
+if (uc($format) eq 'XML') {
+    print $cgi->header( -type => 'application/xml' );
+    my $xml = $dataFieldsDoc->toString(1);
+    print $xml;
+    exit 0;
+}
+
+# By default, output the document in json
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+
+my $obj = XML::XML2JSON->new( module => 'JSON::XS',
+                              pretty => $prettyJSON,
+                              attribute_prefix => $prefix,
+                              content_key => $content_key,
+                              force_array => $forceJSONarray,
+                              private_attributes => ['encoding', 'version']);
+my $xml = $dataFieldsDoc->toString();
+my $json = $obj->convert($xml);
+
+print $cgi->header( -type => 'application/json' );
+print $json;
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}

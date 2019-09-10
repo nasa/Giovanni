@@ -1,0 +1,448 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: createNewDataProduct,v 1.13 2015/06/30 17:02:01 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+createNewDataProduct - Create a new data product for the AESIR catalog
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+POST createNewDataProduct
+
+=head1 DESCRIPTION
+
+Create a new data product for the AESIR catalog
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::LibXSLT;
+use XML::XML2JSON;
+use DateTime;
+use Time::HiRes qw (gettimeofday);
+use LWP::UserAgent;
+use LWP::Simple;
+use CGI;
+use Safe;
+
+my $SUCCESS_STATUS = 1;
+my $ERROR_STATUS   = 2;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+my $entryIdsCfgFile = $CFG::EDDA_GCMD_DIF_ENTRY_IDS;
+unless (defined $entryIdsCfgFile) {
+    exit_with_error("EDDA_GCMD_DIF_ENTRY_IDS not defined in $cfgFile\n");
+}
+unless ( $cpt->rdo($entryIdsCfgFile) ) {
+    # If unable to read entry ids configuration file, create a new one
+    unless (open (OUT, "> $entryIdsCfgFile")) {
+	exit_with_error("Could not open $entryIdsCfgFile for writing\n");
+    }
+    print OUT '%AESIR_GCMD_DIF_ENTRY_IDs = (', "\n";
+    print OUT ");\n\n1;\n";
+    close(OUT);
+    chmod 0666, $entryIdsCfgFile;
+    unless ( $cpt->rdo($entryIdsCfgFile) ) {
+	exit_with_error("Could not read configuration file $entryIdsCfgFile\n");
+    }
+}
+
+# Check for required configuration variables
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+
+# Obtain type and content of POSTed data product info
+my $content_type = $cgi->content_type();
+my $newDataProductInfo;
+if ($content_type =~ /application\/xml/) {
+    $newDataProductInfo = $cgi->param('XForms:Model');
+} else {
+    $newDataProductInfo = $cgi->param('POSTDATA');
+}
+
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+
+my $xml2jsonObj = XML::XML2JSON->new( module => 'JSON::XS',
+                                      pretty => $prettyJSON,
+                                      attribute_prefix => $prefix,
+                                      content_key => $content_key,
+                                      force_array => $forceJSONarray,
+                                      private_attributes => ['encoding', 'version']);
+
+my $newDataProductInfoXml;
+
+if ($content_type =~ /json/) {
+    # Convert input from json to xml
+    $newDataProductInfoXml = $xml2jsonObj->json2xml($newDataProductInfo);
+    # Remove newlines that surround element text
+    $newDataProductInfoXml =~ s/^(\s+?)<(.+?)>\n^(.+?)\n\1<\/\2>/$1<$2>$3<\/$2>/gm;
+} elsif ($content_type =~ /xml/) {
+    # Do some taint-checking here
+    $newDataProductInfoXml = $newDataProductInfo;
+} else {
+    exit_with_error("Unrecognized content type $content_type");
+}
+
+# Parse data product info
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+my $xslt = XML::LibXSLT->new();
+my $styleSheet;
+eval { $styleSheet = $xslt->parse_stylesheet_file($CFG::AESIR_CATALOG_DATA_PRODUCTS_XSL); };
+if ($@) {
+    exit_with_error("Error parsing stylesheet $CFG::AESIR_CATALOG_DATA_PRODUCTS_XSL: $@");
+}
+
+my $newDataProductInfoDom = $parser->parse_string($newDataProductInfoXml);
+my $newDataProductInfoDoc = $newDataProductInfoDom->documentElement();
+
+# Check that all constraints have been satisfied
+my @validationMessages;
+my %newDataProductHash;
+foreach my $fieldKey (@CFG::ADD_DOC_PRODUCT_FIELDS) {
+    unless (exists $CFG::ADD_DOC_PRODUCT_MAPPING->{$fieldKey}) {
+        # Every field in ADD_DOC_PRODUCT_FIELDS should be a key in
+        # $ADD_DOC_PRODUCT_MAPPING, otherwise there is a problem
+        # with the configuration file
+        print STDERR "Key $fieldKey not found in ADD_DOC_PRODUCT_MAPPING\n";
+        next;
+    }
+    my $value;
+    my $path = $CFG::ADD_DOC_PRODUCT_MAPPING->{$fieldKey};
+    my ($node) = $newDataProductInfoDoc->findnodes($path);
+    if ($node) {
+        my ($valueNode) = $node->findnodes('value');
+        if ($valueNode) {
+            $value = $valueNode->textContent;
+            if ($value && $fieldKey eq 'dataProductOpendapUrl') {
+                # Check for valid dataProductOpendapUrl
+                # First check if value is in the form of a URL
+                my ($regexNode) = $node->findnodes('./constraints/regex');
+                if ($regexNode) {
+                    my $regex = $regexNode->textContent;
+                    if ($regex) {
+                        if ($value =~ $regex) {
+                            my $ddx_url;
+                            if ($value =~ /\.html$/) {
+                                ($ddx_url = $value) =~ s/\.html$/.ddx/;
+                            } else {
+                                 $ddx_url = $value . ".ddx";
+                            }
+                            my $opendapGranule = LWP::Simple::get($ddx_url);
+                            if (defined $opendapGranule) {
+                                $newDataProductHash{$fieldKey} = $value;
+                            } else {
+                                push @validationMessages, "Unable to retrieve data description xml (ddx) for $value";
+                            }
+                        } else {
+                            push @validationMessages, "Value '$value' is not a valid value for $fieldKey";
+                        }
+                    }
+                }
+            } else {
+                $newDataProductHash{$fieldKey} = $value;
+            }
+        }
+        my ($requiredNode) = $node->findnodes('./constraints/required');
+        if ($requiredNode) {
+            my $required = $requiredNode->textContent;
+            if ($required =~ /t(?:rue)?/i) {
+                unless ($value ne '') {
+                    push @validationMessages, "Required value for $fieldKey not found";
+                }
+            }
+        }
+    } else {
+        print STDERR "Element with xpath $path not found in new data product";
+    }
+}
+
+if (@validationMessages) {
+    my $errorCode = 'VALIDATION_ERRORS';
+    my $message = join("\n", @validationMessages);
+    outputResponse($parser, $xml2jsonObj, $newDataProductInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+my $newDataProductId = $newDataProductHash{dataProductId}
+    if exists $newDataProductHash{dataProductId};
+unless ($newDataProductId) {
+    my $errorCode = 'NO_DATA_PRODUCT_ID';
+    my $message = "No value was provided for dataProductId";
+    outputResponse($parser, $xml2jsonObj, $newDataProductInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+$newDataProductId =~ s/\s+//g;
+# Untaint the dataProductId, which will determine the name of the
+# output file
+$newDataProductId = $1 if $newDataProductId =~ /([a-zA-Z0-9_.-]+)$/;
+
+# Check that product does not already exist
+# Assume that the names of the files in the data products catalog directory
+# are the dataProductId values for each data product (with any spaces deleted).
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory $dataProductsDir not found")
+    unless -d $dataProductsDir;
+exit_with_error("Could not open $dataProductsDir: $!\n")
+    unless opendir(DIR, $dataProductsDir);
+my @dataProductIds = grep { !/^\./ && -f "$dataProductsDir/$_" } readdir(DIR);
+closedir(DIR);
+my %dataProductIds = map { $_ => $_ } @dataProductIds;
+if (exists $dataProductIds{$newDataProductId}) {
+    my $errorCode = 'PRODUCT_ID_ALREADY_EXISTS';
+    my $message = "A data product with dataProductId $newDataProductId already exists";
+    outputResponse($parser, $xml2jsonObj, $newDataProductInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+# Create data product document
+
+# Parse data product xml template from configuration
+my $dataProductDom = $parser->parse_string($CFG::DATA_PRODUCT_XML);
+my $dataProductDoc = $dataProductDom->documentElement();
+
+foreach my $fieldKey (@CFG::ADD_DOC_PRODUCT_FIELDS) {
+    if ($fieldKey eq 'dataProductDataSetId') {
+        my $dataProductDataSetId = $newDataProductHash{$fieldKey};
+        unless (defined $dataProductDataSetId) {
+            if (exists $newDataProductHash{dataProductLongName} &&
+                exists $newDataProductHash{dataProductVersion} ) {
+                $dataProductDataSetId =
+                    $newDataProductHash{dataProductLongName} .
+                        ' V' . $newDataProductHash{dataProductVersion};
+            }
+        }
+        if (defined $dataProductDataSetId) {
+            addValue($dataProductDoc, $fieldKey,
+                     $CFG::ADD_DOC_PRODUCT_MAPPING,
+                     $dataProductDataSetId);
+            next;
+        }
+    }
+    if (exists $newDataProductHash{$fieldKey}) {
+        if (ref $newDataProductHash{$fieldKey} eq 'ARRAY') {
+            foreach my $val (@{$newDataProductHash{$fieldKey}}) {
+                addValue($dataProductDoc, $fieldKey,
+                         $CFG::ADD_DOC_PRODUCT_MAPPING,
+                         $val);
+            }
+        } else {
+            addValue($dataProductDoc, $fieldKey,
+                     $CFG::ADD_DOC_PRODUCT_MAPPING,
+                     $newDataProductHash{$fieldKey});
+        }
+    }
+}
+
+# Change dataProductInternal to true (internal)
+my $path = $CFG::ADD_DOC_PRODUCT_MAPPING->{dataProductInternal};
+my ($dataProductInternalNode) = $dataProductDoc->findnodes($path);
+if (defined $dataProductInternalNode) {
+    my ($valueNode) = $dataProductInternalNode->findnodes('./value');
+    if ($valueNode) {
+        $valueNode->removeChildNodes();
+        $valueNode->appendText('true');
+    }
+}
+
+# Change dataProductCanAddNewFields to 'true'
+$path = '/dataProduct/dataProductCanAddNewFields';
+my ($dataProductCanAddNewFieldsNode) = $dataProductDoc->findnodes($path);
+if (defined $dataProductCanAddNewFieldsNode) {
+    my ($valueNode) = $dataProductCanAddNewFieldsNode->findnodes('./value');
+    if ($valueNode) {
+        $valueNode->removeChildNodes();
+        $valueNode->appendText('true');
+    }
+}
+
+# Get current date/time in iso8601 format.
+my $now;
+my $nowEpoch = DateTime->from_epoch(epoch => scalar(gettimeofday));
+$now = $nowEpoch->iso8601 . '.' . $nowEpoch->millisecond . 'Z';
+
+# Modify dataProductLastModified value in the updated info to be the current
+# date/time.
+my ($lastModifiedNode) = $dataProductDoc->findnodes('/dataProduct/dataProductLastModified/value');
+if ($lastModifiedNode) {
+    $lastModifiedNode->removeChildNodes();
+    $lastModifiedNode->appendText($now);
+}
+
+my $eraseValidsNode = XML::LibXML::Element->new('eraseValids');
+$dataProductDoc->addChild($eraseValidsNode);
+my $transform = $styleSheet->transform($dataProductDom);
+my $transform_string = $styleSheet->output_string($transform);
+$dataProductDoc->removeChild($eraseValidsNode);
+
+# Create data product file
+my $dataProductFile = "$dataProductsDir/$newDataProductId";
+if (-f $dataProductFile) {
+    my $errorCode = 'PRODUCT_ID_ALREADY_EXISTS';
+    my $message = "A data product with dataProductId $newDataProductId already exists";
+    outputResponse($parser, $xml2jsonObj, $dataProductDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+} else {
+    unless (open (PRODUCT, "> $dataProductFile")) {
+        my $errorCode = 'CREATING_NEW_FILE';
+        my $message = "Could not open $dataProductFile for writing";
+        outputResponse($parser, $xml2jsonObj, $dataProductDoc, $ERROR_STATUS,
+                       $content_type, $errorCode, $message);
+        exit 1;
+    }
+#    print PRODUCT $dataProductDoc->ownerDocument->toString(1);
+    print PRODUCT $transform_string;
+    close(PRODUCT);
+    chmod 0666, $dataProductFile;
+}
+my $dataProductGcmdEntryId = $newDataProductHash{dataProductGcmdEntryId}
+    if exists $newDataProductHash{dataProductGcmdEntryId};
+if ($dataProductGcmdEntryId) {
+    unless (exists $CFG::AESIR_GCMD_DIF_ENTRY_IDs{$dataProductGcmdEntryId}) {
+        # Add dataProductGcmdEntryId to the configuration file
+        my %AESIR_GCMD_DIF_ENTRY_IDs = %CFG::AESIR_GCMD_DIF_ENTRY_IDs;
+        $AESIR_GCMD_DIF_ENTRY_IDs{$dataProductGcmdEntryId} = 1;
+        unless (open (OUT, "> $entryIdsCfgFile")) {
+            my $errorCode = 'UPDATING_CFG_FILE';
+            my $message = "Could not open $entryIdsCfgFile for writing";
+            outputResponse($parser, $xml2jsonObj, $dataProductDoc, $ERROR_STATUS,
+                           $content_type, $errorCode, $message);
+            exit 1;
+        }
+        print OUT '%AESIR_GCMD_DIF_ENTRY_IDs = (', "\n";
+        foreach my $entryId (sort keys %AESIR_GCMD_DIF_ENTRY_IDs) {
+            print OUT "    '$entryId' => 1,\n";
+        }
+        print OUT ");\n\n1;\n";
+        close(OUT);
+    }
+}
+
+# New product successfully added
+outputResponse($parser, $xml2jsonObj, $dataProductDoc, $SUCCESS_STATUS,
+               $content_type);
+
+exit 0;
+
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub addValue {
+    my ($doc, $key, $mapping, $value) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    # Look for a 'value' child node. If one is found and it is empty,
+    # replace it with a new value
+    my ($valueNode1) = $node->findnodes('./value');
+    if (defined $valueNode1) {
+        my $content = $valueNode1->textContent;
+        if ($content eq '') {
+            $valueNode1->removeChildNodes();
+            $valueNode1->appendText($value);
+            return;
+        }
+    }
+
+    # Otherwise add a new 'value' child node.
+    # Construct a new 'value' node and add it to the node in $doc at
+    # that path.
+    $node->appendTextChild('value', $value);
+    return;
+}
+
+sub outputResponse {
+    my ($parser, $xml2jsonObj, $doc, $status, $content_type,
+        $errorCode, $errorMessage) = @_;
+
+    my $responseDom = $parser->parse_string('<createNewDataProductResponse></createNewDataProductResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ($status > $SUCCESS_STATUS) {
+        # Error
+        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    $resultNode->addChild($doc);
+    $responseDoc->addChild($resultNode);
+
+    if ($content_type =~ /xml/) {
+        print $cgi->header( -type   => 'application/xml' );
+        print $responseDom->toString(1);
+    } else {
+        my $responseJson = $xml2jsonObj->convert($responseDom->toString());
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}

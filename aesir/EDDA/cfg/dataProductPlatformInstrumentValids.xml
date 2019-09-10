@@ -1,0 +1,39 @@
+<valids>
+  <valid>AATSR-Aqua</valid>
+  <valid>AIRS</valid>
+  <valid>AMSR-2</valid>
+  <valid>AMSR-E</valid>
+  <valid>Aquarius</valid>
+  <valid>ENVISAT MERIS</valid>
+  <valid>EPA AIRNow</valid>
+  <valid>FLDAS Model</valid>
+  <valid>GEOS-CHEM</valid>
+  <valid>GLDAS Model</valid>
+  <valid>GMS/PR</valid>
+  <valid>GOCART Model</valid>
+  <valid>GOES AVHRR</valid>
+  <valid>GPM</valid>
+  <valid>GRACE</valid>
+  <valid>MERRA Model</valid>
+  <valid>MERRA-2 Model</valid>
+  <valid>MISR</valid>
+  <valid>MODIS-Aqua</valid>
+  <valid>MODIS-Terra</valid>
+  <valid>MOPITT</valid>
+  <valid>NCA-LDAS Model</valid>
+  <valid>NCDC Model</valid>
+  <valid>NLDAS Model</valid>
+  <valid>NOAA-18 AVHRR-3</valid>
+  <valid>NOBM Model</valid>
+  <valid>OCTS</valid>
+  <valid>OMI</valid>
+  <valid>OMPS-NM SNPP</valid>
+  <valid>SSMI</valid>
+  <valid>SeaWiFS</valid>
+  <valid>SeaWinds</valid>
+  <valid>TOMS EP</valid>
+  <valid>TOMS Meteor-3</valid>
+  <valid>TOMS Nimbus-7</valid>
+  <valid>TRMM</valid>
+  <valid>VIIRS</valid>
+</valids>

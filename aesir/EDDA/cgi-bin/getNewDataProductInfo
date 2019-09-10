@@ -1,0 +1,1524 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getNewDataProductInfo,v 1.27 2016/02/12 18:51:39 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+getNewDataProductInfo - Output AESIR information for one new data product
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getNewDataProductInfo?gcmdDifEntryId=<gcmdDifEntryId>[&format=xml]
+
+OR
+
+getNewDataProductInfo?gcmdDifEntryId=<gcmdDifEntryId>&path=urlPath[&format=xml]
+
+OR
+
+getNewDataProductInfo?shortName=<shortName>&versionId=<versionId>[&providerId=<providerId][&format=xml]
+
+=head1 DESCRIPTION
+
+Output AESIR information for one new data product, including information
+extracted from a GCMD DIF
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+my ($rootPath);
+
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+#        unshift( @INC, $rootPath . 'lib/perl5' );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use LWP::UserAgent;
+use EDDA::DataProbe;
+use URI;
+use CGI;
+use Safe;
+
+my $SUCCESS_STATUS = 1;
+my $ERROR_STATUS   = 2;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+my $entryIdsCfgFile = $CFG::EDDA_GCMD_DIF_ENTRY_IDS;
+unless (defined $entryIdsCfgFile) {
+    exit_with_error("EDDA_GCMD_DIF_ENTRY_IDS not defined in $cfgFile\n");
+}
+unless ( $cpt->rdo($entryIdsCfgFile) ) {
+    # If unable to read entry ids configuration file, create a new one
+    unless (open (OUT, "> $entryIdsCfgFile")) {
+        exit_with_error("Could not open $entryIdsCfgFile for writing\n");
+    }
+    print OUT '%AESIR_GCMD_DIF_ENTRY_IDs = (', "\n";
+    print OUT ");\n\n1;\n";
+    close(OUT);
+    chmod 0666, $entryIdsCfgFile;
+    unless ( $cpt->rdo($entryIdsCfgFile) ) {
+        exit_with_error("Could not read configuration file $entryIdsCfgFile\n");
+    }
+}
+
+#exit_with_error("AESIR_CATALOG_DIR not defined in configuration\n")
+#    unless defined $CFG::AESIR_CATALOG_DIR;
+#exit_with_error("Directory $CFG::AESIR_CATALOG_DIR not found\n")
+#    unless -d $CFG::AESIR_CATALOG_DIR;
+
+# Check for required configuration variables
+#exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+#    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+
+# Assume that the names of the files in the data products catalog directory
+# are the dataProductId values for each data product.
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR not found")
+    unless -d $dataProductsDir;
+
+# Parameters:
+#  path: Path portion of a DIF URL
+#  gcmdDifEntryId: DIF Entry Id. If path is undefined, it was obtained
+#                  from the document name portion (preceding .xml) of the
+#                  DIF URL
+#  shortName: Data set short name
+#  versionId: Data set version
+#  format: response format (xml or json)
+#
+# Logic:
+#   - If gcmdDifEntryId has a value, it must match regex
+#   - If gcmdDifEntryId has no value, path must have a value
+#     - DIF with gcmdDifEntryId must be retrievable from GCMD and parseable
+#   - dataProductShortName and dataProductVersion are determined from
+#     gcmdDifEntryId match of regex
+#   - If gcmdDifEntryId is already in EDDA, exit with error
+#   - Fetch and parse data set xml, exit if error
+#   - Extract data product version from DIF
+#   - If path provided, dataProductVersion is data product version from
+#     data set xml
+#   - If path not provided, data product version extracted from
+#     gcmdDifEntryId (if it exists) must match that from data set xml,
+#     otherwise dataProductVersion is data product version from
+#     data set xml
+#
+
+# If xml format is desired, output the xml version of the dataProducts document
+my $format = $cgi->param('format');
+$format ||= 'json';
+
+# Check that a valid gcmdDifEntryId parameter was provided
+my ($gcmdDifEntryIdParam) = $cgi->param('gcmdDifEntryId');
+my $gcmdDifEntryId = $1 if $gcmdDifEntryIdParam =~ /^\s*(\w[\w.\-]+)\s*$/;
+
+# If a 'path' parameter is provided, obtain the document from an HTTP URL
+# instead of from GCMD web services
+my ($urlPath) = $cgi->param('path');
+
+my ($shortNameParam) = $cgi->param('shortName');
+my $shortName = $1 if $shortNameParam =~ /^([ A-Za-z0-9_.-]+)/;
+
+my ($versionIdParam) = $cgi->param('versionId');
+my $versionId = $1 if ( $versionIdParam && $versionIdParam =~ /^(\w[\w.]*)/ );
+
+my ($providerIdParam) = $cgi->param('providerId');
+my $providerId = $1 if ( $providerIdParam && $providerIdParam =~ /^(\w[\w.]*)/ );
+
+my $errorCode = '';
+my $errorMessage;
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+my $newDataProductDom;
+my $newDataProductDoc;
+eval { $newDataProductDom = $parser->parse_string($CFG::NEW_DATA_PRODUCT_XML); };
+if ($@) {
+    $errorMessage = "Unexpected error: Could not parse data product xml in configuration\n.";
+    outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                    $errorCode, $errorMessage );
+    exit 1;
+}
+$newDataProductDoc = $newDataProductDom->documentElement();
+
+if ($gcmdDifEntryIdParam) {
+    $errorMessage .= " '$gcmdDifEntryIdParam' is not a valid GCMD Entry Id, it must have a value and consist of only letters, underscores, digits, periods, and dashes.\n"
+        unless $gcmdDifEntryId;
+}
+if ($shortNameParam) {
+    $errorMessage .= " '$shortNameParam' is not a valid Short Name, it must have a value and consist of only letters, underscores, digits, periods, and dashes.\n"
+        unless $shortName;
+}
+if ($versionIdParam) {
+    $errorMessage .= " '$versionIdParam' is not a valid Version, it must have a value and consist of only letters, underscores, digits, and periods.\n"
+        unless $versionId;
+}
+if (($shortName || $versionId) && !($shortName && $versionId)) {
+    $errorMessage .= " Both a valid Short Name and a valid Version must be provided.\n";
+}
+if ($providerIdParam) {
+    $errorMessage .= " '$providerIdParam' is not a valid Provider Id, it must have a value and consist of only letters, underscores, digits, and periods.\n"
+        unless $providerId;
+}
+
+if ($errorMessage) {
+    $errorCode = 'INPUT_PARAMETER_ERROR';
+    outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+        $errorCode, $errorMessage );
+    exit 1;
+}
+
+unless ($gcmdDifEntryId || ($shortName && $versionId) || $urlPath) {
+    if (defined $urlPath) {
+        $errorMessage .= "A value must be provided for the DIF XML URL.\n"
+            unless $urlPath;
+    } elsif ( (defined $shortNameParam) || (defined $versionIdParam) ) {
+        $errorMessage .= "A value must be provided for both Short Name and Version.\n";
+    } elsif  (defined ($gcmdDifEntryId) ) {
+        $errorMessage .= "A value must be provided for the DIF ID.\n";
+    }
+}
+
+# Populate valids for each attribute that has them
+my $validsDom;
+my $validsDoc;
+if (defined $CFG::AESIR_CATALOG_DATA_PRODUCT_VALIDS_DOCS) {
+    while (my($attr, $file) = each %$CFG::AESIR_CATALOG_DATA_PRODUCT_VALIDS_DOCS) {
+        my $validsPath = $CFG::ADD_DOC_PRODUCT_MAPPING->{$attr} . '/valids';
+        my ($validsNode) = $newDataProductDoc->findnodes($validsPath);
+        if ($validsNode) {
+            if (defined $file && -r ($file)) {
+                eval { $validsDom = $parser->parse_file( $file ); };
+                if ($@) {
+                    exit_with_error("Error parsing $file");
+                }
+                $validsDoc = $validsDom->documentElement();
+                if ($validsDoc->findnodes('/valids')) {
+                    $validsNode->replaceNode($validsDoc);
+                }
+            }
+        }
+    }
+}
+
+if ($shortName && $versionId) {
+    get_CMR_ProductInfo($parser, $newDataProductDoc, $format,
+                        $shortName, $versionId, $providerId);
+} elsif ($gcmdDifEntryId || $urlPath) {
+    get_DIF_ProductInfo($parser, $newDataProductDoc, $format,
+                        $gcmdDifEntryId, $urlPath);
+}
+
+exit 0;
+
+sub get_CMR_ProductInfo {
+    my ($parser, $newDataProductDoc, $format, $shortName,
+        $versionId, $providerId) = @_;
+
+    my $echo10collDoc;
+    my $message;
+    my $location;
+
+    # Search CMR for a collection with the given short name, version,
+    # and provider id
+    # https://cmr.earthdata.nasa.gov/search/collections?short_name=s&version=v&provider=p
+    my $baseUrl = 'https://cmr.earthdata.nasa.gov/search/collections';
+    my $uri = URI->new($baseUrl);
+    my $queryParams;
+    $queryParams->{'short_name'} = $shortName if defined $shortName;
+    $queryParams->{'version'} = $versionId if defined $versionId;
+    $queryParams->{'provider'} = $providerId if defined $providerId;
+    $uri->query_form($queryParams);
+    my $request = HTTP::Request->new( GET => $uri->as_string );
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->request($request);
+    if ( $response->is_success ) {
+        my $errorCode;
+        my $rDom;
+        eval { $rDom = $parser->parse_string( $response->content ); };
+        if ($@) {
+            $errorCode = 'CMR_SEARCH_ERROR';
+            $message
+                = "Could not parse response from CMR search for short_name $shortName version $versionId\n";
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                            $format, $errorCode, $message );
+            exit 1;
+        }
+        my $rDoc = $rDom->documentElement();
+        my ($hitsNode) = $rDoc->findnodes('/results/hits');
+        my $hits = $hitsNode->textContent if $hitsNode;
+        if ($hits > 1) {
+            $errorCode = 'CMR_SEARCH_NOT_UNIQUE';
+            $message
+                = "$hits results found in CMR for short_name $shortName version $versionId.";
+            if (defined $providerId) {
+                $message .= "\n";
+            } else {
+                $message .= "Select a provider in order to find a single collection in CMR.\n";
+            }
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                            $format, $errorCode, $message );
+            exit 1;
+         }
+        if ($hits < 1) {
+            $errorCode = 'CMR_SEARCH_NOT_FOUND';
+            $message
+                = "No collections were found in CMR for short name $shortName version $versionId";
+            $message .= " provider $providerId" if defined $providerId;
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                            $format, $errorCode, $message );
+            exit 1;
+        }
+        my ($locNode) = $rDoc->findnodes('/results/references/reference/location');
+        $location = $locNode->textContent if $locNode;
+        unless ($location) {
+            $errorCode = 'CMR_SEARCH_NOT_FOUND';
+            $message
+                = "No collections were found in CMR for short name $shortName version $versionId";
+            $message .= " provider $providerId" if defined $providerId;
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                            $format, $errorCode, $message );
+            exit 1;
+        }
+
+        # Get collection metadata in ECHO 10 format
+        my $echo10_location = $location . '.echo10';
+
+        $request = HTTP::Request->new( GET => $echo10_location );
+        my $response2 = $ua->request($request);
+        if ( $response2->is_success ) {
+            my $rDom2;
+            eval { $rDom2 = $parser->parse_string( $response2->content ); };
+            if ($@) {
+                $errorCode = 'CMR_SEARCH_ERROR';
+                $message
+                    = "Could not parse response from CMR collection for short_name $shortName version $versionId\n";
+                outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                                $format, $errorCode, $message );
+                exit 1;
+            }
+            $echo10collDoc = $rDom2->documentElement();
+        }
+    }
+
+    unless ($echo10collDoc) {
+        $errorCode = 'CMR_ERROR';
+        $message
+            = "An unexpected error occured obtaining CMR collection metadata for short_name $shortName version $versionId\n";
+        outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                        $format, $errorCode, $message );
+        exit 1;
+    }
+
+    my %newDataProductHash;
+    my $node;
+
+    ($node) = $echo10collDoc->findnodes('/Collection/ShortName');
+    my $dataProductShortName = $node->textContent if $node;
+    $dataProductShortName =~ s/^\s+|\s+$//g if $dataProductShortName;
+
+    ($node) = $echo10collDoc->findnodes('/Collection/VersionId');
+    my $dataProductVersion = $node->textContent if $node;
+    $dataProductVersion =~ s/^\s+|\s+$//g if $dataProductVersion;
+
+    my $dataProductId = getProductId( $dataProductShortName,
+                                      $dataProductVersion );
+
+    $newDataProductHash{'dataProductId'}        = $dataProductId;
+    $newDataProductHash{'dataProductShortName'} = $dataProductShortName;
+    $newDataProductHash{'dataProductVersion'}   = $dataProductVersion;
+
+    $newDataProductHash{'dataProductDescriptionUrl'} = $location;
+    $newDataProductHash{'dataProductGcmdEntryId'} = $dataProductId;
+
+    ($node) = $echo10collDoc->findnodes('/Collection/LongName');
+    my $dataProductLongName = $node->textContent if $node;
+    $dataProductLongName =~ s/^\s+|\s+$//g if $dataProductLongName;
+    $newDataProductHash{'dataProductLongName'} = $dataProductLongName;
+
+    ($node) = $echo10collDoc->findnodes('/Collection/DataSetId');
+    my $dataProductDataSetId = $node->textContent if $node;
+    $dataProductDataSetId =~ s/^\s+|\s+$//g if $dataProductDataSetId;
+    $newDataProductHash{'dataProductDataSetId'} = $dataProductDataSetId;
+
+    ($node) = $echo10collDoc->findnodes('/Collection/ProcessingLevel');
+    my $dataProductProcessingLevel = $node->textContent if $node;
+    unless ($dataProductProcessingLevel) {
+        if ( $dataProductLongName =~ /\sl(?:evel)?\s*(\d.*?)\s/i ||
+             $dataProductDataSetId =~ /\sl(?:evel)?\s*(\d.*?)\s/i ) {
+            $dataProductProcessingLevel = $1;
+        }
+    }
+    $newDataProductHash{'dataProductProcessingLevel'} = $dataProductProcessingLevel;
+
+    my $dataProductTimeInterval;
+    if ( $dataProductLongName  =~ /\s+(hourly|daily|monthly|yearly)\s+/i ||
+         $dataProductDataSetId =~ /\s+(hourly|daily|monthly|yearly)\s+/i ) {
+        $dataProductTimeInterval = lc($1);
+    } elsif ( $dataProductLongName =~ /3-hour/i ||
+              $dataProductDataSetId =~ /3-hour/i ) {
+        $dataProductTimeInterval = '3-hourly';
+    } elsif ( $dataProductLongName =~ /8-day/i ||
+              $dataProductDataSetId =~ /8-day/i ) {
+        $dataProductTimeInterval = '8-daily';
+    }
+    if (defined $dataProductTimeInterval) {
+        $newDataProductHash{'dataProductTimeInterval'} = $dataProductTimeInterval;
+        $newDataProductHash{'dataProductTimeFrequency'} = 1;
+    }
+
+    my $dataCenter;
+    ($node) = $echo10collDoc->findnodes('/Collection/ArchiveCenter');
+    if ($node) {
+        $dataCenter = $node->textContent;
+        $newDataProductHash{'dataProductDataCenter'} = $dataCenter;
+    }
+
+    my $dataProductPlatformShortName;
+    ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/ShortName' );
+    if ($node) {
+        $dataProductPlatformShortName = $node->textContent;
+    }
+    else {
+        ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/LongName' );
+        $dataProductPlatformShortName = $node->textContent if $node;
+    }
+    $dataProductPlatformShortName =~ s/^\s+|\s+$//g if $dataProductPlatformShortName;
+
+    if ( defined $dataProductPlatformShortName ) {
+        $dataProductPlatformShortName = 'Aqua'
+            if $dataProductPlatformShortName eq 'AQUA';
+        $dataProductPlatformShortName = 'Aura'
+            if $dataProductPlatformShortName eq 'AURA';
+        $dataProductPlatformShortName = 'Terra'
+            if $dataProductPlatformShortName eq 'TERRA';
+    }
+    else {
+        if ( $dataProductLongName =~ /gocart model/i ) {
+            $dataProductPlatformShortName = 'GOCART Model';
+        }
+        elsif ( $dataProductLongName =~ /model/i ) {
+            $dataProductPlatformShortName = 'Model';
+        }
+        elsif ( $dataProductLongName =~ /SeaWiFS/i ) {
+            $dataProductPlatformShortName = 'OrbView-2';
+        }
+    }
+    $newDataProductHash{'dataProductPlatformShortName'}
+    = $dataProductPlatformShortName
+        if $dataProductPlatformShortName;
+
+    my $dataProductPlatformLongName;
+    ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/LongName' );
+    if ($node) {
+        $dataProductPlatformLongName = $node->textContent;
+    }
+    else {
+        ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/ShortName' );
+        $dataProductPlatformLongName = $node->textContent if $node;
+    }
+    $dataProductPlatformLongName =~ s/^\s+|\s+$//g if $dataProductPlatformLongName;
+
+    unless ( defined $dataProductPlatformLongName ) {
+        if ( $dataProductLongName =~ /gocart model/i ) {
+            $dataProductPlatformLongName = 'GOCART Model';
+        }
+        elsif ( $dataProductLongName =~ /model/i ) {
+            $dataProductPlatformLongName = 'Model';
+        }
+        elsif ( $dataProductLongName =~ /SeaWiFS/i ) {
+            $dataProductPlatformLongName = 'Orbital Sciences Corporation OrbView-2 Satellite';
+        }
+    }
+    $newDataProductHash{'dataProductPlatformLongName'}
+    = $dataProductPlatformLongName
+        if $dataProductPlatformLongName;
+
+    my $dataProductInstrumentShortName;
+    ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/Instruments/Instrument/ShortName' );
+    if ($node) {
+        $dataProductInstrumentShortName = $node->textContent;
+    }
+    else {
+        ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/Instruments/Instrument/LongName' );
+        $dataProductInstrumentShortName = $node->textContent if $node;
+    }
+    $dataProductInstrumentShortName =~ s/^\s+|\s+$//g if $dataProductInstrumentShortName;
+
+    if ( defined $dataProductInstrumentShortName ) {
+        $dataProductInstrumentShortName = 'SeaWiFS'
+            if $dataProductInstrumentShortName eq 'SEAWIFS';
+    }
+    else {
+        if ( $dataProductLongName =~ /gocart model/i ) {
+            $dataProductInstrumentShortName = 'GOCART Model';
+        }
+        elsif ( $dataProductLongName =~ /model/i ) {
+            $dataProductInstrumentShortName = 'Model';
+        }
+    }
+    $newDataProductHash{'dataProductInstrumentShortName'}
+    = $dataProductInstrumentShortName
+        if $dataProductInstrumentShortName;
+
+    my $dataProductInstrumentLongName;
+    ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/Instruments/Instrument/LongName' );
+    if ($node) {
+        $dataProductInstrumentLongName = $node->textContent;
+    }
+    else {
+        ($node) = $echo10collDoc->findnodes( '/Collection/Platforms/Platform/Instruments/Instrument/ShortName' );
+        $dataProductInstrumentLongName = $node->textContent if $node;
+    }
+    $dataProductInstrumentLongName =~ s/^\s+|\s+$//g if $dataProductInstrumentLongName;
+
+    unless ( defined $dataProductInstrumentLongName ) {
+        if ( $dataProductLongName =~ /gocart model/i ) {
+            $dataProductInstrumentLongName = 'GOCART Model';
+        }
+        elsif ( $dataProductLongName =~ /model/i ) {
+            $dataProductInstrumentLongName = 'Model';
+        }
+    }
+    $newDataProductHash{'dataProductInstrumentLongName'}
+    = $dataProductInstrumentLongName
+        if $dataProductInstrumentLongName;
+
+    my $dataProductBeginDateTime;
+    my $dataProductEndDateTime;
+    my (@temporalCoverageNodes)
+        = $echo10collDoc->findnodes( '/Collection/Temporal/RangeDateTime' );
+    if (@temporalCoverageNodes) {
+        my $temporalCoverageNode = $temporalCoverageNodes[0];
+        ($node) = $temporalCoverageNode->findnodes( './BeginningDateTime' );
+        $dataProductBeginDateTime = $node->textContent() if $node;
+        ($node) = $temporalCoverageNode->findnodes( './EndingDateTime' );
+        $dataProductEndDateTime = $node->textContent() if $node;
+    }
+    $newDataProductHash{'dataProductBeginDateTime'} = $dataProductBeginDateTime
+        if $dataProductBeginDateTime;
+    $newDataProductHash{'dataProductEndDateTime'} = $dataProductEndDateTime
+        if $dataProductEndDateTime;
+
+    my $dataProductWest;
+    my $dataProductNorth;
+    my $dataProductEast;
+    my $dataProductSouth;
+    my (@spatialCoverageNodes)
+        = $echo10collDoc->findnodes( '/Collection/Spatial/HorizontalSpatialDomain/Geometry/BoundingRectangle' );
+    if (@spatialCoverageNodes) {
+        my $spatialCoverageNode = $spatialCoverageNodes[0];
+        ($node)
+            = $spatialCoverageNode->findnodes( 'SouthBoundingCoordinate');
+        $dataProductSouth = $node->textContent() if $node;
+        ($node)
+            = $spatialCoverageNode->findnodes( 'NorthBoundingCoordinate' );
+        $dataProductNorth = $node->textContent() if $node;
+        ($node)
+            = $spatialCoverageNode->findnodes( 'WestBoundingCoordinate' );
+        $dataProductWest = $node->textContent() if $node;
+        ($node)
+            = $spatialCoverageNode->findnodes( 'EastBoundingCoordinate' );
+        $dataProductEast = $node->textContent() if $node;
+    }
+    $newDataProductHash{'dataProductWest'} = $dataProductWest
+        if defined $dataProductWest;
+    $newDataProductHash{'dataProductNorth'} = $dataProductNorth
+        if defined $dataProductNorth;
+    $newDataProductHash{'dataProductEast'} = $dataProductEast
+        if defined $dataProductEast;
+    $newDataProductHash{'dataProductSouth'} = $dataProductSouth
+        if defined $dataProductSouth;
+
+#    my $;
+#    ($node) = $echo10collDoc->findnodes( '/Collection/' );
+#    if ($node) {
+#        $ = $node->textContent;
+#    }
+
+    my $dif10collDoc;
+    my $dif10_location = $location . '.dif10';
+    $request = HTTP::Request->new( GET => $dif10_location );
+    my $response3 = $ua->request($request);
+    if ( $response3->is_success ) {
+        my $rDom3;
+        eval { $rDom3 = $parser->parse_string( $response3->content ); };
+        if ($@) {
+            $errorCode = 'CMR_SEARCH_ERROR';
+            $message
+                = "Could not parse response from CMR collection in dif10 format for short_name $shortName version $versionId\n";
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                            $format, $errorCode, $message );
+            exit 1;
+        }
+        $dif10collDoc = $rDom3->documentElement();
+    }
+
+    unless ($dif10collDoc) {
+        $errorCode = 'CMR_ERROR';
+        $message
+            = "An unexpected error occured obtaining CMR collection metadata in dif10 format for short_name $shortName version $versionId\n";
+        outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                        $format, $errorCode, $message );
+        exit 1;
+    }
+
+    my $xpc = XML::LibXML::XPathContext->new;
+    $xpc->registerNs( 'dif', 'http://gcmd.gsfc.nasa.gov/Aboutus/xml/dif/' );
+
+    ($node)
+        = $xpc->findnodes( '/dif:DIF/dif:Data_Resolution/dif:Latitude_Resolution',
+                           $dif10collDoc );
+    my $dataProductLatitudeResolution = $node->textContent() if $node;
+    my ( $latRes, $latResUnit )
+        = $dataProductLatitudeResolution =~ m/([\d.\/]+)\s*([a-zA-Z]*[a-zA-Z.]*)/;
+
+    # If resolution is like "1/2 degrees"
+    $latRes = eval($latRes) if $latRes =~ m/\//;
+
+    ($node)
+        = $xpc->findnodes(
+        '/dif:DIF/dif:Data_Resolution/dif:Longitude_Resolution', $dif10collDoc );
+    my $dataProductLongitudeResolution = $node->textContent() if $node;
+    my ( $lonRes, $lonResUnit )
+        = $dataProductLongitudeResolution =~ m/([\d.\/]+)\s*([a-zA-Z]*[a-zA-Z.]*)/;
+
+    # If resolution is like "1/2 degrees"
+    $lonRes = eval($lonRes) if $lonRes =~ m/\//;
+
+    $latResUnit =~ s/deg(?:\.)?(?:ree)?(?:s)?/deg./i;
+    $latResUnit =~ s/kilometer(?:s)?/km/i;
+    $latResUnit =~ s/meter(?:s)?/m/i;
+    $lonResUnit =~ s/deg(?:\.)?(?:ree)?(?:s)?/deg./i;
+    $lonResUnit =~ s/kilometer(?:s)?/km/i;
+    $lonResUnit =~ s/meter(?:s)?/m/i;
+    if ( $latResUnit eq $lonResUnit ) {
+        $latResUnit = '';
+    }
+    else {
+        $latResUnit = ' ' . $latResUnit;
+    }
+    $newDataProductHash{'dataProductSpatialResolutionLatitude'} = $latRes
+        if $latRes;
+    $newDataProductHash{'dataProductSpatialResolutionLongitude'} = $lonRes
+        if $lonRes;
+    $newDataProductHash{'dataProductSpatialResolutionUnits'} = $lonResUnit
+        if $lonResUnit;
+
+    ($node) = $xpc->findnodes( '/dif:DIF/dif:Metadata_Dates/dif:Metadata_Last_Revision', $dif10collDoc );
+    if ($node) {
+        my $revDate = $node->textContent;
+        if ($revDate) {
+            $revDate .= 'T00:00:00Z' unless $revDate =~ /^\d{4}-\d{2}-\d{2}T/;
+            $newDataProductHash{'dataProductGcmdLastRevisionDate'} = $revDate;
+        }
+    }
+
+    foreach my $fieldKey (@CFG::ADD_DOC_PRODUCT_FIELDS) {
+        if ( exists $newDataProductHash{$fieldKey} ) {
+            if ( ref $newDataProductHash{$fieldKey} eq 'ARRAY' ) {
+                foreach my $val ( @{ $newDataProductHash{$fieldKey} } ) {
+                    addValue( $newDataProductDoc, $fieldKey,
+                              $CFG::ADD_DOC_PRODUCT_MAPPING, $val );
+                }
+            }
+            else {
+                addValue( $newDataProductDoc, $fieldKey,
+                          $CFG::ADD_DOC_PRODUCT_MAPPING,
+                          $newDataProductHash{$fieldKey} );
+            }
+        }
+        else {
+            # No value was found with key $fieldKey. If the field
+            # is required but not editable, make it editable.
+            next if $fieldKey eq 'dataProductInternal';
+            updateEditable( $newDataProductDoc, $fieldKey,
+                            $CFG::ADD_DOC_PRODUCT_MAPPING );
+        }
+    }
+
+    addValue( $newDataProductDoc, 'dataProductInternal',
+              $CFG::ADD_DOC_PRODUCT_MAPPING, 'false' );
+
+    # Check that the data product is not already in AESIR
+    if ( -f "$dataProductsDir/$dataProductId" ) {
+        my $errorCode = 'PRODUCT_ALREADY_EXISTS';
+        my $message
+            = "A product with product id '$dataProductId' is already in AESIR, so there is no need to add it again.";
+        outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                        $errorCode, $message );
+        exit 1;
+    }
+
+    my $granuleOsddUrl;
+    unless($urlPath) {
+
+        # Add path to Giovanni library modules to @INC so that DataProbe
+        # can find ESIP::OSDD
+        unshift( @INC, $CFG::GIOVANNI_LIB ) if defined $CFG::GIOVANNI_LIB;
+
+        # Use a data probe to try to find a sample OPeNDAP granule URL
+        my $dataProbe = new EDDA::DataProbe(
+            SHORTNAME    => $dataProductShortName,
+            VERSION      => $dataProductVersion,
+            BEGINDATE    => $dataProductBeginDateTime,
+            TIMEINTERVAL => $dataProductTimeInterval,
+            DATACENTER   => $dataCenter,
+            URLONLY      => 1
+            );
+        if ( $dataProbe && !$dataProbe->onError ) {
+            my $opendapUrl = $dataProbe->opendapUrl;
+            if ($opendapUrl) {
+                addValue( $newDataProductDoc, 'dataProductOpendapUrl',
+                          $CFG::ADD_DOC_PRODUCT_MAPPING, $opendapUrl );
+            }
+
+            $granuleOsddUrl = $dataProbe->granuleOsddUrl;
+            if ($granuleOsddUrl) {
+                addValue( $newDataProductDoc, 'dataProductOsddUrl',
+                          $CFG::ADD_DOC_PRODUCT_MAPPING, $granuleOsddUrl );
+            }
+
+            my $granuleUrl = $dataProbe->granuleUrl;
+            if ($granuleUrl) {
+                addValue( $newDataProductDoc, 'dataProductSampleGranuleUrl',
+                          $CFG::ADD_DOC_PRODUCT_MAPPING, $granuleUrl );
+            }
+        }
+    }
+
+    unless ($granuleOsddUrl) {
+        $granuleOsddUrl = 'https://cmr.earthdata.nasa.gov/opensearch/granules/descriptor_document.xml?clientId=giovanni&shortName=SHORTNAME&versionId=VERSIONID&dataCenter=PROVIDER_ID';
+        # We won't do full URI escaping here, but just take care of
+        # space.
+        (my $escShortName = $dataProductShortName) =~ s/ /%20/g;
+        $granuleOsddUrl =~ s/SHORTNAME/$escShortName/
+            if defined $dataProductShortName;
+        $granuleOsddUrl =~ s/VERSIONID/$dataProductVersion/
+            if defined $dataProductVersion;
+        $granuleOsddUrl =~ s/PROVIDER_ID/$providerId/
+            if defined $providerId;
+        addValue( $newDataProductDoc, 'dataProductOsddUrl',
+                  $CFG::ADD_DOC_PRODUCT_MAPPING, $granuleOsddUrl );
+    }
+
+    outputResponse( $parser, $newDataProductDoc, $SUCCESS_STATUS, $format );
+}
+
+sub get_DIF_ProductInfo {
+my ($parser, $newDataProductDoc, $format, $gcmdDifEntryId, $urlPath) = @_;
+
+my %newDataProductHash;
+my $versionIdParam;
+my $shortNameParam;
+
+unless ($urlPath) {
+    # Check that the DIF Entry_ID exists
+    my $entryIdDom;
+    my $url
+        = "http://gcmdservices.gsfc.nasa.gov/mws/entryids/dif?query=[Entry_ID='$gcmdDifEntryId']&format=xml";
+    my $req = HTTP::Request->new( GET => $url );
+#    $req->authorization_basic( 'URS_USERNAME_GOES_HERE', 'URS_PASSWORD_GOES_HERE' );
+    # Assume that IP-based access to GCMD MWS has been allowed
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->request($req);
+    if ( $response->is_success ) {
+        eval { $entryIdDom = $parser->parse_string( $response->content ); };
+        if ($@) {
+            my $errorCode = 'DIF_ERROR';
+            my $message
+                = "Could not parse response from query for GCMD DIF Entry_ID $gcmdDifEntryId";
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                            $errorCode, $message );
+            exit 1;
+        }
+        my $entryIdDoc = $entryIdDom->documentElement();
+        my ($node) = $entryIdDoc->findnodes('/Error_Message');
+        if ($node) {
+            my $errorCode = 'DIF_NOT_FOUND';
+            my $message
+                = "Could not find a DIF with with Entry_ID $gcmdDifEntryId";
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                            $errorCode, $message );
+            exit 1;
+        }
+    }
+}
+
+my $dataProductShortName;
+my $dataProductVersion;
+my $dataCenter;
+my $productShortNameMissing = 1;
+my $productVersionMissing   = 1;
+if ( $gcmdDifEntryId =~ /^GES_DISC_(.+)_V(.+)$/ ) {
+    $dataProductShortName    = $1;
+    $dataProductVersion      = $2;
+    $dataCenter              = 'GESDISC';
+    $productShortNameMissing = 0;
+    $productVersionMissing   = 0;
+} else {
+    if ( $gcmdDifEntryId =~ /^ESGF_(.+)-v(.+)$/ ) {
+        $dataProductShortName    = $1;
+        $dataProductVersion      = $2;
+        $productShortNameMissing = 0;
+        $productVersionMissing   = 0;
+    } elsif ( $gcmdDifEntryId =~ /^ESGF_(.+)$/ ) {
+        $dataProductShortName    = $1;
+        $dataProductVersion      = $2;
+        $productShortNameMissing = 0;
+        $productVersionMissing   = 0;
+    } elsif ( $gcmdDifEntryId =~ /^(M[OY]D.+)_C(\d)(.*)$/ ) {
+        $dataProductShortName    = $1;
+        $dataProductVersion      = $2;
+        $productShortNameMissing = 0;
+        $productVersionMissing   = 0;
+    } else {
+        $dataProductShortName    = $1;
+        $dataProductVersion      = $2;
+    }
+}
+$productShortNameMissing = 0 if defined $dataProductShortName;
+$productVersionMissing   = 0 if defined $dataProductVersion;
+
+# Check that the DIF Entry_ID is not already in AESIR
+if ( exists $CFG::AESIR_GCMD_DIF_ENTRY_IDs{$gcmdDifEntryId} ) {
+    my $errorCode = 'PRODUCT_ALREADY_EXISTS';
+    my $message
+        = "A product with DIF Entry_ID $gcmdDifEntryId is already in AESIR, so there is no need to add it again.";
+    if ( $dataProductShortName && $dataProductVersion ) {
+        my $dataProductId = getProductId( $dataProductShortName, $dataProductVersion );
+        addValue( $newDataProductDoc, 'dataProductId',
+                  $CFG::ADD_DOC_PRODUCT_MAPPING, $dataProductId );
+    }
+    outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+        $errorCode, $message );
+    exit 1;
+}
+
+# Fetch the DIF, parse it, and add information from it to the dataProducts
+# document
+my $ua  = LWP::UserAgent->new;
+my $url;
+my $docDescription;
+my $req;
+if ($urlPath) {
+    $url = $urlPath . "/" . $gcmdDifEntryId . ".xml";
+#    $docDescription = "DIF with Entry_ID $gcmdDifEntryId";
+    $docDescription = "DIF XML with url $url";
+    $req = HTTP::Request->new( GET => $url );
+} else {
+    $url = "http://gcmdservices.gsfc.nasa.gov/mws/dif/$gcmdDifEntryId";
+    $docDescription = "DIF XML with url $url";
+    $req = HTTP::Request->new( GET => $url );
+#    $req->authorization_basic( 'URS_USERNAME_GOES_HERE', 'URS_PASSWORD_GOES_HERE' );
+    # Assume that IP-based access to GCMD MWS has been allowed
+}
+$req->header( Accept => [qw(application/xml)] );
+my $response = $ua->request($req);
+
+my $difDom;
+my $difDoc;
+if ( $response->is_success ) {
+    eval { $difDom = $parser->parse_string( $response->content ); };
+    if ($@) {
+        my $errorCode = 'DIF_ERROR';
+        my $message
+            = "Could not read and parse $docDescription";
+        outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+            $errorCode, $message );
+        exit 1;
+    }
+    $difDoc = $difDom->documentElement();
+}
+else {
+    my $errorCode = 'DIF_NOT_FOUND';
+    my $message   = "Could not obtain $docDescription";
+    outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+        $errorCode, $message );
+    exit 1;
+}
+
+my $node;
+
+my $xpc = XML::LibXML::XPathContext->new;
+$xpc->registerNs( 'dif', 'http://gcmd.gsfc.nasa.gov/Aboutus/xml/dif/' );
+
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Data_Set_Citation/dif:Version',
+    $difDoc );
+my $difProductVersion = $node->textContent if $node;
+$difProductVersion =~ s/^\s+|\s+$//g if $difProductVersion;
+$difProductVersion = $1 if $difProductVersion =~ /v(\d+)/i;
+
+if ($urlPath) {
+    if ( ( defined $difProductVersion ) && ( not defined $dataProductVersion ) ) {
+        $dataProductVersion    = $difProductVersion;
+        $productVersionMissing = 0;
+    }
+} else {
+    # Check that version in the DIF agrees with version in the DIF ID
+    if ($dataProductVersion) {
+        if ( $difProductVersion && ( $difProductVersion ne $dataProductVersion ) )
+            {
+                print STDERR
+                    "Version Id mismatch between DIF Entry Id $gcmdDifEntryId and DIF Data_set_Citation Version $difProductVersion\n";
+            }
+    }
+    elsif ( defined $difProductVersion ) {
+        $dataProductVersion    = $difProductVersion;
+        $productVersionMissing = 0;
+    }
+
+    if ( $versionIdParam ne '' ) {
+        unless ($versionId) {
+            $errorMessage
+                = "'$versionIdParam' is not a valid versionId parameter, it must have a value and consist of only letters, underscores, digits, and periods.\n";
+            $errorCode = 'INPUT_PARAMETER_ERROR';
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+            $errorCode, $errorMessage );
+            exit 1;
+        }
+        if ( defined $dataProductVersion ) {
+            if ( $dataProductVersion ne $versionId ) {
+                my $errorCode = 'VERSION_ID_MISMATCH';
+                my $message
+                    = "The DIF with Entry_ID $gcmdDifEntryId already has a version ID of '$difProductVersion', so a version ID of '$versionId' cannot be used with that DIF.";
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                            $format, $errorCode, $message );
+                exit 1;
+            }
+        }
+        else {
+            $dataProductVersion    = $versionId;
+            $productVersionMissing = 0;
+        }
+    }
+    if ( $shortNameParam ne '' ) {
+        unless ($shortName) {
+            $errorMessage
+            .= "'$shortNameParam' is not a valid shortName parameter, it must have a value and consist of only letters, digits, underscores, dots, and hyphens.\n";
+            $errorCode = 'INPUT_PARAMETER_ERROR';
+            outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                            $errorCode, $errorMessage );
+            exit 1;
+        }
+        if ( defined $dataProductShortName ) {
+            if ( $dataProductShortName ne $shortName ) {
+                my $errorCode = 'SHORTNAME_MISMATCH';
+                my $message
+                    = "The DIF with Entry_ID $gcmdDifEntryId has a short name of '$dataProductShortName', so a short name '$shortName' cannot be used with that DIF.";
+                outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS,
+                                $format, $errorCode, $message );
+                exit 1;
+            }
+        }
+        else {
+            $dataProductShortName    = $shortName;
+            $productShortNameMissing = 0;
+        }
+
+    }
+}
+if ($productShortNameMissing) {
+    if ($productVersionMissing) {
+        my $errorCode = 'SHORTNAME_AND_VERSION_ID_MISSING';
+        my $message
+            = "The DIF with Entry_ID $gcmdDifEntryId does not have a short name or a version ID, so a version ID value must be provided.";
+        outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                        $errorCode, $message );
+        exit 1;
+    }
+    else {
+        my $errorCode = 'SHORTNAME_MISSING';
+        my $message
+            = "The DIF with Entry_ID $gcmdDifEntryId does not have a short name, so a short name value must be provided.";
+        outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                        $errorCode, $message );
+        exit 1;
+    }
+}
+elsif ($productVersionMissing) {
+    my $errorCode = 'VERSION_ID_MISSING';
+    my $message
+        = "The DIF with Entry_ID $gcmdDifEntryId does not have a version ID, so a version ID value must be provided.";
+    outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+                    $errorCode, $message );
+    exit 1;
+}
+
+
+# Add information from the DIF to the dataProducts document
+
+my $dataProductId = getProductId( $dataProductShortName, $dataProductVersion );
+
+# Fix LAADS contradiction of including 'Collection ' in the version
+# in the DIF but not including it in the version in ECHO
+$dataProductVersion =~ s/Collection //;
+
+$newDataProductHash{'dataProductId'}        = $dataProductId;
+$newDataProductHash{'dataProductShortName'} = $dataProductShortName;
+$newDataProductHash{'dataProductVersion'}   = $dataProductVersion;
+
+$newDataProductHash{'dataProductDescriptionUrl'}
+    = 'http://gcmd.gsfc.nasa.gov/getdif.htm?' . $gcmdDifEntryId;
+
+$newDataProductHash{'dataProductGcmdEntryId'} = $gcmdDifEntryId;
+
+# Attempt to determine the long name, data set Id, processing level, and
+# time interval from the Data_Set_Citation/Dataset_Title, or alternatively,
+# the Entry_Title
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Data_Set_Citation/dif:Dataset_Title',
+    $difDoc );
+my ($node2) = $xpc->findnodes( '/dif:DIF/dif:Entry_Title', $difDoc );
+my $dataProductLongName;
+my $dataProductTimeInterval;
+my $title;
+my $altTitle;
+if ($node) {
+    $title = $node->textContent;
+    if ($node2) {
+        $altTitle = $node2->textContent;
+    }
+} else {
+    if ($node2) {
+        $title = $node2->textContent;
+    }
+}
+$dataProductLongName = $title || $altTitle;
+$dataProductLongName =~ s/^\s+|\s+$//g;
+$newDataProductHash{'dataProductLongName'} = $dataProductLongName;
+if ($dataProductLongName) {
+    $newDataProductHash{'dataProductDataSetId'} = $dataProductLongName;
+    if ( defined $dataProductVersion ) {
+        $newDataProductHash{'dataProductDataSetId'}
+            .= ' V' . $dataProductVersion
+        unless $newDataProductHash{'dataProductDataSetId'} =~ /V$dataProductVersion$/i;
+    }
+}
+if ( $title    =~ /\sl(?:evel)?\s*(\d.*?)\s/i ||
+     $altTitle =~ /\sl(?:evel)?\s*(\d.*?)\s/i ) {
+    $newDataProductHash{'dataProductProcessingLevel'} = $1;
+}
+
+if ( $title    =~ /\s+(hourly|daily|monthly|yearly)\s+/i ||
+     $altTitle =~ /\s+(hourly|daily|monthly|yearly)\s+/i ) {
+    $dataProductTimeInterval = lc($1);
+} elsif ( $title =~ /3-hour/i || $altTitle =~ /3-hour/i ) {
+    $dataProductTimeInterval = '3-hourly';
+} elsif ( $title =~ /8-day/i || $altTitle =~ /8-day/i ) {
+    $dataProductTimeInterval = '8-daily';
+}
+if (defined $dataProductTimeInterval) {
+    $newDataProductHash{'dataProductTimeInterval'} = $dataProductTimeInterval;
+    $newDataProductHash{'dataProductTimeFrequency'} = 1;
+}
+
+($node)
+    = $xpc->findnodes(
+    '/dif:DIF/dif:Data_Center/dif:Data_Center_Name/dif:Short_Name', $difDoc );
+if ($node) {
+    $dataCenter = $node->textContent;
+    $newDataProductHash{'dataProductDataCenter'} = $dataCenter;
+}
+
+my $dataProductPlatformShortName;
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Source_Name/dif:Short_Name', $difDoc );
+if ($node) {
+    $dataProductPlatformShortName = $node->textContent;
+}
+else {
+    ($node)
+        = $xpc->findnodes( '/dif:DIF/dif:Source_Name/dif:Long_Name',
+        $difDoc );
+    $dataProductPlatformShortName = $node->textContent if $node;
+}
+if ( defined $dataProductPlatformShortName ) {
+    $dataProductPlatformShortName = 'Aqua'
+        if $dataProductPlatformShortName eq 'AQUA';
+    $dataProductPlatformShortName = 'Aura'
+        if $dataProductPlatformShortName eq 'AURA';
+    $dataProductPlatformShortName = 'Terra'
+        if $dataProductPlatformShortName eq 'TERRA';
+}
+else {
+    if ( $dataProductLongName =~ /gocart model/i ) {
+        $dataProductPlatformShortName = 'GOCART Model';
+    }
+    elsif ( $dataProductLongName =~ /model/i ) {
+        $dataProductPlatformShortName = 'Model';
+    }
+    elsif ( $dataProductLongName =~ /SeaWiFS/i ) {
+        $dataProductPlatformShortName = 'OrbView-2';
+    }
+}
+$newDataProductHash{'dataProductPlatformShortName'}
+    = $dataProductPlatformShortName
+    if $dataProductPlatformShortName;
+
+my $dataProductPlatformLongName;
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Source_Name/dif:Long_Name', $difDoc );
+if ($node) {
+    $dataProductPlatformLongName = $node->textContent;
+}
+else {
+    ($node)
+        = $xpc->findnodes( '/dif:DIF/dif:Source_Name/dif:Short_Name',
+        $difDoc );
+    $dataProductPlatformLongName = $node->textContent if $node;
+}
+unless ( defined $dataProductPlatformLongName ) {
+    if ( $dataProductLongName =~ /gocart model/i ) {
+        $dataProductPlatformLongName = 'GOCART Model';
+    }
+    elsif ( $dataProductLongName =~ /model/i ) {
+        $dataProductPlatformLongName = 'Model';
+    }
+    elsif ( $dataProductLongName =~ /SeaWiFS/i ) {
+        $dataProductPlatformLongName
+            = 'Orbital Sciences Corporation OrbView-2 Satellite';
+    }
+}
+$newDataProductHash{'dataProductPlatformLongName'}
+    = $dataProductPlatformLongName
+    if $dataProductPlatformLongName;
+
+my $dataProductInstrumentShortName;
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Sensor_Name/dif:Short_Name', $difDoc );
+if ($node) {
+    $dataProductInstrumentShortName = $node->textContent;
+}
+else {
+    ($node)
+        = $xpc->findnodes( '/dif:DIF/dif:Sensor_Name/dif:Long_Name',
+        $difDoc );
+    $dataProductInstrumentShortName = $node->textContent if $node;
+}
+if ( defined $dataProductInstrumentShortName ) {
+    $dataProductInstrumentShortName = 'SeaWiFS'
+        if $dataProductInstrumentShortName eq 'SEAWIFS';
+}
+else {
+    if ( $dataProductLongName =~ /gocart model/i ) {
+        $dataProductInstrumentShortName = 'GOCART Model';
+    }
+    elsif ( $dataProductLongName =~ /model/i ) {
+        $dataProductInstrumentShortName = 'Model';
+    }
+}
+$newDataProductHash{'dataProductInstrumentShortName'}
+    = $dataProductInstrumentShortName
+    if $dataProductInstrumentShortName;
+
+my $dataProductInstrumentLongName;
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Sensor_Name/dif:Long_Name', $difDoc );
+if ($node) {
+    $dataProductInstrumentLongName = $node->textContent;
+}
+else {
+    ($node)
+        = $xpc->findnodes( '/dif:DIF/dif:Sensor_Name/dif:Short_Name',
+        $difDoc );
+    $dataProductInstrumentLongName = $node->textContent if $node;
+}
+unless ( defined $dataProductInstrumentLongName ) {
+    if ( $dataProductLongName =~ /gocart model/i ) {
+        $dataProductInstrumentLongName = 'GOCART Model';
+    }
+    elsif ( $dataProductLongName =~ /model/i ) {
+        $dataProductInstrumentLongName = 'Model';
+    }
+}
+$newDataProductHash{'dataProductInstrumentLongName'}
+    = $dataProductInstrumentLongName
+    if $dataProductInstrumentLongName;
+
+($node)
+    = $xpc->findnodes( '/dif:DIF/dif:Data_Resolution/dif:Latitude_Resolution',
+    $difDoc );
+my $dataProductLatitudeResolution = $node->textContent() if $node;
+my ( $latRes, $latResUnit )
+    = $dataProductLatitudeResolution =~ m/([\d.\/]+)\s*([a-zA-Z]*[a-zA-Z.]*)/;
+
+# If resolution is like "1/2 degrees"
+$latRes = eval($latRes) if $latRes =~ m/\//;
+
+($node)
+    = $xpc->findnodes(
+    '/dif:DIF/dif:Data_Resolution/dif:Longitude_Resolution', $difDoc );
+my $dataProductLongitudeResolution = $node->textContent() if $node;
+my ( $lonRes, $lonResUnit )
+    = $dataProductLongitudeResolution =~ m/([\d.\/]+)\s*([a-zA-Z]*[a-zA-Z.]*)/;
+
+# If resolution is like "1/2 degrees"
+$lonRes = eval($lonRes) if $lonRes =~ m/\//;
+
+$latResUnit =~ s/deg(?:\.)?(?:ree)?(?:s)?/deg./i;
+$latResUnit =~ s/kilometer(?:s)?/km/i;
+$latResUnit =~ s/meter(?:s)?/m/i;
+$lonResUnit =~ s/deg(?:\.)?(?:ree)?(?:s)?/deg./i;
+$lonResUnit =~ s/kilometer(?:s)?/km/i;
+$lonResUnit =~ s/meter(?:s)?/m/i;
+if ( $latResUnit eq $lonResUnit ) {
+    $latResUnit = '';
+}
+else {
+    $latResUnit = ' ' . $latResUnit;
+}
+$newDataProductHash{'dataProductSpatialResolutionLatitude'} = $latRes
+    if $latRes;
+$newDataProductHash{'dataProductSpatialResolutionLongitude'} = $lonRes
+    if $lonRes;
+$newDataProductHash{'dataProductSpatialResolutionUnits'} = $lonResUnit
+    if $lonResUnit;
+
+my $dataProductBeginDateTime;
+my $dataProductEndDateTime;
+my (@temporalCoverageNodes)
+    = $xpc->findnodes( '/dif:DIF/dif:Temporal_Coverage', $difDoc );
+if (@temporalCoverageNodes) {
+    my $temporalCoverageNode = $temporalCoverageNodes[0];
+    ($node) = $xpc->findnodes( './dif:Start_Date', $temporalCoverageNode );
+    $dataProductBeginDateTime = $node->textContent() if $node;
+    $dataProductBeginDateTime .= 'T00:00:00Z'
+        if $dataProductBeginDateTime;
+    ($node) = $xpc->findnodes( './dif:Stop_Date', $temporalCoverageNode );
+    $dataProductEndDateTime = $node->textContent() if $node;
+    $dataProductEndDateTime .= 'T23:59:59.999Z'
+        if $dataProductEndDateTime;
+}
+$newDataProductHash{'dataProductBeginDateTime'} = $dataProductBeginDateTime
+    if $dataProductBeginDateTime;
+$newDataProductHash{'dataProductEndDateTime'} = $dataProductEndDateTime
+    if $dataProductEndDateTime;
+
+my $dataProductWest;
+my $dataProductNorth;
+my $dataProductEast;
+my $dataProductSouth;
+my (@spatialCoverageNodes)
+    = $xpc->findnodes( '/dif:DIF/dif:Spatial_Coverage', $difDoc );
+if (@spatialCoverageNodes) {
+    my $spatialCoverageNode = $spatialCoverageNodes[0];
+    ($node)
+        = $xpc->findnodes( './dif:Southernmost_Latitude',
+        $spatialCoverageNode );
+    $dataProductSouth = $node->textContent() if $node;
+    ($node)
+        = $xpc->findnodes( './dif:Northernmost_Latitude',
+        $spatialCoverageNode );
+    $dataProductNorth = $node->textContent() if $node;
+    ($node)
+        = $xpc->findnodes( './dif:Westernmost_Longitude',
+        $spatialCoverageNode );
+    $dataProductWest = $node->textContent() if $node;
+    ($node)
+        = $xpc->findnodes( './dif:Easternmost_Longitude',
+        $spatialCoverageNode );
+    $dataProductEast = $node->textContent() if $node;
+}
+$newDataProductHash{'dataProductWest'} = $dataProductWest
+    if defined $dataProductWest;
+$newDataProductHash{'dataProductNorth'} = $dataProductNorth
+    if defined $dataProductNorth;
+$newDataProductHash{'dataProductEast'} = $dataProductEast
+    if defined $dataProductEast;
+$newDataProductHash{'dataProductSouth'} = $dataProductSouth
+    if defined $dataProductSouth;
+
+($node) = $xpc->findnodes( '/dif:DIF/dif:Last_DIF_Revision_Date', $difDoc );
+if ($node) {
+    my $revDate = $node->textContent;
+    if ($revDate) {
+        $revDate .= 'T00:00:00Z' unless $revDate =~ /^\d{4}-\d{2}-\d{2}T/;
+        $newDataProductHash{'dataProductGcmdLastRevisionDate'} = $revDate;
+    }
+}
+
+foreach my $fieldKey (@CFG::ADD_DOC_PRODUCT_FIELDS) {
+    if ( exists $newDataProductHash{$fieldKey} ) {
+        if ( ref $newDataProductHash{$fieldKey} eq 'ARRAY' ) {
+            foreach my $val ( @{ $newDataProductHash{$fieldKey} } ) {
+                addValue( $newDataProductDoc, $fieldKey,
+                    $CFG::ADD_DOC_PRODUCT_MAPPING, $val );
+            }
+        }
+        else {
+            addValue( $newDataProductDoc, $fieldKey,
+                $CFG::ADD_DOC_PRODUCT_MAPPING,
+                $newDataProductHash{$fieldKey} );
+        }
+    }
+    else {
+        # No value was found with key $fieldKey. If the field
+        # is required but not editable, make it editable.
+        next if $fieldKey eq 'dataProductInternal';
+        updateEditable( $newDataProductDoc, $fieldKey,
+            $CFG::ADD_DOC_PRODUCT_MAPPING );
+    }
+}
+
+addValue( $newDataProductDoc, 'dataProductInternal',
+    $CFG::ADD_DOC_PRODUCT_MAPPING, 'false' );
+
+# Check that the data product is not already in AESIR
+if ( -f "$dataProductsDir/$dataProductId" ) {
+    my $errorCode = 'PRODUCT_ALREADY_EXISTS';
+    my $message
+        = "A product with product id '$dataProductId' is already in AESIR, so there is no need to add it again.";
+    outputResponse( $parser, $newDataProductDoc, $ERROR_STATUS, $format,
+        $errorCode, $message );
+    exit 1;
+}
+
+unless($urlPath) {
+
+    # Add path to Giovanni library modules to @INC so that DataProbe
+    # can find ESIP::OSDD
+    unshift( @INC, $CFG::GIOVANNI_LIB ) if defined $CFG::GIOVANNI_LIB;
+
+    # Use a data probe to try to find a sample OPeNDAP granule URL
+    my $dataProbe = new EDDA::DataProbe(
+                                        SHORTNAME    => $dataProductShortName,
+                                        VERSION      => $dataProductVersion,
+                                        BEGINDATE    => $dataProductBeginDateTime,
+                                        TIMEINTERVAL => $dataProductTimeInterval,
+                                        DATACENTER   => $dataCenter,
+                                        URLONLY      => 1
+                                       );
+    if ( $dataProbe && !$dataProbe->onError ) {
+        my $opendapUrl = $dataProbe->opendapUrl;
+        if ($opendapUrl) {
+            addValue( $newDataProductDoc, 'dataProductOpendapUrl',
+                      $CFG::ADD_DOC_PRODUCT_MAPPING, $opendapUrl );
+        }
+
+        my $granuleOsddUrl = $dataProbe->granuleOsddUrl;
+        if ($granuleOsddUrl) {
+            addValue( $newDataProductDoc, 'dataProductOsddUrl',
+                      $CFG::ADD_DOC_PRODUCT_MAPPING, $granuleOsddUrl );
+        }
+
+        my $granuleUrl = $dataProbe->granuleUrl;
+        if ($granuleUrl) {
+            addValue( $newDataProductDoc, 'dataProductSampleGranuleUrl',
+                      $CFG::ADD_DOC_PRODUCT_MAPPING, $granuleUrl );
+        }
+    }
+}
+
+outputResponse( $parser, $newDataProductDoc, $SUCCESS_STATUS, $format );
+}
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(
+        -status        => 404,
+        -type          => 'text/plain',
+        -cache_control => 'no-cache'
+    );
+    print $message;
+    exit;
+}
+
+sub addValue {
+    my ( $doc, $key, $mapping, $value ) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    # Look for a 'value' child node. If one is found and it is empty,
+    # replace it with a new value
+    my ($valueNode1) = $node->findnodes('./value');
+    if ( defined $valueNode1 ) {
+        my $content = $valueNode1->textContent;
+        if ( $content eq '' ) {
+            $valueNode1->removeChildNodes();
+            $valueNode1->appendText($value);
+            return;
+        }
+    }
+
+    # Otherwise add a new 'value' child node.
+    # Construct a new 'value' node and add it to the node in $doc at
+    # that path.
+    $node->appendTextChild( 'value', $value );
+    return;
+}
+
+sub updateEditable {
+    my ( $doc, $key, $mapping ) = @_;
+
+    # If a field is required but not editable, make it editable
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    my ($requiredNode) = $node->findnodes('./constraints/required');
+    return unless $requiredNode;
+    my $required = $requiredNode->textContent;
+    if ( $required =~ /t(?:rue)?/i ) {
+        my ($editableNode) = $node->findnodes('./constraints/editable');
+        return unless $editableNode;
+        my $editable = $editableNode->textContent;
+        if ( $editable =~ /f(?:alse)?/i ) {
+            $editableNode->removeChildNodes();
+            $editableNode->appendText('true');
+        }
+    }
+    return;
+}
+
+sub addOptionalValue {
+    my ( $doc, $key, $mapping, $dataFieldOptionalDoc, $value ) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+
+    if ($node) {
+
+        # Add the 'value' node to the node in $doc at that path
+        $node->appendTextChild( 'value', $value );
+        return;
+    }
+    else {
+        # Find the node in $dataFieldOptionalDoc at that path, clone it,
+        # and add the 'value' node to the cloned node
+        ($node) = $dataFieldOptionalDoc->findnodes($path);
+        unless ($node) {
+            print STDERR
+                "Could not find optional node for key $key path $path\n";
+            return;
+        }
+        my $newNode = $node->cloneNode(1);
+        $newNode->appendTextChild( 'value', $value );
+
+        # Add the cloned node to $doc
+        $doc->addChild($newNode);
+    }
+}
+
+sub outputResponse {
+    my ( $parser, $doc, $status, $content_type, $errorCode, $errorMessage )
+        = @_;
+
+    my $responseDom = $parser->parse_string(
+        '<getNewDataProductInfoResponse></getNewDataProductInfoResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ( $status > $SUCCESS_STATUS ) {
+
+        # Error
+        $responseDoc->appendTextChild( 'errorCode',    $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    $resultNode->addChild($doc);
+    $responseDoc->addChild($resultNode);
+
+    if ( $content_type =~ /xml/ ) {
+        print $cgi->header( -type => 'application/xml' );
+        print $responseDom->toString(1);
+    }
+    else {
+        my $noJsonAttrPrefix      = 1;
+        my $JsonContentKeyIsValue = 1;
+        my $forceJSONarray        = 1;
+        my $prettyJSON            = 1;
+        my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+        my $prefix      = ($noJsonAttrPrefix) ? '' : '@';
+        my $obj         = XML::XML2JSON->new(
+            module             => 'JSON::XS',
+            pretty             => $prettyJSON,
+            attribute_prefix   => $prefix,
+            content_key        => $content_key,
+            force_array        => $forceJSONarray,
+            private_attributes => [ 'encoding', 'version' ]
+        );
+        my $responseJson = $obj->convert( $responseDom->toString() );
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}
+
+sub getProductId {
+    my ( $dataProductShortName, $dataProductVersion ) = @_;
+
+    my $dataProductId = ${dataProductShortName};
+    $dataProductId =~ s/\s+//g;
+    $dataProductId =~ s/_?v\d+\s*$//i;
+    $dataProductId .= ".${dataProductVersion}";
+    $dataProductId =~ s/\s+//g;
+    $dataProductId =~ s/-/_/g;
+
+    return $dataProductId;
+}

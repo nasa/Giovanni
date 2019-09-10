@@ -1,0 +1,75 @@
+body {background-color:#FFFFFF; margin:5px;}
+body, table, td, form, input, select {font-family:Arial; font-size:12px; color:#000000;}
+th {background-color: #B6B6B6}
+
+
+table {
+margin-right:auto;
+margin-left:auto;
+margin-top:5px;
+width:100%;
+min-width:660px;
+}
+
+th {
+background:#b7dafd;
+text-align:center;
+border:1px #000000 solid;
+padding-left:5px;
+padding-right:5px;
+}
+
+th label{                             /* used for "Select All" checkbox label */
+float:left
+}
+
+th input.chkbox {             /* used for "Select All" checkbox */
+float:left;
+margin:1px 5px 1px 0px;
+}
+
+tr.odd td{                            /* alternated table row color for readability */
+background-color:#e4e4e4;
+/* border:1px #888888 solid; */
+}
+
+tr.even td{                           
+background-color:#e0effe;
+/* border:1px #888888 solid;0 */
+}
+
+td {
+text-align:left;
+vertical-align:top;
+padding:5px 5px 5px 6px;
+}
+
+td.left {
+text-align:left;
+}
+
+td.filler {                           /* soon to be obsolete */
+padding-top:10px;
+}
+
+td input.chkbox {
+float:left;
+margin:1px 5px 1px 0px;
+}
+
+
+table table{
+margin-top:0px;
+margin-right:auto;
+margin-left:auto;
+width:100%;
+}
+
+table table th {  /* This is used for view by Data Set on the Cart page */
+padding:0px;
+background:#999999;
+text-align:center;
+border:1px #000000 solid;
+padding-left:5px;
+}
+

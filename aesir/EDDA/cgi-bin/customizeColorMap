@@ -1,0 +1,171 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: customizeColorMap,v 1.17 2015/06/19 22:09:27 eseiler Exp $
+# -@@@ AESIR EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+customizeColorMap - Customize a color map based on user input (range, scale type..)
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+customizeColorMap?srcName=<SLD Name>&destName=<SLD Name>&min=<min>&max=<max>[&overwrite=<0 or 1>]
+
+=head1 DESCRIPTION
+
+Customizes a color map (OGC SLD) based on user input.
+
+=head1 OPTIONS
+
+=over 4
+
+=back
+
+=head1 AUTHOR
+
+M. Hegde, E<lt>Mahabaleshwa.S.Hegde@nasa.govE<gt>
+
+=cut
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use JSON;
+use CGI;
+use File::Basename;
+use Fcntl qw(:flock);
+use Safe;
+
+my $cgi = new CGI;
+my $input = {};
+$input = $cgi->Vars();
+
+$ENV{ENV} = undef;
+$ENV{PATH} = '/usr/bin';
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error(3,"Could not read configuration file");
+}
+if (defined $CFG::GIOVANNI_LIB) {
+    unshift( @INC, $CFG::GIOVANNI_LIB );
+    require Giovanni::Util;
+    require Giovanni::OGC::SLD;
+}
+
+foreach my $key ( keys %$input ) {
+    $input->{$key} = ($input->{$key} =~ /(.+)/ ? $1 : undef);
+}
+# Get input
+my $srcSldName = ($input->{srcName}=~/^(\w+)$/ ? $1 : undef);
+my $srcSldFile = $CFG::SLD_LOCATION . "/$srcSldName.xml";
+my $destSldName = exists $input->{destName} ? ($input->{destName}=~/^(\w+)$/ ? $1 : undef) : $srcSldName;
+my $destSldFile = $CFG::SLD_LOCATION . "/$destSldName.xml";
+my $min = exists $input->{min} ? ($input->{min}=~/(.+)/ ? $1 : undef) : undef;
+my $max = exists $input->{max} ? ($input->{max}=~/(.+)/ ? $1 : undef) : undef;
+# Convert min and max to numbers
+$min=0+$min;
+$max=0+$max;
+
+my $overwrite = exists $input->{overwrite} ? $input->{overwrite} : undef;
+
+if ( (-f $destSldFile) && $overwrite==0 ){
+    # If src and dest SLD's are the same and overwrite flag is not set, complain
+    exit_with_error(2, "Target SLD exists; is it ok to overwrite?");
+}
+
+# Create a lock file so that any updates are blocked for the duration of this request
+my $sldIndexFile = $CFG::SLD_LOCATION . "/sld_list.json";
+my $lockFile = $sldIndexFile . '.lock';
+local (*FH);
+if ( open( FH, ">$lockFile" ) ) { 
+    flock( FH, LOCK_EX );
+} else {
+    my $message = "Failed to update SLD index file which contains thumbnails and SLD attributes";
+    exit_with_error(3, $message);
+}
+
+# Get index file of SLDs
+my $sldIndexStr = Giovanni::Util::readFile($sldIndexFile);
+my $sldIndexHash = $sldIndexStr eq '' ? {} : from_json($sldIndexStr);
+my %sldNameHash = map { $_->{name} => $_ } @{$sldIndexHash->{sldList}{sld}};
+
+# Parse the source SLD
+my $srcSld = Giovanni::OGC::SLD->new( FILE=>$srcSldFile );
+# Modify the SLD based on user input
+my $status = $srcSld->modifyColorMap(MIN=>$min, MAX=>$max, INTDATA=>0, SLDTYPE=>1);
+$srcSld->setLayerName($destSldName);
+# Failed to modify color map with user specified min/max
+exit_with_error(3,"Failed to modify color map") unless $status;
+# If successful in modifying SLD, save it to the destination file
+$status = Giovanni::Util::writeFile($destSldFile,  $srcSld->toString());
+exit_with_error(3,"Failed to save modified color map") unless $status;
+# Update the thumbnail
+my $pngFile = $CFG::SLD_LOCATION . "/$destSldName.png";
+$srcSld->createThumbnail( HEIGHT=>12, WIDTH=>128, FILE=>$pngFile);
+# Update the SLD index
+my $sldEntryRef = {};
+my @dataRange = $srcSld->getDataRange();
+if ( exists $sldNameHash{$destSldName} ) {
+    $sldEntryRef = $sldNameHash{$destSldName};
+    if ( @dataRange==2 && $dataRange[0] ne '' && $dataRange[1] ne '' ) {
+        ($sldEntryRef->{min}, $sldEntryRef->{max}) = @dataRange;
+    }
+} else {
+    $sldEntryRef->{name} = $srcSld->getLayerName();
+    $sldEntryRef->{title} = $srcSld->getUserStyleName();
+    $sldEntryRef->{name} = $sldEntryRef->{name};
+    $sldEntryRef->{title} = $sldEntryRef->{title};
+    $sldEntryRef->{file} = basename($destSldFile);
+    $sldEntryRef->{thumbnail} = basename($pngFile);
+    if ( @dataRange==2 && $dataRange[0] ne '' && $dataRange[1] ne '' ) {
+        ($sldEntryRef->{min}, $sldEntryRef->{max}) = @dataRange;
+    }
+    my @colorList = $srcSld->getColors();
+    $sldEntryRef->{numColors} = scalar(@colorList);
+    push( @{$sldIndexHash->{sldList}{sld}}, $sldEntryRef );
+}
+my ( $hashRef, $message ) = ( {}, '' );
+# If successful in saving the modified SLD, share it with EDDA
+my $flag = Giovanni::Util::writeFile( $sldIndexFile, to_json($sldIndexHash, {pretty=>1}) );
+flock( FH, LOCK_UN );
+if ( $flag ) {
+    my $errMsg = `$rootPath/bin/AESIR/EDDA/updateDataFieldSldValids.pl '$destSldName'`;
+    if ( $? ) {
+        exit_with_error(3, "Failed to update EDDA global SLD valids");
+        print STDERR "Failed to update EDDA global SLD valids: $errMsg\n";
+    } else {
+        $hashRef = {customizeColorMap=>{code=>1, result=>$sldEntryRef, message=>"$destSldName created"}};
+        print $cgi->header(-type=>'text/plain',-cache_control=>'no-cache');
+        # Print the response
+        print to_json($hashRef);
+    }
+}
+exit 0;
+
+sub exit_with_error {
+    my ($code, $message) = @_;
+    my $httpStatusCode = 200;
+    print $cgi->header(-status=>$httpStatusCode,-type=>'text/plain',-cache_control=>'no-cache');
+    my $hashRef = {customizeColorMap=>{code=>$code, message=>$message}};
+    print to_json($hashRef);
+    exit;
+}
+

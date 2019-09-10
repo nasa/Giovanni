@@ -1,0 +1,163 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getDataProducts,v 1.10 2015/06/19 22:09:27 eseiler Exp $
+# -@@@ AESIR EDDA Version: $Name:  $
+################################################################################
+
+
+=head1 NAME
+
+getDataProducts - Output a subset of AESIR information for all data products
+currently in the AESIR catalog
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getDataProducts[?format=xml]
+
+=head1 DESCRIPTION
+
+Output a subset of information for all data products currently in the AESIR
+catalog.
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use CGI;
+use Safe;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+# Check for required configuration variables
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+
+# Assume that the names of the files in the data products catalog directory
+# are the dataProductId values for each data product.
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory $dataProductsDir not found")
+    unless -d $dataProductsDir;
+exit_with_error("Could not open $dataProductsDir: $!\n")
+    unless opendir(DIR, $dataProductsDir);
+my @dataProductIds = grep { !/^\./ && -f "$dataProductsDir/$_" } readdir(DIR);
+closedir(DIR);
+
+# Define the nodes of the data product xml whose content will be included
+# in the response
+my @dataProductNodeNames = ('dataProductId',
+                            'dataProductIdentifiers/value/dataProductDataSetId',
+                            'dataProductIdentifiers/value/dataProductGcmdEntryId',
+                            'dataProductIdentifiers/value/dataProductShortName',
+                            'dataProductIdentifiers/value/dataProductVersion',
+                            'dataProductDescriptionUrl');
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+# Start new dataProducts xml document
+my $dataProductsDom = $parser->parse_string('<dataProducts></dataProducts>');
+my $dataProductsDoc = $dataProductsDom->documentElement();
+
+# For each data product, parse the data product xml file, extract the desired
+# nodes and add them to the dataProducts document
+DATAPRODUCT: foreach my $dataProductId (sort @dataProductIds) {
+    my $productFile = "$dataProductsDir/$dataProductId";
+    exit_with_error("Could not find catalog information for dataProductId $dataProductId\n")
+        unless -e "$dataProductsDir/$dataProductId";
+    my $dataProductDom;
+    eval { $dataProductDom = $parser->parse_file( $productFile ); };
+    if ($@) {
+        exit_with_error("Could not read and parse $productFile\n");
+    }
+    my $dataProductDoc = $dataProductDom->documentElement();
+    my $dataProductNode = XML::LibXML::Element->new('dataProduct');
+    foreach my $nodeName (@dataProductNodeNames) {
+        my ($node) = $dataProductDoc->findnodes("/dataProduct/$nodeName");
+        if ($node) {
+            if ($nodeName =~ /dataProductGcmdEntryId/) {
+                my ($valueNode) = $node->findnodes("./value");
+                my $dataProductGcmdEntryId = $valueNode->textContent()
+                    if $valueNode;
+                # For now skip products with no dataProductGcmdEntryId
+                next DATAPRODUCT unless $dataProductGcmdEntryId;
+            }
+            $dataProductNode->addChild($node);
+        }
+    }
+    $dataProductsDoc->addChild($dataProductNode) if $dataProductNode;
+}
+
+# If xml format is desired, output the xml version of the dataProducts document
+my $format = $cgi->param('format');
+if (uc($format) eq 'XML') {
+    print $cgi->header( -type => 'application/xml' );
+    my $xml = $dataProductsDoc->toString(1);
+    print $xml;
+    exit 0;
+}
+
+# By default, output the dataProducts document in json
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+
+my $obj = XML::XML2JSON->new( module => 'JSON::XS',
+                              pretty => $prettyJSON,
+                              attribute_prefix => $prefix,
+                              content_key => $content_key,
+                              force_array => $forceJSONarray,
+                              private_attributes => ['encoding', 'version']);
+my $xml = $dataProductsDoc->toString();
+my $json = $obj->convert($xml);
+
+print $cgi->header( -type => 'application/json' );
+print $json;
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}

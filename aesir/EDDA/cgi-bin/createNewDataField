@@ -1,0 +1,606 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: createNewDataField,v 1.17 2015/06/24 18:26:42 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+createNewDataField - Create a new data field for the AESIR catalog
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+POST createNewDataField
+
+=head1 DESCRIPTION
+
+Create a new data field for the AESIR catalog
+
+=head1 OPTIONS
+
+=over 4
+
+=item format=xml
+
+Option to output in xml format. Default format is json.
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::LibXSLT;
+use XML::XML2JSON;
+use LWP::UserAgent;
+use CGI;
+use Safe;
+use Time::HiRes qw (gettimeofday);
+use DateTime;
+use Date::Parse;
+
+my $SUCCESS_STATUS = 1;
+my $ERROR_STATUS = 2;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+# Check for required configuration variables
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_DIR;
+
+my $newDataFieldInfo;
+my $newDataFieldInfoFile;
+
+# Obtain type and content of new data field info
+my $request_method = $cgi->request_method;
+my $content_type   = $cgi->content_type();
+
+# Obtain input parameter values.
+if ($request_method eq 'POST') {
+    # Perl CGI will give the posted data parameter a different name if
+    # the content type is application/xml. Otherwise it will be
+    # named POSTDATA.
+    if ($content_type =~ /application\/xml/) {
+        $newDataFieldInfo = $cgi->param('XForms:Model');
+    } else {
+        $newDataFieldInfo = $cgi->param('POSTDATA');
+    }
+} elsif ($request_method eq 'GET') {
+    $newDataFieldInfo     = $cgi->param('newDataFieldInfo');
+    $newDataFieldInfoFile = $cgi->param('newDataFieldInfoFile');
+}
+
+if ( (defined $newDataFieldInfoFile) && (-r $newDataFieldInfoFile) ) {
+    # Need to untaint $newDataFieldInfoFile here before open
+    unless (open(UPDATED, "< $newDataFieldInfoFile")) {
+        exit_with_error("Could not open $newDataFieldInfoFile for reading: $!")
+    }
+    {
+        local $/;
+        $newDataFieldInfo = <UPDATED>;
+    }
+    close(UPDATED);
+}
+
+my $styleSheet;
+my $xslt = XML::LibXSLT->new();
+eval { $styleSheet = $xslt->parse_stylesheet_file($CFG::AESIR_CATALOG_DATA_FIELDS_XSL); };
+if ($@) {
+    exit_with_error("Error parsing stylesheet $CFG::AESIR_CATALOG_DATA_FIELDS_XSL: $@");
+}
+
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+my $xml2jsonObj = XML::XML2JSON->new( module => 'JSON::XS',
+                                      pretty => $prettyJSON,
+                                      attribute_prefix => $prefix,
+                                      content_key => $content_key,
+                                      force_array => $forceJSONarray,
+                                      private_attributes => ['encoding', 'version']);
+
+my $newDataFieldInfoXml;
+
+if ($content_type =~ /json/) {
+    # Convert input from json to xml
+    $newDataFieldInfoXml = $xml2jsonObj->json2xml($newDataFieldInfo);
+    # Remove newlines that surround element text
+    $newDataFieldInfoXml =~ s/^(\s+?)<(.+?)>\n^(.+?)\n\1<\/\2>/$1<$2>$3<\/$2>/gm;
+} elsif ($content_type =~ /xml/) {
+    # Do some taint-checking here
+    $newDataFieldInfoXml = $newDataFieldInfo;
+} else {
+    exit_with_error("Unrecognized content type $content_type");
+}
+
+# Parse data field info
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+my $newDataFieldInfoDom;
+eval { $newDataFieldInfoDom = $parser->parse_string($newDataFieldInfoXml); };
+if ($@) {
+    exit_with_error("Error parsing input as xml: $@");
+}
+my $newDataFieldInfoDoc = $newDataFieldInfoDom->documentElement();
+
+# Check that all constraints have been satisfied
+my @validationMessages;
+my %newDataFieldHash;
+my $dataFieldIdMaxLength = 1024;
+foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_FIELDS, @CFG::ADD_DOC_DATA_FIELD_OPTIONAL_FIELDS, 'dataFieldState') {
+    my $value;
+    my $path;
+    if (exists $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$fieldKey}) {
+        $path = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{$fieldKey};
+#    } elsif (exists $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING->{$fieldKey}) {
+#        $path = $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING->{$fieldKey};
+    } else {
+        # Every field in ADD_DOC_DATA_FIELD_FIELDS should be a key in
+        # $ADD_DOC_DATA_FIELD_MAPPING or $ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING,
+        # otherwise there is a problem with the configuration file
+        print STDERR "Key $fieldKey not found in ADD_DOC_DATA_FIELD_MAPPING",
+            " or ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING\n";
+        next;
+    }
+    my ($node) = $newDataFieldInfoDoc->findnodes($path);
+    if ($node) {
+        my @valueNodes = $node->findnodes('value');
+        if (@valueNodes > 1) {
+            foreach my $valueNode (@valueNodes) {
+                $value = $valueNode->textContent;
+                push @{$newDataFieldHash{$fieldKey}}, $value;
+            }
+        } elsif (@valueNodes == 1) {
+            $value = $valueNodes[0]->textContent;
+            $newDataFieldHash{$fieldKey} = $value;
+        }
+        my ($requiredNode) = $node->findnodes('./constraints/required');
+        if ($requiredNode) {
+            my $required = $requiredNode->textContent;
+            if ($required =~ /t(?:rue)?/i) {
+                unless ($value ne '') {
+                    push @validationMessages, "Required value for $fieldKey not found";
+                }
+            }
+        }
+        if ($fieldKey eq 'dataFieldId') {
+            my ($maxLengthNode) = $node->findnodes('./constraints/maxlength');
+            if ($maxLengthNode) {
+                $dataFieldIdMaxLength = $maxLengthNode->textContent;
+            }
+        }
+    } else {
+        print STDERR "Element with xpath $path not found in new data field\n";
+    }
+}
+
+if (@validationMessages) {
+    my $errorCode = 'VALIDATION_ERRORS';
+    my $message = join("\n", @validationMessages);
+    outputResponse($parser, $xml2jsonObj, $newDataFieldInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+my $newDataFieldProductId = $1
+    if (exists $newDataFieldHash{dataProductId}) &&
+       $newDataFieldHash{dataProductId} =~ /([a-zA-Z0-9_.-]+)/ ;
+unless ($newDataFieldProductId) {
+    my $errorCode = 'NO_DATA_FIELD_PRODUCT_ID';
+    my $message = "No value was provided for dataFieldProductId";
+    outputResponse($parser, $xml2jsonObj, $newDataFieldInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+my $newDataFieldLongIdPrefix = $newDataFieldProductId;
+$newDataFieldLongIdPrefix =~ s/\./_/g;
+$newDataFieldLongIdPrefix .= '_';
+
+# Read dataField Ids from the product file, which will be updated if we
+# add a new data field
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+my $productXml;
+my $productFilePath = "$dataProductsDir/$newDataFieldProductId";
+unless (open(UPDATED, "+< $productFilePath")) {
+    exit_with_error("Could not open $productFilePath for updating: $!")
+}
+{
+    local $/;
+    $productXml = <UPDATED>;
+}
+my $dataProductDom = $parser->parse_string($productXml);
+my $dataProductDoc = $dataProductDom->documentElement();
+my ($dataProductDataFieldIdsNode) = $dataProductDoc->findnodes('/dataProduct/dataProductDataFieldIds');
+my @dataFieldIdNodes = $dataProductDataFieldIdsNode->findnodes('./value');
+my $dataProductDataFieldIds;
+my $dataProductDataFieldLongIds;
+my $emptyDataFieldIdValueNode;
+foreach my $dataFieldIdNode (@dataFieldIdNodes) {
+    my $dataFieldId = $dataFieldIdNode->textContent;
+    my $dataFieldLongId = $dataFieldIdNode->getAttribute('longId');
+    if ($dataFieldId eq '') {
+        $emptyDataFieldIdValueNode = $dataFieldIdNode;
+    } else {
+        $dataProductDataFieldIds->{$dataFieldLongId} = $dataFieldId;
+        $dataProductDataFieldLongIds->{$dataFieldId} = $dataFieldLongId;
+    }
+}
+
+# Construct new dataFieldId from dataFieldProductId and dataFieldAccessName
+
+# Only expect dataFieldSdsName if data field information was populated by
+# DataProbe; it should no longer be possible to populate it from the new
+# data field form. Otherwise obtain the data field name from
+# dataFieldAccessName.
+my $newDataFieldLongName;
+if (exists $newDataFieldHash{virtualDataFieldGenerator} &&
+         $newDataFieldHash{virtualDataFieldGenerator} &&
+	 $newDataFieldHash{virtualDataFieldGenerator} =~ /$newDataFieldLongIdPrefix(.+)=/) {
+    # If virtualDataFieldGenerator has a value and contains a substring
+    # preceding an equals sign that is equal to newDataFieldLongIdPrefix,
+    # then the substring to the left of the
+    # equals sign is the data field long name
+    $newDataFieldLongName = $1;
+} elsif (exists $newDataFieldHash{dataFieldAccessName} &&
+         $newDataFieldHash{dataFieldAccessName} &&
+	 $newDataFieldHash{dataFieldAccessName} =~ /([a-zA-Z0-9_\/\[\],-]+)$/) {
+    $newDataFieldLongName = $1;
+    $newDataFieldLongName =~ s#/#_#g;
+    $newDataFieldLongName =~ s/\[/_/g;
+    $newDataFieldLongName =~ s/\]/_/g;
+    $newDataFieldLongName =~ s/\,/_/g;
+} elsif (exists $newDataFieldHash{dataFieldSdsName} &&
+    $newDataFieldHash{dataFieldSdsName} &&
+    $newDataFieldHash{dataFieldSdsName} =~ /([a-zA-Z0-9_-]+)$/) {
+    $newDataFieldLongName = $1;
+}
+
+unless ($newDataFieldLongName) {
+    my $errorCode = 'NO_DATA_FIELD_ACCESS_NAME';
+    my $message = "No value was provided for Variable Name (dataFieldAccessName)";
+    outputResponse($parser, $xml2jsonObj, $newDataFieldInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+# If dataFieldAccessName contains more than one value separated by commas,
+# convert commas to underscores
+$newDataFieldLongName =~ s/,/_/g;
+
+my $newDataFieldLongId = $newDataFieldLongIdPrefix . $newDataFieldLongName;
+#$newDataFieldLongId =~ s/ /_/g;
+$newDataFieldLongId =~ s/_HDF4//g;
+
+# Check that data field does not already exist.
+
+# First check if the long id has already been added to the product
+if (exists $dataProductDataFieldIds->{$newDataFieldLongId}) {
+    my $errorCode = 'FIELD_ID_ALREADY_EXISTS';
+    my $message = "A data field with long dataFieldId $newDataFieldLongId already exists for $newDataFieldProductId";
+    outputResponse($parser, $xml2jsonObj, $newDataFieldInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+# Create a new dataFieldId. Start with the long id, and abbreviate if
+# necessary.
+my $newDataFieldId = createNewDataFieldId($newDataFieldLongId,
+                                          $dataFieldIdMaxLength,
+                                          $dataProductDataFieldLongIds);
+unless ($newDataFieldId) {
+    my $errorCode = 'NO_UNIQUE_DATA_FIELD_ID';
+    my $message = "Could not construct unique dataFieldId";
+    outputResponse($parser, $xml2jsonObj, $newDataFieldInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+# Assume that the names of the files in the data fields catalog directory
+# are the dataFieldId values for each data field.
+# Check for the case that a file whose name is the new data field name
+# already exists. If so, then something went wrong, and our assumption
+# that it was sufficient to check the existing ids in the data product
+# file was a bad assumption.
+my $dataFieldsDir = "$CFG::AESIR_CATALOG_DATA_FIELDS_DIR";
+exit_with_error("Directory $dataFieldsDir not found")
+    unless -d $dataFieldsDir;
+exit_with_error("Could not open $dataFieldsDir: $!\n")
+    unless opendir(DIR, $dataFieldsDir);
+my @dataFieldIds = grep { !/^\./ && -f "$dataFieldsDir/$_" } readdir(DIR);
+closedir(DIR);
+my %dataFieldIds = map { $_ => $_ } @dataFieldIds;
+if (exists $dataFieldIds{$newDataFieldId}) {
+    my $errorCode = 'FIELD_ID_ALREADY_EXISTS';
+    my $message = "A data field with dataFieldId $newDataFieldId already exists";
+    outputResponse($parser, $xml2jsonObj, $newDataFieldInfoDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+}
+
+# Create data field document
+
+my $dataFieldDom = $parser->parse_string($CFG::DATA_FIELD_XML);
+my $dataFieldDoc = $dataFieldDom->documentElement();
+foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_FIELDS,
+                      @CFG::ADD_DOC_DATA_FIELD_OPTIONAL_FIELDS) {
+    if (exists $newDataFieldHash{$fieldKey}) {
+        if (ref $newDataFieldHash{$fieldKey} eq 'ARRAY') {
+            foreach my $val (@{$newDataFieldHash{$fieldKey}}) {
+                addValue($dataFieldDoc, $fieldKey,
+                         $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                         $val);
+            }
+        } else {
+            addValue($dataFieldDoc, $fieldKey,
+                     $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                     $newDataFieldHash{$fieldKey});
+        }
+    }
+}
+#foreach my $fieldKey (@CFG::ADD_DOC_DATA_FIELD_OPTIONAL_FIELDS) {
+#            copyNode($newDataFieldInfoDoc, $dataFieldDoc, $fieldKey,
+#                     $CFG::ADD_DOC_DATA_FIELD_OPTIONAL_MAPPING);
+#}
+if (exists $newDataFieldHash{'dataFieldState'}) {
+    addValue($dataFieldDoc,'dataFieldState' ,
+             $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+             $newDataFieldHash{'dataFieldState'});
+}
+
+# Set the value of dataFieldId
+my $dataFieldIdRegEx;
+my $path = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataFieldId};
+my ($dataFieldIdNode) = $dataFieldDoc->findnodes($path);
+if (defined $dataFieldIdNode) {
+    my ($valueNode) = $dataFieldIdNode->findnodes('./value');
+    if ($valueNode) {
+        $valueNode->removeChildNodes();
+        $valueNode->appendText($newDataFieldId);
+    }
+    my ($regexNode) = $dataFieldIdNode->findnodes('./constraints/regex');
+    if ($regexNode) {
+	$dataFieldIdRegEx = $regexNode->textContent();
+	# Untaint $newDataFieldId using $dataFieldIdRegEx
+	$newDataFieldId = $1 if $newDataFieldId =~ /($dataFieldIdRegEx)/;
+    }
+}
+
+# Change dataFieldInternal to internal
+$path = $CFG::ADD_DOC_DATA_FIELD_MAPPING->{dataFieldInternal};
+my ($dataFieldInternalNode) = $dataFieldDoc->findnodes($path);
+if (defined $dataFieldInternalNode) {
+    my ($valueNode) = $dataFieldInternalNode->findnodes('./value');
+    if ($valueNode) {
+        $valueNode->removeChildNodes();
+        $valueNode->appendText('true');
+    }
+}
+
+# Set dataFieldInDb to 'false'
+addValue($dataFieldDoc, 'dataFieldInDb',
+         $CFG::ADD_DOC_DATA_FIELD_MAPPING, 'false');
+
+# Modify dataFieldLastModified value to be the current date/time.
+my ($updatedLastModifiedNode) = $dataFieldDoc->findnodes('/dataField/dataFieldLastModified/value');
+if (defined $updatedLastModifiedNode) {
+    $updatedLastModifiedNode->removeChildNodes();
+    my $nowEpoch = DateTime->from_epoch(epoch => scalar(gettimeofday));
+    my $now = $nowEpoch->iso8601 . '.' . $nowEpoch->millisecond . 'Z';
+    $updatedLastModifiedNode->appendText($now);
+}
+
+# Create data field file
+my $dataFieldFile = "$dataFieldsDir/$newDataFieldId";
+if (-f $dataFieldFile) {
+    my $errorCode = 'FIELD_ID_ALREADY_EXISTS';
+    my $message = "A data field with dataFieldId $newDataFieldId already exists";
+    outputResponse($parser, $xml2jsonObj, $dataFieldDoc, $ERROR_STATUS,
+                   $content_type, $errorCode, $message);
+    exit 1;
+} else {
+    unless (open (FIELD, "> $dataFieldFile")) {
+        my $errorCode = 'CREATING_NEW_FILE';
+        my $message = "Could not open $dataFieldFile for writing";
+        outputResponse($parser, $xml2jsonObj, $dataFieldDoc, $ERROR_STATUS,
+                       $content_type, $errorCode, $message);
+        exit 1;
+    }
+
+    my $eraseValidsNode = XML::LibXML::Element->new('eraseValids');
+    $dataFieldDoc->addChild($eraseValidsNode);
+    my $transform = $styleSheet->transform($dataFieldDom);
+    my $transform_string = $styleSheet->output_string($transform);
+    $dataFieldDoc->removeChild($eraseValidsNode);
+
+#    print FIELD $dataFieldDoc->ownerDocument->toString(1);
+    print FIELD $transform_string;
+    close(FIELD);
+    chmod 0666, $dataFieldFile;
+}
+
+# Update data product file by adding new data field id
+
+if ($emptyDataFieldIdValueNode) {
+    $emptyDataFieldIdValueNode->removeChildNodes();
+    $emptyDataFieldIdValueNode->appendText($newDataFieldId);
+    $emptyDataFieldIdValueNode->setAttribute('longId', $newDataFieldLongId);
+} else {
+    my $valueNode = XML::LibXML::Element->new('value');
+    $valueNode->appendText($newDataFieldId);
+    $valueNode->setAttribute('longId', $newDataFieldLongId);
+    $dataProductDataFieldIdsNode->appendChild($valueNode);
+}
+
+# Replace the file contents with the updated information
+seek(UPDATED, 0, 0);
+print UPDATED $dataProductDom->toString(1);
+truncate(UPDATED, tell(UPDATED));
+close(UPDATED);
+
+# New field successfully added
+outputResponse($parser, $xml2jsonObj, $dataFieldDoc, $SUCCESS_STATUS,
+               $content_type);
+
+exit 0;
+
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub addValue {
+    my ($doc, $key, $mapping, $value) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    # Look for a 'value' child node. If one is found and it is empty,
+    # replace it with a new value
+    my ($valueNode1) = $node->findnodes('./value');
+    if (defined $valueNode1) {
+        my $content = $valueNode1->textContent;
+        if ($content eq '') {
+            $valueNode1->removeChildNodes();
+            $valueNode1->appendText($value);
+            return;
+        }
+    }
+
+    # Otherwise add a new 'value' child node.
+    # Construct a new 'value' node and add it to the node in $doc at
+    # that path.
+    $node->appendTextChild('value', $value);
+    return;
+}
+
+sub copyNode {
+    my ($srcDoc, $doc, $key, $mapping) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        print STDERR "Could not find mapping for key $key\n";
+        return;
+    }
+
+    # Find the node in $srcDoc at that path
+    my ($node) = $srcDoc->findnodes($path);
+    unless ($node) {
+        print STDERR "Could not find node for key $key path $path\n";
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($existingNode) = $doc->findnodes($path);
+    if ($existingNode) {
+        # Don't add a node if it already exists
+        return;
+    } else {
+        my ($optionalNode) = $srcDoc->findnodes($path);
+        if ($optionalNode) {
+            my $newNode = $optionalNode->cloneNode(1);
+            $doc->appendChild($newNode);
+        }
+    }
+
+    return;
+}
+
+sub outputResponse {
+    my ($parser, $xml2jsonObj, $doc, $status, $content_type,
+        $errorCode, $errorMessage) = @_;
+
+    my $responseDom = $parser->parse_string('<createNewDataFieldResponse></createNewDataFieldResponse>');
+    my $responseDoc = $responseDom->documentElement();
+    $responseDoc->appendTextChild( 'status', "$status" );
+
+    if ($status > $SUCCESS_STATUS) {
+        # Error
+        $responseDoc->appendTextChild( 'errorCode', $errorCode );
+        $responseDoc->appendTextChild( 'errorMessage', $errorMessage );
+    }
+    my $resultNode = XML::LibXML::Element->new('result');
+    $resultNode->addChild($doc);
+    $responseDoc->addChild($resultNode);
+
+    if ($content_type =~ /xml/) {
+        print $cgi->header( -type   => 'application/xml' );
+        print $responseDom->toString(1);
+    } else {
+        my $responseJson = $xml2jsonObj->convert($responseDom->toString());
+        print $cgi->header( -type => 'application/json' );
+        print $responseJson;
+    }
+}
+
+sub createNewDataFieldId {
+    my ($longId, $maxLength, $existingIds) = @_;
+
+    my $newId;
+    my $minSuffix;
+    my $maxSuffix;
+    if (length($longId) <= $maxLength) {
+        return $longId if (not exists $existingIds->{$longId});
+    } else {
+        # Try a simple approach of truncating, and if necessary,
+        # adding a numerical suffix until a unique string is
+        # produced;
+        $newId = substr($longId, 0, $maxLength);
+        my @suffixes = 1..9;
+        my $suffix;
+        my $suffixLength = 1;
+        my $prefixLength = $maxLength - $suffixLength;
+        while ( (exists $existingIds->{$newId}) && ($suffix = shift @suffixes) ) {
+            my $formatStr = '%0' . $suffixLength . 'd';
+            $newId = substr($longId, 0, $prefixLength) .
+                     sprintf($formatStr, $suffix);
+        }
+    }
+
+    # If a unique abbreviation is found, return it, otherwise return undef
+    return (exists $existingIds->{$newId}) ? undef : $newId;
+}

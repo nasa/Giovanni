@@ -1,0 +1,11 @@
+    <valids>
+      <valid>EPA</valid>
+      <valid>JP/JAXA/EOC</valid>
+      <valid>NASA/GSFC/SED/ESD/GCDC/GESDISC</valid>
+      <valid>NASA/GSFC/SED/ESD/GCDC/GESDISC/ACDISC</valid>
+      <valid>NASA/GSFC/SED/ESD/GCDC/GESDISC/HDISC</valid>
+      <valid>NASA/GSFC/SED/ESD/GCDC/GESDISC/NEESPI</valid>
+      <valid>NASA/GSFC/SED/ESD/HBSL/BISB/LAADS</valid>
+      <valid>NASA/LARC/SD/ASDC</valid>
+      <valid>other</valid>
+    </valids>

@@ -1,0 +1,354 @@
+#!/usr/bin/perl -T
+
+################################################################################
+# $Id: getDataFields,v 1.23 2015/06/24 18:26:42 eseiler Exp $
+# -@@@ EDDA Version: $Name:  $
+################################################################################
+
+=head1 NAME
+
+getDataFields - Output a subset of AESIR information for all data fields
+associated with the specified data product
+
+=head1 PROJECT
+
+AESIR EDDA
+
+=head1 SYNOPSIS
+
+getDataFields?dataProductId=<dataProductId>[&format=xml]
+
+=head1 DESCRIPTION
+
+Output a subset of AESIR information for all data fields associated with the
+specified data product
+
+=head1 OPTIONS
+
+=over 4
+
+=item --help
+Print usage information
+
+=back
+
+=head1 AUTHOR
+
+Ed Seiler, E<lt>Ed.Seiler@nasa.govE<gt>
+
+=cut
+
+
+my ($rootPath);
+BEGIN {
+    $rootPath = ( $0 =~ /(.+\/)cgi-bin\/.+/ ? $1 : undef );
+    if (defined $rootPath) {
+#        unshift( @INC, $rootPath . 'lib/perl5/site_perl/' . sprintf( "%vd", $^V ) );
+#        unshift( @INC, $rootPath . 'lib/perl5' );
+        unshift( @INC, $rootPath . 'share/perl5' );
+    }
+}
+
+use strict;
+use XML::LibXML;
+use XML::XML2JSON;
+use EDDA::DataProbe;
+use EDDA;
+use CGI;
+use Safe;
+
+my $cgi = new CGI;
+
+# Read configuration file
+my $cfgFile = $rootPath . 'cfg/EDDA/edda.cfg';
+my $cpt     = Safe->new('CFG');
+unless ( $cpt->rdo($cfgFile) ) {
+    exit_with_error("Could not read configuration file $cfgFile\n");
+}
+
+exit_with_error("AESIR_CATALOG_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DIR;
+exit_with_error("Directory $CFG::AESIR_CATALOG_DIR not found")
+    unless -d $CFG::AESIR_CATALOG_DIR;
+
+# Check for required configuration variables
+exit_with_error("AESIR_CATALOG_DATA_PRODUCTS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR;
+exit_with_error("AESIR_CATALOG_DATA_FIELDS_DIR not defined in configuration")
+    unless defined $CFG::AESIR_CATALOG_DATA_FIELDS_DIR;
+
+# Check that the configured data products catalog directory and data fields
+# catalog directory exist
+my $dataProductsDir = "$CFG::AESIR_CATALOG_DATA_PRODUCTS_DIR";
+exit_with_error("Directory $dataProductsDir not found")
+    unless -d $dataProductsDir;
+my $dataFieldsDir = "$CFG::AESIR_CATALOG_DATA_FIELDS_DIR";
+exit_with_error("Directory $dataFieldsDir not found")
+    unless -d $dataFieldsDir;
+
+# Check that a valid dataProductId parameter was provided
+my $pid = $cgi->param('dataProductId');
+my $dataProductId = $1 if $pid =~ /^([a-zA-Z0-9_.-]+)/;
+exit_with_error("Need a valid dataProductId parameter")
+    unless defined $dataProductId;
+my $productFile = "$dataProductsDir/$dataProductId";
+exit_with_error("Could not find catalog information for dataProductId $dataProductId\n")
+    unless -e "$dataProductsDir/$dataProductId";
+
+my $parser = XML::LibXML->new();
+$parser->keep_blanks(0);
+
+# Parse the data product document for the specified dataProductId
+# and find the dataProductDataFieldIds to obtain a list of all dataFieldId
+# values associated with the data product.
+my $dataProductDom;
+eval { $dataProductDom = $parser->parse_file( $productFile ); };
+if ($@) {
+    exit_with_error("Could not read and parse $productFile\n");
+}
+my $dataProductDoc = $dataProductDom->documentElement();
+
+# Get dataFieldId values from data product file
+my $dataFieldIds = EDDA::getDataProductDataFieldIds($dataProductDoc);
+
+# Start new dataFields xml document
+my $dataFieldsDom = $parser->parse_string('<dataFields></dataFields>');
+my $dataFieldsDoc = $dataFieldsDom->documentElement();
+
+#my @dataProbeFieldElementNames = ('dataFieldId', 'dataFieldLongName');
+
+my %dataFieldNodes;
+my $doDataProbe = defined $cgi->param('dataProbe');
+if ($doDataProbe) {
+    my $newDataFieldDom;
+    eval { $newDataFieldDom = $parser->parse_string($CFG::NEW_DATA_FIELD_XML); };
+    if ($@) {
+        exit_with_error("Could not parse NEW_DATA_FIELD_XML from configuration\n");
+    }
+    my $newDataFieldDoc = $newDataFieldDom->documentElement();
+    my ($dataProductShortNameNode) = $dataProductDoc->findnodes('/dataProduct/dataProductIdentifiers/value/dataProductShortName/value');
+    my $dataProductShortName = $dataProductShortNameNode->textContent
+        if $dataProductShortNameNode;
+#    $dataProductShortName = $1 if $dataProductShortName =~ /^([a-zA-Z0-9_-]+)$/;
+    my ($dataProductVersionNode) = $dataProductDoc->findnodes('/dataProduct/dataProductIdentifiers/value/dataProductVersion/value');
+    my $dataProductVersion = $dataProductVersionNode->textContent
+        if $dataProductVersionNode;
+#    $dataProductVersion = $1 if $dataProductVersion =~ /^([a-zA-Z0-9.-]+$)$/;
+    my ($dataProductOpendapUrlNode) = $dataProductDoc->findnodes('/dataProduct/dataProductOpendapUrl/value');
+    my $dataProductOpendapUrl = $dataProductOpendapUrlNode->textContent
+        if $dataProductOpendapUrlNode;
+#    $dataProductOpendapUrl = $1
+#        if $dataProductOpendapUrl =~ /^((?:http|ftp):\/\/[\w.-]+(?::\d+)?\/[-\w\d\/.#\?]+)$/;
+
+    my %args = (SHORTNAME  => $dataProductShortName,
+                VERSION    => $dataProductVersion);
+    if ($dataProductOpendapUrl) {
+	$args{OPENDAPURL} = $dataProductOpendapUrl;
+    } else {
+	my ($dataProductBeginDateTimeNode) = $dataProductDoc->findnodes('/dataProduct/dataProductTemporalCoverage/value/dataProductBeginDateTime/value');
+	my $dataProductBeginDateTime = $dataProductBeginDateTimeNode->textContent
+	    if $dataProductBeginDateTimeNode;
+	$args{BEGINDATE} = $dataProductBeginDateTime if $dataProductBeginDateTime;
+	my ($dataProductTimeIntervalNode) = $dataProductDoc->findnodes('/dataProduct/dataProductTemporalCoverage/value/dataProductTimeInterval/value');
+	my $dataProductTimeInterval = $dataProductTimeIntervalNode->textContent
+	    if $dataProductTimeIntervalNode;
+	$args{TIMEINTERVAL} = $dataProductTimeInterval if $dataProductTimeInterval;
+
+	# Add path to Giovanni library modules to @INC so that DataProbe
+	# can find ESIP::OSDD
+	unshift( @INC, $CFG::GIOVANNI_LIB ) if defined $CFG::GIOVANNI_LIB;
+    }
+
+    my $dataProbe = new EDDA::DataProbe(%args);
+    if ($dataProbe->onError) {
+        exit_with_error("Data probe: " . $dataProbe->errorMessage);
+    }
+
+    # Read data field ids that are to be skipped from a text file and
+    # store them as keys of %skip_dataFieldIds_from_dataProbe
+    my %skip_dataFieldIds_from_dataProbe;
+    if (defined $CFG::AESIR_CATALOG_SKIP_DATAFIELDIDS_DOC &&
+        -r $CFG::AESIR_CATALOG_SKIP_DATAFIELDIDS_DOC) {
+        if (open(SKIP_DATAFIELDIDS_DOC, '< $CFG::AESIR_CATALOG_SKIP_DATAFIELDIDS_DOC')) {
+            my @dataFieldIds = <SKIP_DATAFIELDIDS_DOC>;
+            close(SKIP_DATAFIELDIDS_DOC);
+            foreach my $dataFieldId (@dataFieldIds) {
+                $skip_dataFieldIds_from_dataProbe{chomp($dataFieldId)} = 1;
+            }
+        }
+    }
+#    my $idPrefix = "${dataProductShortName}_${dataProductVersion}_";
+    my $idPrefix = $dataProductId . '_';
+    $idPrefix =~ s/\./_/g;
+    foreach my $dataField (sort $dataProbe->dataFieldNames) {
+        next unless defined $dataField;
+
+        # Skip fields found by the data probe if they already exist in EDDA
+        my $dataFieldId = $idPrefix . $dataField;
+        $dataFieldId =~ s/_HDF4//g;
+        next if exists $dataFieldIds->{$dataFieldId};
+
+        next if exists $skip_dataFieldIds_from_dataProbe{$dataFieldId};
+
+        my $dataFieldNode = XML::LibXML::Element->new('dataField');
+
+        my $dataFieldIdNode = getNodeWithSetValue($newDataFieldDoc,
+                                                  'dataFieldId',
+                                                  $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                                                  $dataFieldId);
+        $dataFieldNode->addChild($dataFieldIdNode);
+
+        my $longName = $dataProbe->dataFieldAttribute($dataField, 'dataFieldLongName');
+        my $dataFieldLongNameNode = getNodeWithSetValue($newDataFieldDoc,
+                                                        'dataFieldLongName',
+                                                        $CFG::ADD_DOC_DATA_FIELD_MAPPING,
+                                                        $longName);
+        $dataFieldNode->addChild($dataFieldLongNameNode);
+
+#        $dataFieldsDoc->addChild($dataFieldNode);
+        if (defined $longName && $longName) {
+            $dataFieldNodes{$longName} = $dataFieldNode;
+        } else {
+            $dataFieldNodes{$dataField} = $dataFieldNode;
+        }
+    }
+} else {
+
+    # For each data field, parse the data field xml file, extract the desired
+    # nodes and add them to the dataFields document
+    foreach my $longId (keys %{$dataFieldIds}) {
+        # Assume that data field info files have a name which is the dataFieldId
+        my $dataFieldId = $dataFieldIds->{$longId};
+        my $fieldFile = "$dataFieldsDir/$dataFieldId";
+        unless (-e $fieldFile) {
+            print STDERR "Could not find catalog information file $fieldFile\n";
+            next;
+        }
+        my $dataFieldDom;
+        eval { $dataFieldDom = $parser->parse_file( $fieldFile ); };
+        if ($@) {
+            print STDERR "Could not read and parse $fieldFile\n";
+            next;
+        }
+        my $dataFieldDoc = $dataFieldDom->documentElement();
+
+        my $longName;
+        my $dataFieldNode = XML::LibXML::Element->new('dataField');
+        foreach my $elementName (@CFG::dataFieldElementNames) {
+            my ($node) = $dataFieldDoc->findnodes("/dataField/$elementName");
+            if ($node) {
+                $dataFieldNode->addChild($node);
+                if ($elementName eq 'dataFieldLongName') {
+                    my ($valueNode) = $node->findnodes('./value');
+                    $longName = $valueNode->textContent if $valueNode;
+                }
+            }
+        }
+
+        if ($CFG::INCLUDE_DATA_FIELD_PUBLISHED_BASELINE) {
+            my $publishedBaselines = EDDA::getPublishedBaselines($dataFieldId,
+                                                                 $CFG::MODE,
+                                                                 \@CFG::AESIR_BASELINES,
+                                                                 $CFG::AESIR_CATALOG_PUBLISHED_DATA_FIELDS_DIR,
+                                                                 $parser);
+            if ($publishedBaselines) {
+                foreach my $baseline (@CFG::AESIR_BASELINES) {
+                    if (exists $publishedBaselines->{$baseline}) {
+                        my $baselineInfoNode = EDDA::createPublishedBaselineInfoNode($baseline, $publishedBaselines);
+                        $dataFieldNode->addChild($baselineInfoNode) if $baselineInfoNode;
+                    }
+                }
+            }
+        }
+
+        if ($dataFieldNode) {
+            # Add node to a hash whose key is the long name
+            if (defined $longName && $longName) {
+                $dataFieldNodes{$longName} = $dataFieldNode;
+            } else {
+                $dataFieldNodes{$dataFieldId} = $dataFieldNode;
+            }
+        }
+    }
+}
+
+# Add nodes to document in order sorted by long name
+foreach my $longName (sort keys %dataFieldNodes) {
+    $dataFieldsDoc->addChild($dataFieldNodes{$longName});
+}
+
+# If xml format is desired, output the xml version of the dataProducts document
+my $format = $cgi->param('format');
+if (uc($format) eq 'XML') {
+    print $cgi->header( -type => 'application/xml' );
+    my $xml = $dataFieldsDoc->toString(1);
+    print $xml;
+    exit 0;
+}
+
+# By default, output the dataFields document in json
+my $noJsonAttrPrefix = 1;
+my $JsonContentKeyIsValue = 1;
+my $forceJSONarray = 1;
+my $prettyJSON = 1;
+my $content_key = ($JsonContentKeyIsValue) ? 'value' : undef;
+my $prefix = ($noJsonAttrPrefix) ? '' : '@';
+
+my $obj = XML::XML2JSON->new( module => 'JSON::XS',
+                              pretty => $prettyJSON,
+                              attribute_prefix => $prefix,
+                              content_key => $content_key,
+                              force_array => $forceJSONarray,
+                              private_attributes => ['encoding', 'version']);
+my $xml = $dataFieldsDoc->toString();
+my $json = $obj->convert($xml);
+
+print $cgi->header( -type => 'application/json' );
+print $json;
+
+exit 0;
+
+sub exit_with_error {
+    my ($message) = @_;
+
+    print $cgi->header(-status=>404,-type=>'text/plain',-cache_control=>'no-cache');
+    print $message;
+    exit;
+}
+
+sub getNodeWithSetValue {
+    my ($doc, $key, $mapping, $value) = @_;
+
+    # Use mapping to determine the path in $doc that corresponds to $key
+    my $path = $mapping->{$key};
+    unless ($path) {
+        exit_with_error("Could not find mapping for key '$key'");
+        return;
+    }
+
+    # Find the node in $doc at that path
+    my ($node) = $doc->findnodes($path);
+    unless ($node) {
+        exit_with_error("Could not find node for key '$key' path '$path'");
+        return;
+    }
+    my $newNode = $node->cloneNode(1);
+
+    # Look for a 'value' child node. If one is found and it is empty,
+    # replace it with a new value
+    my ($valueNode1) = $newNode->findnodes('./value');
+    if (defined $valueNode1) {
+        my $content = $valueNode1->textContent;
+        if ($content eq '') {
+            $valueNode1->removeChildNodes();
+            $valueNode1->appendText($value);
+            return $newNode;
+        }
+    }
+
+    # Otherwise add a new 'value' child node.
+    # Construct a new 'value' node and add it to the node in $doc at
+    # that path.
+    $newNode->appendTextChild('value', $value);
+    return $newNode;
+}

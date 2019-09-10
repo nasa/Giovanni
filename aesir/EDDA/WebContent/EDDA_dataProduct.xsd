@@ -1,0 +1,694 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id: EDDA_dataProduct.xsd,v 1.5 2015/01/14 03:21:29 eseiler Exp $ -->
+<!-- -@@@ EDDA, Version $Name:  $ -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+  <xs:simpleType name="fieldType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="text"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="datetime"/>
+      <xs:enumeration value="number"/>
+      <xs:enumeration value="url"/>
+      <xs:enumeration value="container"/>
+      <xs:enumeration value="list"/>
+      <xs:enumeration value="colorPaletteList"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="multiplicity">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="one"/>
+      <xs:enumeration value="many"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="multiplicityOne">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="one"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="multiplicityMany">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="many"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="typeText">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="text"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="typeBoolean">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="boolean"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="typeNumber">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="number"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="typeUrl">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="url"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="typeDateTime">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="datetime"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9_]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="booleanRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="^true$|^false$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithDotHyphenRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9_.-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithDotCommaParensHyphenAmpersandRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.,)(-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenSlashRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.-/]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenParensRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.)(-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenParensSlashRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.)(/-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotCommaHyphenParensAmpersandSlashRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.,)(&amp;/-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="shortnameRegex">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="[a-zA-Z0-9 _.,)(@/%+-]+$"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]|_)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithHyphenType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]|_|\-)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithCommaSlashBracketsHyphenType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]|_|,|/|\[|\]|\-)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="alphaNumericWithDotHyphenType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]|_|\-|\.)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="shortnameType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\.|,|\)|\(|@|/|%|\+|\-)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="longnameType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\.|,|:|\)|\(|&amp;|/|%|&gt;|&lt;|=|\+|\-)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithDotHyphenType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]|_|\-|\.)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\-|\.)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenSlashType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\-|\.|/)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenParensType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\-|\.|\)|\()+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotHyphenParensSlashType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\-|\.|\)|\(|/)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithDotCommaParensHyphenAmpersandType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\.|,|\)|\(|\-|&amp;)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="wordWithSpaceDotCommaHyphenParensAmpersandSlashType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-z]|[A-Z]|[0-9]| |_|\.|,|\)|\(|&amp;|\-|/)+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="nullStringType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="0"/>
+      <xs:maxLength value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="optionalDateTimeType">
+    <xs:union memberTypes="nullStringType xs:dateTime">
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="optionalIntType">
+    <xs:union memberTypes="nullStringType xs:int">
+    </xs:union>
+  </xs:simpleType>
+  <xs:simpleType name="optionalBooleanType">
+    <xs:union memberTypes="nullStringType xs:boolean">
+    </xs:union>
+  </xs:simpleType>
+  <xs:complexType name="constraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithDotHyphenConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithDotHyphenRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithSpaceDotHyphenRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenSlashConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithSpaceDotHyphenSlashRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenParensConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithSpaceDotHyphenParensRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenParensSlashConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithSpaceDotHyphenParensSlashRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotCommaHyphenParensAmpersandSlashConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithDotCommaParensHyphenAmpersandConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="wordWithDotCommaParensHyphenAmpersandRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="maxlength" type="xs:int" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="shortnameConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="shortnameRegex" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="booleanConstraints">
+    <xs:sequence>
+      <xs:element name="required" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="editable" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="regex" type="booleanRegex" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="validationText" type="xs:string" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="valids">
+    <xs:sequence>
+      <xs:element name="valid" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="simpleField">
+    <xs:sequence>
+      <xs:element name="type" type="fieldType" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="valids" type="valids" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="simpleNoValidsField">
+    <xs:sequence>
+      <xs:element name="type" type="fieldType" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithHyphenTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <!--
+      <xs:element name="constraints" type="wordConstraints" minOccurs="1" maxOccurs="1"/>
+      -->
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithHyphenType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="alphaNumericWithDotHyphenTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="alphaNumericWithDotHyphenType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithDotHyphenTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithDotHyphenConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithDotHyphenType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithSpaceDotHyphenConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithSpaceDotHyphenType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenSlashTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithSpaceDotHyphenSlashConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithSpaceDotHyphenSlashType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenParensSlashTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithSpaceDotHyphenParensSlashConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithSpaceDotHyphenParensSlashType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotCommaHyphenParensAmpersandSlashTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithSpaceDotHyphenParensTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithSpaceDotHyphenParensConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithSpaceDotHyphenParensType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithDotCommaParensHyphenAmpersandTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="wordWithDotCommaParensHyphenAmpersandConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithDotCommaParensHyphenAmpersandType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="wordWithCommaSlashBracketsHyphenTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <!--
+      <xs:element name="constraints" type="wordConstraints" minOccurs="1" maxOccurs="1"/>
+      -->
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="wordWithCommaSlashBracketsHyphenType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="shortnameTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="shortnameConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="shortnameType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="longnameTextField">
+    <xs:sequence>
+      <xs:element name="type" type="typeText" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="longnameType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="booleanField">
+    <xs:sequence>
+      <xs:element name="type" type="typeBoolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="booleanConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:boolean" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="optionalBooleanField">
+    <xs:sequence>
+      <xs:element name="type" type="typeBoolean" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="booleanConstraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="optionalBooleanType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="numberField">
+    <xs:sequence>
+      <xs:element name="type" type="typeNumber" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:float" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="optionalIntField">
+    <xs:sequence>
+      <xs:element name="type" type="typeNumber" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="optionalIntType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="urlField">
+    <xs:sequence>
+      <xs:element name="type" type="typeUrl" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="valids" type="valids" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:anyURI" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dateTimeField">
+    <xs:sequence>
+      <xs:element name="type" type="typeDateTime" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:dateTime" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="optionalDateTimeField">
+    <xs:sequence>
+      <xs:element name="type" type="typeDateTime" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="optionalDateTimeType" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="multiValuedField">
+    <xs:sequence>
+      <xs:element name="type" type="fieldType" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityMany" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="valids" type="valids" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="stringWithLongId">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="longId" type="xs:string" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="multiValuedLongIdField">
+    <xs:sequence>
+      <xs:element name="type" type="fieldType" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityMany" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="valids" type="valids" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="example" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="value" type="stringWithLongId" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="sld">
+    <xs:sequence>
+      <xs:element name="type" type="fieldType" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicity" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="valids" type="valids" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="constraints" type="constraints" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="container">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="container"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="dataProductIdentifier">
+    <xs:sequence>
+      <xs:element name="dataProductDataSetId" type="simpleField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductGcmdEntryId" type="wordWithDotHyphenTextField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductShortName" type="alphaNumericWithDotHyphenTextField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductVersion" type="alphaNumericWithDotHyphenTextField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductLongName" type="simpleField" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductIdentifierContainer">
+    <xs:sequence>
+      <xs:element name="type" type="container" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="dataProductIdentifier" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductPlatform">
+    <xs:sequence>
+      <xs:element name="dataProductPlatformShortName" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashTextField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductPlatformLongName" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashTextField" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductPlatformContainer">
+    <xs:sequence>
+      <xs:element name="type" type="container" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="dataProductPlatform" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductInstrument">
+    <xs:sequence>
+      <xs:element name="dataProductInstrumentShortName" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashTextField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductInstrumentLongName" type="wordWithSpaceDotCommaHyphenParensAmpersandSlashTextField" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductInstrumentContainer">
+    <xs:sequence>
+      <xs:element name="type" type="container" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="dataProductInstrument" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductSpatialResolution">
+    <xs:sequence>
+      <xs:element name="dataProductSpatialResolutionLatitude" type="numberField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductSpatialResolutionLongitude" type="numberField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductSpatialResolutionUnits" type="simpleField" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductSpatialResolutionContainer">
+    <xs:sequence>
+      <xs:element name="type" type="container" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="dataProductSpatialResolution" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductSpatialCoverage">
+    <xs:sequence>
+      <xs:element name="dataProductWest" type="numberField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductNorth" type="numberField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductEast" type="numberField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductSouth" type="numberField" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductSpatialCoverageContainer">
+    <xs:sequence>
+      <xs:element name="type" type="container" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="dataProductSpatialCoverage" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductTemporalCoverage">
+    <xs:sequence>
+      <xs:element name="dataProductBeginDateTime" type="dateTimeField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductEndDateTime" type="optionalDateTimeField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductEndDateTimeLocked" type="optionalBooleanField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductTimeFrequency" type="simpleField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductTimeInterval" type="simpleField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductStartTimeOffset" type="optionalIntField" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="dataProductEndTimeOffset" type="optionalIntField" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="dataProductTemporalCoverageContainer">
+    <xs:sequence>
+      <xs:element name="type" type="container" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="label" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="multiplicity" type="multiplicityOne" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="value" type="dataProductTemporalCoverage" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="dataProduct">
+    <xs:annotation>
+      <xs:documentation>
+         Attributes for an AESIR data product.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="dataProductId" type="wordWithDotHyphenTextField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductIdentifiers" type="dataProductIdentifierContainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductDescriptionUrl" type="urlField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductProcessingLevel" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductDataCenter" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductPlatform" type="dataProductPlatformContainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductInstrument" type="dataProductInstrumentContainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductPlatformInstrument" type="multiValuedField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductSpatialResolution" type="dataProductSpatialResolutionContainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductSpatialCoverage" type="dataProductSpatialCoverageContainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductTemporalCoverage" type="dataProductTemporalCoverageContainer" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductSearchIntervalDays" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductOsddUrl" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductSampleGranuleUrl" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductOpendapUrl" type="urlField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductResponseFormat" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductSpecialFeatures" type="simpleField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductInternal" type="booleanField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductDataFieldIds" type="multiValuedLongIdField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductCanAddNewFields" type="booleanField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductGcmdLastRevisionDate" type="optionalDateTimeField" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="dataProductLastModified" type="optionalDateTimeField" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
