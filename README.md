@@ -6,7 +6,7 @@ Giovanni is an online (Web) environment for the display and analysis of geophysi
 GES DISC is making our Giovanni (currently at version 4.31)  code base available on github
 
 <h4> Getting Started with the code </h4>
-Giovanni locally is split into several repositories:
+At the <a href="https://disc.gsfc.nasa.gov/">GES DISC</a>, development of Giovanni is split into several repositories:
 
 Each subdirectory has either a Makefile or Perl Makefile.PL
 <br/><b>agiovanni</b>
