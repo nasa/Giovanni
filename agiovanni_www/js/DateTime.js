@@ -122,10 +122,10 @@ Date.prototype.parse = function (dString) {
  */
 Date.prototype.toISO8601DateString = function () {
     // All date time GES DISC uses is GMT
-    var year = this.getUTCFullYear();
-    var mon = this.getUTCMonth() + 1;
-    var day = this.getUTCDate();
-    var str = '' + year + '-' + (mon < 10 ? '0' : '') + mon + '-' +
+    const year = this.getUTCFullYear();
+    const mon = this.getUTCMonth() + 1;
+    const day = this.getUTCDate();
+    const str = '' + year + '-' + (mon < 10 ? '0' : '') + mon + '-' +
         (day < 10 ? '0' : '') + day;
     return str;
 };
@@ -139,17 +139,17 @@ Date.prototype.toISO8601DateString = function () {
  */
 Date.prototype.toISO8601DateTimeString = function () {
     // All date time GES DISC uses is GMT
-    var year = this.getUTCFullYear();
-    var mon = this.getUTCMonth() + 1;
-    var day = this.getUTCDate();
-    var dateStr = '' + year + '-' + (mon < 10 ? '0' : '') + mon + '-' +
+    const year = this.getUTCFullYear();
+    const mon = this.getUTCMonth() + 1;
+    const day = this.getUTCDate();
+    const dateStr = '' + year + '-' + (mon < 10 ? '0' : '') + mon + '-' +
         (day < 10 ? '0' : '') + day;
-    var hr = this.getUTCHours();
-    var mm = this.getUTCMinutes();
-    var ss = this.getUTCSeconds();
-    var timeStr = '' + (hr < 10 ? '0' : '') + hr + ':' + (mm < 10 ? '0' : '') +
+    const hr = this.getUTCHours();
+    const mm = this.getUTCMinutes();
+    const ss = this.getUTCSeconds();
+    const timeStr = '' + (hr < 10 ? '0' : '') + hr + ':' + (mm < 10 ? '0' : '') +
         mm + ':' + (ss < 10 ? '0' : '') + ss;
-    var dateTimeStr = dateStr + 'T' + timeStr;
+    const dateTimeStr = dateStr + 'T' + timeStr;
     return dateTimeStr;
 };
 
@@ -162,14 +162,14 @@ Date.prototype.toISO8601DateTimeString = function () {
  */
 Date.prototype.toISO8601DateHourString = function () {
     // All date time GES DISC uses is GMT
-    var year = this.getUTCFullYear();
-    var mon = this.getUTCMonth() + 1;
-    var day = this.getUTCDate();
-    var dateStr = '' + year + '-' + (mon < 10 ? '0' : '') + mon + '-' +
+    const year = this.getUTCFullYear();
+    const mon = this.getUTCMonth() + 1;
+    const day = this.getUTCDate();
+    const dateStr = '' + year + '-' + (mon < 10 ? '0' : '') + mon + '-' +
         (day < 10 ? '0' : '') + day;
-    var hr = this.getUTCHours();
-    var timeStr = '' + (hr < 10 ? '0' : '') + hr + ' hrs';
-    var dateTimeStr = dateStr + ' ' + timeStr;
+    const hr = this.getUTCHours();
+    const timeStr = '' + (hr < 10 ? '0' : '') + hr + ' hrs';
+    const dateTimeStr = dateStr + ' ' + timeStr;
     return dateTimeStr;
 };
 
@@ -182,10 +182,10 @@ Date.prototype.toISO8601DateHourString = function () {
  * @author M.Hegde
  */
 Date.prototype.toMonthDayYearDateString = function () {
-    var year = this.getUTCFullYear();
-    var mon = this.getUTCMonth() + 1;
-    var day = this.getUTCDate();
-    var dateStr = '' + (mon < 10 ? '0' : '') + mon + '/' + (day < 10 ? '0' : '') + day + '/' + year;
+    const year = this.getUTCFullYear();
+    const mon = this.getUTCMonth() + 1;
+    const day = this.getUTCDate();
+    const dateStr = '' + (mon < 10 ? '0' : '') + mon + '/' + (day < 10 ? '0' : '') + day + '/' + year;
     return dateStr;
 };
 
